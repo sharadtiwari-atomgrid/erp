@@ -1,22 +1,40 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
+import { buttonClass } from "@/components/ui/button";
 import { Card, CardHeader, StatCard } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyRow, Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { requireUser } from "@/lib/auth";
+import { branchWhere } from "@/lib/branch";
 import { db } from "@/lib/db";
 import { formatDateTime, formatMoney, formatNumber, num } from "@/lib/format";
+import { NAVIGATION } from "@/lib/navigation";
+import { can, type Module } from "@/lib/permissions";
+
+const QUICK_ACTIONS: Array<{ label: string; href: string; module: Module; section: string }> = [
+  { label: "New sales order", href: "/sales/orders/new", module: "salesOrders", section: "orders" },
+  { label: "New purchase order", href: "/purchasing/orders/new", module: "purchaseOrders", section: "orders" },
+  { label: "Receive goods", href: "/warehouse/inbound/new", module: "inbound", section: "warehouse" },
+  { label: "Outbound queue", href: "/warehouse/outbound", module: "outbound", section: "warehouse" },
+  { label: "New production order", href: "/manufacturing/orders/new", module: "production", section: "manufacturing" },
+  { label: "Manufacturing needs", href: "/manufacturing/needs", module: "mfgNeeds", section: "orders" },
+  { label: "Plan a trip", href: "/logistics/trips/new", module: "trips", section: "logistics" },
+  { label: "New invoice", href: "/sales/invoices/new", module: "invoices", section: "books" },
+  { label: "New contact", href: "/contacts/new", module: "contacts", section: "quick" },
+  { label: "Adjust stock", href: "/inventory/stock/adjust", module: "stock", section: "warehouse" },
+];
+const SECTION_COLOR = new Map(NAVIGATION.map((g) => [g.key, g.color]));
 
 export const metadata: Metadata = { title: "Dashboard" };
 
-async function getLowStock() {
+async function getLowStock(warehouse: { branchId?: string }) {
   const [products, levels] = await Promise.all([
     db.product.findMany({
       where: { isActive: true, type: "GOODS", reorderLevel: { gt: 0 } },
       select: { id: true, sku: true, name: true, unit: true, reorderLevel: true },
     }),
-    db.stockLevel.groupBy({ by: ["productId"], _sum: { quantity: true } }),
+    db.stockLevel.groupBy({ by: ["productId"], where: { warehouse }, _sum: { quantity: true } }),
   ]);
   const onHand = new Map(levels.map((l) => [l.productId, num(l._sum.quantity)]));
   return products
@@ -29,27 +47,33 @@ export default async function DashboardPage() {
   const user = await requireUser("dashboard");
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const branch = await branchWhere();
 
-  const [monthSales, receivables, overdue, openOrders, openPurchases, pipeline, lowStock, activity] = await Promise.all([
+  const [monthSales, receivables, overdue, openOrders, openPurchases, pipeline, lowStock, activity, qcPending, toDispatch, inProduction, inTransit, openReturns] = await Promise.all([
     db.invoice.aggregate({
-      where: { issueDate: { gte: monthStart }, status: { notIn: ["DRAFT", "CANCELLED"] } },
+      where: { ...branch, issueDate: { gte: monthStart }, status: { notIn: ["DRAFT", "CANCELLED"] } },
       _sum: { total: true },
       _count: true,
     }),
     db.invoice.findMany({
-      where: { status: { in: ["ISSUED", "PARTIALLY_PAID"] } },
+      where: { ...branch, status: { in: ["ISSUED", "PARTIALLY_PAID"] } },
       select: { total: true, amountPaid: true },
     }),
-    db.invoice.count({ where: { status: { in: ["ISSUED", "PARTIALLY_PAID"] }, dueDate: { lt: now } } }),
-    db.salesOrder.count({ where: { status: { in: ["CONFIRMED", "PARTIALLY_DELIVERED"] } } }),
-    db.purchaseOrder.count({ where: { status: { in: ["ORDERED", "PARTIALLY_RECEIVED"] } } }),
+    db.invoice.count({ where: { ...branch, status: { in: ["ISSUED", "PARTIALLY_PAID"] }, dueDate: { lt: now } } }),
+    db.salesOrder.count({ where: { ...branch, status: { in: ["CONFIRMED", "PARTIALLY_DELIVERED"] } } }),
+    db.purchaseOrder.count({ where: { ...branch, status: { in: ["ORDERED", "PARTIALLY_RECEIVED"] } } }),
     db.lead.aggregate({
       where: { status: { in: ["NEW", "CONTACTED", "QUALIFIED"] } },
       _sum: { estimatedValue: true },
       _count: true,
     }),
-    getLowStock(),
+    getLowStock(branch),
     db.activity.findMany({ orderBy: { createdAt: "desc" }, take: 10, include: { user: { select: { name: true } } } }),
+    db.inboundReceipt.count({ where: { ...branch, status: "QC_PENDING" } }),
+    db.outboundOrder.count({ where: { ...branch, status: { in: ["PENDING", "PICKING", "PICKED", "PACKING", "PACKED"] } } }),
+    db.productionOrder.count({ where: { ...branch, status: { in: ["SCHEDULED", "IN_PROGRESS"] } } }),
+    db.trip.count({ where: { ...branch, status: "IN_TRANSIT" } }),
+    db.returnOrder.count({ where: { ...branch, status: { in: ["REQUESTED", "RECEIVED", "INSPECTED"] } } }),
   ]);
 
   const receivableTotal = receivables.reduce((s, i) => s + num(i.total) - num(i.amountPaid), 0);
@@ -57,6 +81,15 @@ export default async function DashboardPage() {
   return (
     <>
       <PageHeader title={`Welcome back, ${user.name.split(" ")[0]}`} description="Here’s what’s happening in your business today." />
+
+      <section aria-label="Quick actions" className="mb-6 flex flex-wrap gap-2">
+        {QUICK_ACTIONS.filter((a) => can(user, a.module, a.module === "mfgNeeds" ? "view" : "edit")).map((a) => (
+          <Link key={a.href} href={a.href} className={buttonClass("secondary", "md", "gap-2")}>
+            <span className="h-2 w-2 rounded-full" style={{ background: SECTION_COLOR.get(a.section) }} aria-hidden />
+            {a.label}
+          </Link>
+        ))}
+      </section>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <StatCard label="Sales this month" value={formatMoney(monthSales._sum.total)} hint={`${monthSales._count} invoices`} />
@@ -70,6 +103,11 @@ export default async function DashboardPage() {
         <StatCard label="Open purchase orders" value={openPurchases} hint="Awaiting receipt" />
         <StatCard label="Pipeline" value={formatMoney(pipeline._sum.estimatedValue)} hint={`${pipeline._count} open leads`} />
         <StatCard label="Low-stock items" value={lowStock.length} tone={lowStock.length > 0 ? "danger" : "default"} hint="At or below reorder level" />
+        <StatCard label="Inbound awaiting QC" value={qcPending} tone={qcPending > 0 ? "warning" : "default"} hint="Goods receipts" />
+        <StatCard label="Outbound to dispatch" value={toDispatch} hint="Pending, picking or packed" />
+        <StatCard label="Production in progress" value={inProduction} hint="Scheduled or running orders" />
+        <StatCard label="Trips in transit" value={inTransit} />
+        <StatCard label="Open returns" value={openReturns} hint="Awaiting receipt, QC or closure" />
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
