@@ -7,13 +7,14 @@ import type { PurchaseOrderStatus } from "@/generated/prisma/enums";
 import { logActivity } from "@/lib/activity";
 import { requireUser } from "@/lib/auth";
 import { db, type Tx } from "@/lib/db";
-import { formatNumber, num } from "@/lib/format";
+import { num } from "@/lib/format";
 import { f, parseForm, parseLines, type ActionState } from "@/lib/forms";
 import { nextDocumentNumber } from "@/lib/sequence";
-import { adjustStock } from "@/lib/stock";
 import { computeDocument } from "@/lib/totals";
 import { canReceiveGoods } from "../_components/access";
 import { warehouseBranchId } from "@/lib/branch";
+import { WarehouseError } from "../../warehouse/_lib/errors";
+import { createGrn } from "../../warehouse/_lib/inbound";
 
 /** Thrown inside a transaction to roll it back and show the message to the user. */
 class OrderError extends Error {}
@@ -32,6 +33,13 @@ const orderSchema = z
     path: ["expectedDate"],
     message: "Expected date cannot be before the order date",
   });
+
+const receiveSchema = z.object({
+  receivedAt: f.optionalDate(),
+  supplierInvoice: f.optionalText(),
+  vehicleNo: f.optionalText().transform((v) => (v ? v.toUpperCase() : null)),
+  notes: f.optionalText(),
+});
 
 function revalidateOrder(id: string, supplierId?: string) {
   revalidatePath("/purchasing/orders");
@@ -151,88 +159,52 @@ export async function cancelPurchaseOrder(id: string): Promise<ActionState> {
   });
 }
 
+/**
+ * "Receive goods" now creates a goods receipt note (GRN) in QC_PENDING. The
+ * PO line received quantities and PO status are updated straight away; stock
+ * is posted only when QC is completed on the GRN.
+ */
 export async function receivePurchaseOrder(id: string, _prev: ActionState, formData: FormData): Promise<ActionState> {
   const user = await requireUser("purchaseOrders");
   if (!canReceiveGoods(user)) redirect("/forbidden");
-  const note = String(formData.get("note") ?? "").trim() || undefined;
+  const parsed = parseForm(receiveSchema, formData);
+  if (!parsed.ok) return parsed.state;
 
-  let order: { supplierId: string; productIds: string[] };
+  let receipt: { id: string };
   try {
-    order = await db.$transaction(async (tx) => {
+    receipt = await db.$transaction(async (tx) => {
       const po = await tx.purchaseOrder.findUnique({
         where: { id },
         include: { lines: { orderBy: { position: "asc" }, include: { product: { select: { name: true } } } } },
       });
       if (!po) throw new OrderError("Purchase order not found.");
-      if (po.status !== "ORDERED" && po.status !== "PARTIALLY_RECEIVED") {
-        throw new OrderError("Goods can only be received against an ordered purchase order.");
-      }
 
-      const receipts: Array<{ line: (typeof po.lines)[number]; qty: number }> = [];
+      const lines = [];
       for (const line of po.lines) {
         const raw = String(formData.get(`qty_${line.id}`) ?? "").trim();
         const qty = round3(Number(raw || 0));
         if (!Number.isFinite(qty) || qty < 0) throw new OrderError(`Enter a valid quantity for ${line.product.name}.`);
-        const remaining = round3(num(line.quantity) - num(line.receivedQty));
-        if (qty > remaining) {
-          throw new OrderError(`Only ${formatNumber(remaining)} of ${line.product.name} remain to be received; you entered ${formatNumber(qty)}.`);
-        }
-        if (qty > 0) receipts.push({ line, qty });
-      }
-      if (receipts.length === 0) throw new OrderError("Enter a quantity to receive on at least one line.");
-
-      for (const { line, qty } of receipts) {
-        // Optimistic check: fails if someone else received this line in the meantime.
-        const { count } = await tx.purchaseOrderLine.updateMany({
-          where: { id: line.id, receivedQty: line.receivedQty },
-          data: { receivedQty: { increment: qty } },
-        });
-        if (count === 0) throw new OrderError("This order was updated by someone else. Reload and try again.");
-        await adjustStock(tx, {
-          productId: line.productId,
-          warehouseId: po.warehouseId,
-          quantity: qty,
-          type: "RECEIPT",
-          unitCost: num(line.unitPrice),
-          referenceType: "PurchaseOrder",
-          referenceId: po.id,
-          reference: po.number,
-          note,
-          userId: user.id,
-        });
+        if (qty > 0) lines.push({ productId: line.productId, purchaseOrderLineId: line.id, receivedQty: qty, unitCost: num(line.unitPrice) });
       }
 
-      const received = new Map(receipts.map((r) => [r.line.id, r.qty]));
-      const complete = po.lines.every((l) => round3(num(l.receivedQty) + (received.get(l.id) ?? 0)) >= num(l.quantity));
-      const status: PurchaseOrderStatus = complete ? "RECEIVED" : "PARTIALLY_RECEIVED";
-      const { count } = await tx.purchaseOrder.updateMany({
-        where: { id, status: { in: ["ORDERED", "PARTIALLY_RECEIVED"] } },
-        data: { status },
+      return createGrn(tx, {
+        ...parsed.data,
+        warehouseId: po.warehouseId,
+        supplierId: po.supplierId,
+        purchaseOrderId: po.id,
+        lines,
+        userId: user.id,
       });
-      if (count === 0) throw new OrderError("This order was updated by someone else. Reload and try again.");
-
-      await logActivity(
-        {
-          userId: user.id,
-          entityType: "PurchaseOrder",
-          entityId: id,
-          action: status.toLowerCase(),
-          message: `Goods received against ${po.number} (${receipts.length} line${receipts.length === 1 ? "" : "s"}); now ${complete ? "fully received" : "partially received"}`,
-        },
-        tx,
-      );
-      return { supplierId: po.supplierId, productIds: receipts.map((r) => r.line.productId) };
     });
   } catch (e) {
     if (e instanceof OrderError) return { error: e.message };
+    if (e instanceof WarehouseError) return { error: e.message };
     throw e;
   }
 
-  revalidateOrder(id, order.supplierId);
+  revalidateOrder(id);
+  revalidatePath("/warehouse/inbound");
   revalidatePath("/inventory/stock");
-  revalidatePath("/inventory/movements");
-  revalidatePath("/inventory/products");
-  for (const productId of order.productIds) revalidatePath(`/inventory/products/${productId}`);
   revalidatePath("/dashboard");
-  redirect(`/purchasing/orders/${id}`);
+  redirect(`/warehouse/inbound/${receipt.id}`);
 }

@@ -31,6 +31,7 @@ export default async function EditProductPage({ params }: PageProps<"/inventory/
           purchasePrice: num(product.purchasePrice),
           taxRate: num(product.taxRate),
           reorderLevel: num(product.reorderLevel),
+          weightKg: product.weightKg === null ? null : num(product.weightKg),
         }}
       />
     </div>

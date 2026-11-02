@@ -1,17 +1,22 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Field, FormGrid, FormMessage, Input, Select, Textarea } from "@/components/ui/form";
 import { SubmitButton } from "@/components/ui/submit-button";
 import type { ActionState } from "@/lib/forms";
+import { ITEM_TYPES, SUPPLY_MODES, type ItemTypeKey, type SupplyModeKey } from "./_item-meta";
 
 export type ProductFormValues = {
   sku: string;
   name: string;
   description: string | null;
   type: "GOODS" | "SERVICE";
+  itemType: ItemTypeKey;
+  supplyMode: SupplyModeKey;
+  qcRequired: boolean;
+  weightKg: number | null;
   unit: string;
   hsnCode: string | null;
   categoryId: string | null;
@@ -35,6 +40,8 @@ export function ProductForm({
 }) {
   const [state, formAction] = useActionState(action, undefined);
   const err = state?.fieldErrors ?? {};
+  const [itemType, setItemType] = useState<ItemTypeKey>(initial?.itemType ?? "TRADING");
+  const [supplyMode, setSupplyMode] = useState<SupplyModeKey>(initial?.supplyMode ?? "BUY");
 
   return (
     <form action={formAction} className="space-y-6">
@@ -50,7 +57,15 @@ export function ProductForm({
               <Input id="name" name="name" defaultValue={initial?.name} required />
             </Field>
             <Field label="Type" htmlFor="type" errors={err.type} hint="Services are never stocked">
-              <Select id="type" name="type" defaultValue={initial?.type ?? "GOODS"}>
+              <Select
+                id="type"
+                name="type"
+                defaultValue={initial?.type ?? "GOODS"}
+                onChange={(e) => {
+                  if (e.target.value === "SERVICE") setItemType("SERVICE");
+                  else if (itemType === "SERVICE") setItemType("TRADING");
+                }}
+              >
                 <option value="GOODS">Goods</option>
                 <option value="SERVICE">Service</option>
               </Select>
@@ -79,6 +94,42 @@ export function ProductForm({
                 <input type="checkbox" name="isActive" defaultChecked={initial?.isActive ?? true} className="h-4 w-4 rounded border-line" />
                 Active
               </label>
+            </div>
+          </FormGrid>
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardHeader title="Classification & handling" />
+        <CardBody>
+          <FormGrid>
+            <Field label="Item type" htmlFor="itemType" errors={err.itemType} hint={ITEM_TYPES[itemType].hint}>
+              <Select id="itemType" name="itemType" value={itemType} onChange={(e) => setItemType(e.target.value as ItemTypeKey)}>
+                {Object.entries(ITEM_TYPES).map(([value, t]) => (
+                  <option key={value} value={value}>
+                    {t.label}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="Supply mode" htmlFor="supplyMode" errors={err.supplyMode} hint={SUPPLY_MODES[supplyMode].hint}>
+              <Select id="supplyMode" name="supplyMode" value={supplyMode} onChange={(e) => setSupplyMode(e.target.value as SupplyModeKey)}>
+                {Object.entries(SUPPLY_MODES).map(([value, m]) => (
+                  <option key={value} value={value}>
+                    {m.label}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="Weight (kg)" htmlFor="weightKg" errors={err.weightKg} hint="Per unit; used for packing and freight">
+              <Input id="weightKg" name="weightKg" type="number" min="0" step="0.001" defaultValue={initial?.weightKg ?? ""} />
+            </Field>
+            <div className="flex flex-col justify-end pb-2">
+              <label className="flex items-center gap-2 text-sm text-ink">
+                <input type="checkbox" name="qcRequired" defaultChecked={initial?.qcRequired ?? false} className="h-4 w-4 rounded border-line" />
+                Quality check on receipt
+              </label>
+              <p className="mt-1 text-xs text-ink-faint">Inbound receipts must pass QC before this item is added to stock.</p>
             </div>
           </FormGrid>
         </CardBody>

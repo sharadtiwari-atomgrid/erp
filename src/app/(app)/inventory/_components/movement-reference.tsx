@@ -3,6 +3,8 @@ import Link from "next/link";
 const REFERENCE_ROUTES: Record<string, string> = {
   SalesOrder: "/sales/orders",
   PurchaseOrder: "/purchasing/orders",
+  InboundReceipt: "/warehouse/inbound",
+  OutboundOrder: "/warehouse/outbound",
 };
 
 /** Document number of a stock movement, linked to the source document when there is one. */

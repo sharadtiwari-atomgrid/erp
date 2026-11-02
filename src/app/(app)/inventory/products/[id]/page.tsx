@@ -10,7 +10,8 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDateTime, formatMoney, formatNumber, humanize, num } from "@/lib/format";
 import { can } from "@/lib/permissions";
-import { isLowStock } from "../../_components/stock";
+import { getStockBreakdown, isLowStock } from "../../_components/stock";
+import { ITEM_TYPES, SUPPLY_MODES } from "../_item-meta";
 import { OnHand, SignedQty } from "../../_components/stock-badge";
 import { MovementReference } from "../../_components/movement-reference";
 
@@ -23,7 +24,6 @@ export default async function ProductPage({ params }: PageProps<"/inventory/prod
     where: { id },
     include: {
       category: { select: { name: true } },
-      stockLevels: { include: { warehouse: { select: { id: true, code: true, name: true } } }, orderBy: { warehouse: { name: "asc" } } },
       stockMovements: {
         orderBy: { createdAt: "desc" },
         take: 20,
@@ -36,7 +36,18 @@ export default async function ProductPage({ params }: PageProps<"/inventory/prod
   const isGoods = product.type === "GOODS";
   const purchasePrice = num(product.purchasePrice);
   const reorderLevel = num(product.reorderLevel);
-  const onHand = product.stockLevels.reduce((s, l) => s + num(l.quantity), 0);
+  const breakdown = await getStockBreakdown({ productIds: [id] });
+  const warehouses = await db.warehouse.findMany({
+    where: { id: { in: breakdown.map((b) => b.warehouseId) } },
+    select: { id: true, code: true, name: true },
+  });
+  const warehouseById = new Map(warehouses.map((w) => [w.id, w]));
+  const stockRows = breakdown
+    .map((b) => ({ ...b, warehouse: warehouseById.get(b.warehouseId)! }))
+    .filter((r) => r.warehouse)
+    .sort((a, b) => a.warehouse.name.localeCompare(b.warehouse.name));
+  const sum = (k: "quantity" | "reserved" | "allocated" | "available" | "inQc") => stockRows.reduce((s, r) => s + r[k], 0);
+  const onHand = sum("quantity");
   const low = isLowStock({ type: product.type, reorderLevel }, onHand);
 
   return (
@@ -69,9 +80,13 @@ export default async function ProductPage({ params }: PageProps<"/inventory/prod
           tone={low ? (onHand <= 0 ? "danger" : "warning") : "default"}
           hint={isGoods ? (reorderLevel > 0 ? `Reorder at ${formatNumber(reorderLevel)}` : "No reorder level") : "Services are not stocked"}
         />
-        <StatCard label="Stock value" value={formatMoney(isGoods ? onHand * purchasePrice : 0)} hint="At purchase price" />
+        <StatCard
+          label="Available"
+          value={isGoods ? `${formatNumber(sum("available"))} ${product.unit}` : "—"}
+          hint={isGoods ? `${formatNumber(sum("reserved"))} reserved · ${formatNumber(sum("inQc"))} in QC` : undefined}
+        />
         <StatCard label="Sale price" value={formatMoney(product.salePrice)} hint={`GST ${formatNumber(product.taxRate, 2)}%`} />
-        <StatCard label="Purchase price" value={formatMoney(purchasePrice)} />
+        <StatCard label="Purchase price" value={formatMoney(purchasePrice)} hint={isGoods ? `Stock value ${formatMoney(onHand * purchasePrice)}` : undefined} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -80,6 +95,10 @@ export default async function ProductPage({ params }: PageProps<"/inventory/prod
           <CardBody>
             <DetailList
               items={[
+                { label: "Item type", value: `${ITEM_TYPES[product.itemType].label} — ${ITEM_TYPES[product.itemType].hint}` },
+                { label: "Supply mode", value: `${SUPPLY_MODES[product.supplyMode].label} — ${SUPPLY_MODES[product.supplyMode].hint}` },
+                { label: "Quality check", value: product.qcRequired ? "Required on receipt" : "Not required" },
+                { label: "Weight", value: product.weightKg === null ? null : `${formatNumber(product.weightKg)} kg per ${product.unit}` },
                 { label: "Category", value: product.category?.name },
                 { label: "Unit", value: product.unit },
                 { label: "HSN / SAC", value: product.hsnCode },
@@ -93,34 +112,46 @@ export default async function ProductPage({ params }: PageProps<"/inventory/prod
         <div className="space-y-6 lg:col-span-2">
           {isGoods && (
             <Card>
-              <CardHeader title="Stock by warehouse" />
+              <CardHeader title="Stock by warehouse" description="Available = in hand − reserved. Allocated is the picked part of reserved. In QC is received but not yet in stock." />
               <Table>
                 <THead>
                   <tr>
                     <TH>Warehouse</TH>
-                    <TH align="right">On hand</TH>
+                    <TH align="right">In hand</TH>
+                    <TH align="right">Reserved</TH>
+                    <TH align="right">Allocated</TH>
+                    <TH align="right">Available</TH>
+                    <TH align="right">In QC</TH>
                     <TH align="right">Value</TH>
                     {can(user, "stock", "edit") && <TH align="right">Actions</TH>}
                   </tr>
                 </THead>
                 <TBody>
-                  {product.stockLevels.length === 0 && <EmptyRow colSpan={4}>No stock in any warehouse.</EmptyRow>}
-                  {product.stockLevels.map((l) => (
-                    <TR key={l.id}>
+                  {stockRows.length === 0 && <EmptyRow colSpan={8}>No stock in any warehouse.</EmptyRow>}
+                  {stockRows.map((r) => (
+                    <TR key={r.warehouseId}>
                       <TD>
-                        <Link href={`/inventory/warehouses/${l.warehouse.id}`} className="font-medium text-brand-700 hover:underline">
-                          {l.warehouse.name}
+                        <Link href={`/inventory/warehouses/${r.warehouse.id}`} className="font-medium text-brand-700 hover:underline">
+                          {r.warehouse.name}
                         </Link>
-                        <div className="font-mono text-xs text-ink-faint">{l.warehouse.code}</div>
+                        <div className="font-mono text-xs text-ink-faint">{r.warehouse.code}</div>
                       </TD>
                       <TD align="right">
-                        <OnHand value={num(l.quantity)} unit={product.unit} low={false} />
+                        <OnHand value={r.quantity} unit={product.unit} low={false} />
                       </TD>
-                      <TD align="right">{formatMoney(num(l.quantity) * purchasePrice)}</TD>
+                      <TD align="right">{formatNumber(r.reserved)}</TD>
+                      <TD align="right">{formatNumber(r.allocated)}</TD>
+                      <TD align="right" className={r.available < 0 ? "text-red-600" : "font-medium"}>
+                        {formatNumber(r.available)}
+                      </TD>
+                      <TD align="right" className={r.inQc > 0 ? "text-amber-700" : "text-ink-faint"}>
+                        {formatNumber(r.inQc)}
+                      </TD>
+                      <TD align="right">{formatMoney(r.quantity * purchasePrice)}</TD>
                       {can(user, "stock", "edit") && (
                         <TD align="right">
                           <Link
-                            href={`/inventory/stock/adjust?productId=${id}&warehouseId=${l.warehouse.id}`}
+                            href={`/inventory/stock/adjust?productId=${id}&warehouseId=${r.warehouse.id}`}
                             className="text-xs font-medium text-brand-700 hover:underline"
                           >
                             Adjust

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { ProductType } from "@/generated/prisma/enums";
+import { ItemType, ProductType, SupplyMode } from "@/generated/prisma/enums";
 import { logActivity } from "@/lib/activity";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -14,6 +14,13 @@ const productSchema = z.object({
   name: f.text("Name"),
   description: f.optionalText(),
   type: z.enum(ProductType),
+  itemType: z.enum(ItemType, { error: "Choose an item type" }),
+  supplyMode: z.enum(SupplyMode, { error: "Choose a supply mode" }),
+  qcRequired: f.checkbox(),
+  weightKg: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? null : v),
+    z.coerce.number({ error: "Weight must be a number" }).min(0, "Weight cannot be negative").nullable(),
+  ),
   unit: f.text("Unit"),
   hsnCode: f.optionalText(),
   categoryId: f.optionalText(),
@@ -22,7 +29,11 @@ const productSchema = z.object({
   taxRate: f.number({ label: "GST rate" }).max(100, "GST rate must be at most 100"),
   reorderLevel: f.number({ label: "Reorder level" }),
   isActive: f.checkbox(),
-});
+})
+  .refine((d) => (d.type === "SERVICE") === (d.itemType === "SERVICE"), {
+    path: ["itemType"],
+    message: "Use item type Service for service products (and only for them)",
+  });
 
 const skuTaken: ActionState = {
   error: "Please fix the highlighted fields.",

@@ -13,6 +13,8 @@ import { formatMoney, num } from "@/lib/format";
 import { pagination, param } from "@/lib/forms";
 import { can } from "@/lib/permissions";
 import type { Prisma } from "@/generated/prisma/client";
+import { ItemType } from "@/generated/prisma/enums";
+import { ITEM_TYPES, SUPPLY_MODES } from "./_item-meta";
 import { getOnHandByProduct, isLowStock } from "../_components/stock";
 import { OnHand } from "../_components/stock-badge";
 
@@ -24,6 +26,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/invento
   const q = param(sp, "q");
   const categoryId = param(sp, "category");
   const status = param(sp, "status");
+  const itemType = param(sp, "itemType");
   const { page, take, skip } = pagination(sp);
 
   const where: Prisma.ProductWhereInput = {
@@ -35,6 +38,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/invento
       ],
     }),
     ...(categoryId && { categoryId }),
+    ...(Object.hasOwn(ItemType, itemType) && { itemType: itemType as ItemType }),
     ...(status === "ACTIVE" && { isActive: true }),
     ...(status === "INACTIVE" && { isActive: false }),
   };
@@ -64,6 +68,14 @@ export default async function ProductsPage({ searchParams }: PageProps<"/invento
             options: categories.map((c) => ({ value: c.id, label: c.name })),
           }}
         >
+          <Select name="itemType" defaultValue={itemType} className="w-auto" aria-label="Item type">
+            <option value="">All item types</option>
+            {Object.entries(ITEM_TYPES).map(([value, t]) => (
+              <option key={value} value={value}>
+                {t.label}
+              </option>
+            ))}
+          </Select>
           <Select name="status" defaultValue={status} className="w-auto" aria-label="Status">
             <option value="">Active and inactive</option>
             <option value="ACTIVE">Active</option>
@@ -75,6 +87,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/invento
             <tr>
               <TH>SKU</TH>
               <TH>Name</TH>
+              <TH>Item type</TH>
               <TH>Category</TH>
               <TH>HSN</TH>
               <TH align="right">Sale price</TH>
@@ -84,7 +97,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/invento
             </tr>
           </THead>
           <TBody>
-            {products.length === 0 && <EmptyRow colSpan={8} />}
+            {products.length === 0 && <EmptyRow colSpan={9} />}
             {products.map((p) => {
               const qty = onHand.get(p.id) ?? 0;
               const low = isLowStock({ type: p.type, reorderLevel: num(p.reorderLevel) }, qty);
@@ -100,6 +113,13 @@ export default async function ProductsPage({ searchParams }: PageProps<"/invento
                         <Badge tone="violet">Service</Badge>
                       </span>
                     )}
+                  </TD>
+                  <TD className="whitespace-nowrap">
+                    {ITEM_TYPES[p.itemType].label}
+                    <div className="text-xs text-ink-faint">
+                      {SUPPLY_MODES[p.supplyMode].label}
+                      {p.qcRequired && " · QC"}
+                    </div>
                   </TD>
                   <TD className="text-ink-soft">{p.category?.name ?? "—"}</TD>
                   <TD className="font-mono text-xs">{p.hsnCode ?? "—"}</TD>

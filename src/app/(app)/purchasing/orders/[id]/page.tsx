@@ -13,6 +13,7 @@ import { formatDate, formatDateTime, formatMoney, formatNumber, num } from "@/li
 import { can } from "@/lib/permissions";
 import { canReceiveGoods } from "../../_components/access";
 import { cancelPurchaseOrder, placePurchaseOrder } from "../actions";
+import { WarehouseStatusBadge } from "../../../warehouse/_components/status";
 
 export const metadata: Metadata = { title: "Purchase order" };
 
@@ -30,10 +31,10 @@ export default async function PurchaseOrderPage({ params }: PageProps<"/purchasi
   if (!order) notFound();
 
   const [receipts, activity] = await Promise.all([
-    db.stockMovement.findMany({
-      where: { referenceType: "PurchaseOrder", referenceId: id },
+    db.inboundReceipt.findMany({
+      where: { purchaseOrderId: id },
       orderBy: { createdAt: "desc" },
-      include: { product: { select: { sku: true, name: true, unit: true } }, createdBy: { select: { name: true } } },
+      include: { lines: { select: { receivedQty: true, acceptedQty: true, rejectedQty: true } } },
     }),
     db.activity.findMany({
       where: { entityType: "PurchaseOrder", entityId: id },
@@ -199,34 +200,44 @@ export default async function PurchaseOrderPage({ params }: PageProps<"/purchasi
           </Card>
 
           <Card>
-            <CardHeader title="Goods received" description="Stock receipts posted against this order" />
+            <CardHeader title="Goods receipts (GRN)" description="Stock is posted when QC is completed on each GRN" />
             <Table>
               <THead>
                 <tr>
-                  <TH>Date</TH>
-                  <TH>Product</TH>
-                  <TH align="right">Qty</TH>
-                  <TH align="right">Unit cost</TH>
-                  <TH>By</TH>
+                  <TH>GRN</TH>
+                  <TH>Received</TH>
+                  <TH>Invoice / vehicle</TH>
+                  <TH align="right">Received qty</TH>
+                  <TH align="right">Accepted</TH>
+                  <TH align="right">Rejected</TH>
+                  <TH>Status</TH>
                 </tr>
               </THead>
               <TBody>
-                {receipts.length === 0 && <EmptyRow colSpan={5}>Nothing received yet.</EmptyRow>}
-                {receipts.map((m) => (
-                  <TR key={m.id}>
-                    <TD className="whitespace-nowrap text-ink-soft">{formatDateTime(m.createdAt)}</TD>
-                    <TD>
-                      {m.product.name}
-                      <div className="font-mono text-xs text-ink-faint">{m.product.sku}</div>
-                      {m.note && <div className="text-xs text-ink-soft">{m.note}</div>}
-                    </TD>
-                    <TD align="right">
-                      {formatNumber(m.quantity)} <span className="text-xs text-ink-faint">{m.product.unit}</span>
-                    </TD>
-                    <TD align="right">{m.unitCost === null ? "—" : formatMoney(m.unitCost)}</TD>
-                    <TD className="text-ink-soft">{m.createdBy?.name ?? "System"}</TD>
-                  </TR>
-                ))}
+                {receipts.length === 0 && <EmptyRow colSpan={7}>Nothing received yet.</EmptyRow>}
+                {receipts.map((r) => {
+                  const done = r.status === "COMPLETED";
+                  return (
+                    <TR key={r.id}>
+                      <TD>
+                        <Link href={`/warehouse/inbound/${r.id}`} className="font-medium text-brand-700 hover:underline">
+                          {r.number}
+                        </Link>
+                      </TD>
+                      <TD className="whitespace-nowrap text-ink-soft">{formatDateTime(r.receivedAt)}</TD>
+                      <TD className="text-xs text-ink-soft">
+                        {r.supplierInvoice ?? "—"}
+                        {r.vehicleNo && <div className="font-mono">{r.vehicleNo}</div>}
+                      </TD>
+                      <TD align="right">{formatNumber(r.lines.reduce((s, l) => s + num(l.receivedQty), 0))}</TD>
+                      <TD align="right">{done ? formatNumber(r.lines.reduce((s, l) => s + num(l.acceptedQty), 0)) : "—"}</TD>
+                      <TD align="right">{done ? formatNumber(r.lines.reduce((s, l) => s + num(l.rejectedQty), 0)) : "—"}</TD>
+                      <TD>
+                        <WarehouseStatusBadge status={r.status} />
+                      </TD>
+                    </TR>
+                  );
+                })}
               </TBody>
             </Table>
           </Card>
