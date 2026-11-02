@@ -42,8 +42,11 @@ function NavLinks({ groups, onNavigate }: { groups: Group[]; onNavigate?: () => 
 function Brand({ name }: { name: string }) {
   return (
     <Link href="/dashboard" className="flex items-center gap-2.5 px-3">
-      <span className="grid h-8 w-8 place-items-center rounded-md bg-brand-600 text-sm font-bold text-white">E</span>
-      <span className="truncate text-sm font-semibold text-white">{name}</span>
+      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-brand-600 text-sm font-bold text-white">A</span>
+      <span className="min-w-0 leading-tight">
+        <span className="block truncate text-sm font-semibold text-white">{name}</span>
+        <span className="block text-[11px] text-slate-400">Atomgrid ERP</span>
+      </span>
     </Link>
   );
 }

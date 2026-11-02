@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: { default: "ERP", template: "%s · ERP" },
-  description: "Sales, CRM, inventory and purchasing for growing businesses.",
+  title: { default: "Atomgrid ERP", template: "%s · Atomgrid" },
+  description: "Atomgrid ERP: orders, inventory, warehouse, manufacturing, logistics and books in one place.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

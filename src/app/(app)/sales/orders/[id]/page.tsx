@@ -1,0 +1,237 @@
+import Link from "next/link";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { Badge, StatusBadge } from "@/components/ui/badge";
+import { ButtonLink } from "@/components/ui/button";
+import { Card, CardBody, CardHeader, DetailList, StatCard } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
+import { EmptyRow, Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
+import { requireUser } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { formatDate, formatMoney, formatNumber, num } from "@/lib/format";
+import { can } from "@/lib/permissions";
+import { ActionButton } from "../../_components/action-button";
+import { ActivityCard } from "../../_components/activity-card";
+import { DocumentTotals, ProductCell } from "../../_components/document-lines";
+import { cancelOrder, confirmOrder, createInvoiceFromOrder } from "../actions";
+
+export const metadata: Metadata = { title: "Sales order" };
+
+export default async function SalesOrderPage({ params }: PageProps<"/sales/orders/[id]">) {
+  const user = await requireUser("salesOrders");
+  const { id } = await params;
+  const order = await db.salesOrder.findUnique({
+    where: { id },
+    include: {
+      customer: { select: { id: true, code: true, name: true } },
+      warehouse: { select: { id: true, code: true, name: true } },
+      quotation: { select: { id: true, number: true } },
+      invoices: { orderBy: { createdAt: "desc" }, select: { id: true, number: true, status: true, total: true } },
+      lines: {
+        orderBy: { position: "asc" },
+        include: { product: { select: { id: true, sku: true, name: true, unit: true, type: true } } },
+      },
+    },
+  });
+  if (!order) notFound();
+
+  const levels = await db.stockLevel.findMany({
+    where: { warehouseId: order.warehouseId, productId: { in: order.lines.map((l) => l.productId) } },
+    select: { productId: true, quantity: true },
+  });
+  const onHand = new Map(levels.map((l) => [l.productId, num(l.quantity)]));
+
+  const lines = order.lines.map((l) => {
+    const ordered = num(l.quantity);
+    const delivered = num(l.deliveredQty);
+    return { ...l, ordered, delivered, remaining: Math.max(0, Math.round((ordered - delivered) * 1000) / 1000) };
+  });
+  const totalOrdered = lines.reduce((s, l) => s + l.ordered, 0);
+  const totalDelivered = lines.reduce((s, l) => s + l.delivered, 0);
+  const activeInvoice = order.invoices.find((i) => i.status !== "CANCELLED");
+
+  const canEdit = can(user.role, "salesOrders", "edit");
+  const canDeliver =
+    (canEdit || can(user.role, "stock", "edit")) && (order.status === "CONFIRMED" || order.status === "PARTIALLY_DELIVERED");
+  const canInvoice =
+    can(user.role, "invoices", "edit") && !activeInvoice && order.status !== "DRAFT" && order.status !== "CANCELLED";
+  const canCancel =
+    canEdit && (order.status === "DRAFT" || order.status === "CONFIRMED") && totalDelivered === 0 && !activeInvoice;
+
+  return (
+    <>
+      <PageHeader
+        title={
+          <span className="flex items-center gap-3">
+            {order.number} <StatusBadge status={order.status} />
+          </span>
+        }
+        description={order.customer.name}
+        back={{ href: "/sales/orders", label: "Sales orders" }}
+        actions={
+          <>
+            {canCancel && (
+              <ActionButton action={cancelOrder.bind(null, id)} variant="ghost" confirmMessage="Cancel this sales order?">
+                Cancel order
+              </ActionButton>
+            )}
+            {canEdit && order.status === "DRAFT" && (
+              <>
+                <ButtonLink href={`/sales/orders/${id}/edit`} variant="secondary">
+                  Edit
+                </ButtonLink>
+                <ActionButton action={confirmOrder.bind(null, id)} variant="primary">
+                  Confirm order
+                </ActionButton>
+              </>
+            )}
+            {canInvoice && (
+              <ActionButton
+                action={createInvoiceFromOrder.bind(null, id)}
+                variant={canDeliver ? "secondary" : "primary"}
+                pendingText="Creating…"
+              >
+                Create invoice
+              </ActionButton>
+            )}
+            {canDeliver && <ButtonLink href={`/sales/orders/${id}/deliver`}>Deliver</ButtonLink>}
+          </>
+        }
+      />
+
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <StatCard label="Order total" value={formatMoney(order.total)} hint={`${lines.length} line${lines.length === 1 ? "" : "s"}`} />
+        <StatCard
+          label="Delivered"
+          value={totalOrdered > 0 ? `${Math.round((totalDelivered / totalOrdered) * 100)}%` : "—"}
+          hint={`${formatNumber(totalDelivered)} of ${formatNumber(totalOrdered)} units`}
+        />
+        <StatCard
+          label="Invoice"
+          value={
+            activeInvoice ? (
+              <Link href={`/sales/invoices/${activeInvoice.id}`} className="text-brand-700 hover:underline">
+                {activeInvoice.number}
+              </Link>
+            ) : (
+              "Not invoiced"
+            )
+          }
+          hint={activeInvoice ? <StatusBadge status={activeInvoice.status} /> : undefined}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
+          <Card>
+            <CardHeader title="Line items" description={`On hand shows stock in ${order.warehouse.name}.`} />
+            <Table>
+              <THead>
+                <tr>
+                  <TH>Product</TH>
+                  <TH align="right">Ordered</TH>
+                  <TH align="right">Delivered</TH>
+                  <TH align="right">Remaining</TH>
+                  <TH align="right">On hand</TH>
+                  <TH align="right">Unit price</TH>
+                  <TH align="right">Amount</TH>
+                </tr>
+              </THead>
+              <TBody>
+                {lines.length === 0 && <EmptyRow colSpan={7}>No line items.</EmptyRow>}
+                {lines.map((l) => {
+                  const stock = onHand.get(l.productId) ?? 0;
+                  return (
+                    <TR key={l.id}>
+                      <TD>
+                        <ProductCell line={l} />
+                      </TD>
+                      <TD align="right">
+                        {formatNumber(l.ordered)} <span className="text-xs text-ink-faint">{l.product.unit}</span>
+                      </TD>
+                      <TD align="right">{formatNumber(l.delivered)}</TD>
+                      <TD align="right">{l.remaining > 0 ? formatNumber(l.remaining) : <Badge tone="green">Done</Badge>}</TD>
+                      <TD align="right">
+                        {l.product.type === "SERVICE" ? (
+                          <span className="text-ink-faint">Service</span>
+                        ) : (
+                          <Badge tone={stock <= 0 ? "red" : stock < l.remaining ? "amber" : "gray"}>{formatNumber(stock)}</Badge>
+                        )}
+                      </TD>
+                      <TD align="right">{formatMoney(l.unitPrice)}</TD>
+                      <TD align="right">{formatMoney(l.lineTotal)}</TD>
+                    </TR>
+                  );
+                })}
+              </TBody>
+            </Table>
+            <DocumentTotals subtotal={order.subtotal} taxTotal={order.taxTotal} total={order.total} />
+          </Card>
+
+          {order.invoices.length > 0 && (
+            <Card>
+              <CardHeader title="Invoices" />
+              <Table>
+                <THead>
+                  <tr>
+                    <TH>Number</TH>
+                    <TH>Status</TH>
+                    <TH align="right">Total</TH>
+                  </tr>
+                </THead>
+                <TBody>
+                  {order.invoices.map((inv) => (
+                    <TR key={inv.id}>
+                      <TD>
+                        <Link href={`/sales/invoices/${inv.id}`} className="font-medium text-brand-700 hover:underline">
+                          {inv.number}
+                        </Link>
+                      </TD>
+                      <TD>
+                        <StatusBadge status={inv.status} />
+                      </TD>
+                      <TD align="right">{formatMoney(inv.total)}</TD>
+                    </TR>
+                  ))}
+                </TBody>
+              </Table>
+            </Card>
+          )}
+        </div>
+
+        <div className="space-y-6 lg:col-span-1">
+          <Card>
+            <CardHeader title="Details" />
+            <CardBody>
+              <DetailList
+                items={[
+                  {
+                    label: "Customer",
+                    value: (
+                      <Link href={`/crm/customers/${order.customer.id}`} className="text-brand-700 hover:underline">
+                        {order.customer.name}
+                      </Link>
+                    ),
+                  },
+                  { label: "Warehouse", value: order.warehouse.name },
+                  { label: "Order date", value: formatDate(order.orderDate) },
+                  { label: "Expected delivery", value: formatDate(order.expectedDate) },
+                  {
+                    label: "Quotation",
+                    value: order.quotation && (
+                      <Link href={`/sales/quotations/${order.quotation.id}`} className="text-brand-700 hover:underline">
+                        {order.quotation.number}
+                      </Link>
+                    ),
+                  },
+                  { label: "Notes", value: order.notes },
+                ]}
+              />
+            </CardBody>
+          </Card>
+          <ActivityCard entityType="SalesOrder" entityId={id} />
+        </div>
+      </div>
+    </>
+  );
+}
