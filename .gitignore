@@ -46,3 +46,6 @@ next-env.d.ts
 
 # local tooling
 /.claude/
+
+# local uploads and imported data (never commit business data)
+/.data/

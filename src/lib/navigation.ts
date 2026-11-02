@@ -14,6 +14,34 @@ export const NAVIGATION: NavGroup[] = [
       { label: "Branches", href: "/branches", module: "branches" },
       { label: "Teams", href: "/teams", module: "teams" },
       { label: "Third-party contacts", href: "/contacts", module: "contacts" },
+      { label: "POCs", href: "/contacts/pocs", module: "contacts" },
+    ],
+  },
+  {
+    key: "b2b",
+    label: "Domestic B2B",
+    color: "#f2cf5b",
+    items: [
+      { label: "Today", href: "/b2b", module: "b2bOrders" },
+      { label: "Fresh PO", href: "/b2b/fresh-po", module: "b2bOrders" },
+      { label: "Long Hold PO", href: "/b2b/long-hold", module: "b2bOrders" },
+      { label: "Domestic MIS", href: "/b2b/mis", module: "b2bOrders" },
+      { label: "Quotation sheet (D-0)", href: "/b2b/quotation-sheet", module: "b2bOrders" },
+      { label: "COA generator", href: "/b2b/tools/coa", module: "opsTools" },
+      { label: "Archives", href: "/b2b/archives", module: "b2bOrders" },
+    ],
+  },
+  {
+    key: "b2bViews",
+    label: "B2B views",
+    color: "#f2cf5b",
+    items: [
+      { label: "Dashboard", href: "/b2b/dashboard", module: "b2bReports" },
+      { label: "Shipments summary", href: "/b2b/views/summary", module: "b2bReports" },
+      { label: "In transit", href: "/b2b/views/intransit", module: "b2bReports" },
+      { label: "Planned", href: "/b2b/views/planned", module: "b2bReports" },
+      { label: "Delivered", href: "/b2b/views/delivered", module: "b2bReports" },
+      { label: "Daily digest", href: "/b2b/views/daily-digest", module: "b2bReports" },
     ],
   },
   {
@@ -23,6 +51,7 @@ export const NAVIGATION: NavGroup[] = [
     items: [
       { label: "Items", href: "/inventory/products", module: "products" },
       { label: "Categories", href: "/inventory/categories", module: "products" },
+      { label: "Product name check", href: "/inventory/products/name-check", module: "products" },
     ],
   },
   {
@@ -36,6 +65,11 @@ export const NAVIGATION: NavGroup[] = [
       { label: "Outbound", href: "/warehouse/outbound", module: "outbound" },
       { label: "Picking sessions", href: "/warehouse/picking", module: "outbound" },
       { label: "Warehouses & bins", href: "/inventory/warehouses", module: "warehouses" },
+      { label: "Batch stock in hand", href: "/b2b/inventory/stock", module: "batchInventory" },
+      { label: "Batch inward", href: "/b2b/inventory/inward", module: "batchInventory" },
+      { label: "Batch outward", href: "/b2b/inventory/outward", module: "batchInventory" },
+      { label: "Lost & found", href: "/b2b/inventory/lost-and-found", module: "batchInventory" },
+      { label: "Damage & relabelling", href: "/b2b/inventory/damage", module: "batchInventory" },
     ],
   },
   {
@@ -72,6 +106,9 @@ export const NAVIGATION: NavGroup[] = [
       { label: "Vehicles", href: "/logistics/vehicles", module: "fleet" },
       { label: "Drivers", href: "/logistics/drivers", module: "fleet" },
       { label: "Fuel logs", href: "/logistics/fuel", module: "fleet" },
+      { label: "Transport performance", href: "/b2b/transport/performance", module: "transportOps" },
+      { label: "Transport payables", href: "/b2b/transport/payables", module: "transportOps" },
+      { label: "Transport finder", href: "/b2b/transport/finder", module: "transportOps" },
     ],
   },
   {
@@ -92,6 +129,7 @@ export const NAVIGATION: NavGroup[] = [
       { label: "Company", href: "/settings/company", module: "settings" },
       { label: "Users", href: "/settings/users", module: "settings" },
       { label: "Roles & access", href: "/settings/roles", module: "settings" },
+      { label: "Bugs & requests", href: "/settings/feedback", module: "settings" },
     ],
   },
 ];

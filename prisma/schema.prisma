@@ -65,10 +65,13 @@ model User {
   branchId     String?
   branch       Branch?    @relation(fields: [branchId], references: [id], onDelete: SetNull)
   isActive     Boolean    @default(true)
+  /// Domestic B2B: which Fresh PO section this person fills in (null = can act as any team).
+  opsTeam      OpsTeam?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
   teamMemberships TeamMember[]
+  feedback        Feedback[]
   ledTeams        Team[]           @relation("TeamLead")
   leads           Lead[]
   stockMovements  StockMovement[]
@@ -122,26 +125,30 @@ enum ContactRole {
 /// Third-party contact: any external entity in the supply chain. One contact
 /// can hold several roles (e.g. both customer and supplier).
 model Contact {
-  id               String        @id @default(cuid())
-  code             String        @unique
-  name             String
-  roles            ContactRole[]
-  contactPerson    String?
-  email            String?
-  phone            String?
-  gstin            String?
-  pan              String?
-  billingAddress   String?
-  shippingAddress  String?
-  city             String?
-  state            String?
-  pincode          String?
-  creditLimit      Decimal       @default(0) @db.Decimal(14, 2)
-  paymentTermsDays Int           @default(30)
-  notes            String?
-  isActive         Boolean       @default(true)
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+  id                String        @id @default(cuid())
+  code              String        @unique
+  name              String
+  roles             ContactRole[]
+  contactPerson     String?
+  /// Named points of contact at this company (Domestic B2B POC pickers).
+  pocNames          String[]
+  /// Customer delivers to more than one address (shown in Domestic MIS).
+  multipleAddresses Boolean       @default(false)
+  email             String?
+  phone             String?
+  gstin             String?
+  pan               String?
+  billingAddress    String?
+  shippingAddress   String?
+  city              String?
+  state             String?
+  pincode           String?
+  creditLimit       Decimal       @default(0) @db.Decimal(14, 2)
+  paymentTermsDays  Int           @default(30)
+  notes             String?
+  isActive          Boolean       @default(true)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 
   leads           Lead[]
   quotations      Quotation[]
@@ -194,6 +201,9 @@ model Activity {
   entityId   String
   action     String
   message    String
+  /// Field-level changes { field: [old, new] }, for record history.
+  changes    Json?
+  updatedAt  DateTime @default(now()) @updatedAt
   createdAt  DateTime @default(now())
 
   @@index([entityType, entityId])
@@ -432,6 +442,13 @@ model Product {
   supplyMode    SupplyMode       @default(BUY)
   unit          String           @default("pcs")
   hsnCode       String?
+  casNo         String?
+  /// Technical / Formulation / Intermediate / Other
+  productClass  String?
+  /// B2B / B2C
+  funnel        String?
+  /// Other names this material appears under on inward/outward sheets.
+  aliases       String[]
   salePrice     Decimal          @default(0) @db.Decimal(14, 2)
   purchasePrice Decimal          @default(0) @db.Decimal(14, 2)
   taxRate       Decimal          @default(18) @db.Decimal(5, 2)
@@ -1236,4 +1253,372 @@ model ReturnLine {
   scrappedQty  Decimal           @default(0) @db.Decimal(14, 3)
   repairedAt   DateTime?
   qcNotes      String?
+}
+
+// ═══ Domestic B2B order management ══════════════════════════════════════════
+// Ported from the Atomgrid Domestic B2B CRM. Customer / supplier / product /
+// transporter names are stored as text exactly as entered or imported (the
+// masters are pickers, and "not in master" is a warning, not an error); see
+// src/lib/ops for shared helpers.
+
+enum OpsTeam {
+  DEMAND
+  SUPPLY
+  LOGISTICS
+  SCM
+}
+
+/// Internal points of contact (people names) used across Fresh PO and Domestic MIS.
+model OpsPoc {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+}
+
+enum FreshPoBoard {
+  FRESH
+  LONG_HOLD
+  MIS // moved to Domestic MIS
+}
+
+enum FreshPoStage {
+  DEMAND_PENDING
+  SUPPLY_PENDING
+  LOGISTICS_PENDING
+  READY
+}
+
+/// A customer purchase order working its way through Demand → Supply → Logistics.
+model FreshPo {
+  id        String       @id @default(cuid())
+  /// Serial per board (Fresh PO and Long Hold each count 1, 2, 3…).
+  requestNo Int?
+  board     FreshPoBoard @default(FRESH)
+  stage     FreshPoStage @default(DEMAND_PENDING)
+
+  // Demand team
+  customer             String?
+  demandPoc            String?
+  poDate               DateTime? @db.Date
+  product              String?
+  productType          String?
+  poQty                Decimal?  @db.Decimal(14, 3)
+  qtyToDispatch        Decimal?  @db.Decimal(14, 3)
+  rate                 Decimal?  @db.Decimal(14, 2)
+  totalTaxable         Decimal?  @db.Decimal(16, 2)
+  paymentTerms         String?
+  paymentReceived      String?
+  customerType         String?
+  customerPoc          String?
+  scmContactCustomer   String?
+  deliveryAddress      String?
+  logisticsPaymentTerm String?
+  cxLogisticsPoc       String?
+  logisticsType        String?
+  scmToDispatch        String?
+  businessLeg          String?   @default("B2B")
+  notes                String?
+
+  // Supply team
+  agSupplyPoc   String?
+  supplier      String?
+  supplyPoc     String?
+  pickupAddress String?
+  hsnCode       String?
+  packaging     String?
+  originType    String?
+  batchNo       String?
+
+  // Logistics team
+  movementType String? @default("Forward")
+  verifiedBy   String?
+
+  /// Day the PO was brought back from Long Hold (restarts the 15-day clock).
+  holdReleasedAt DateTime? @db.Date
+  /// Domestic MIS job created from this PO.
+  misJobId       String?   @unique
+  misJob         MisJob?   @relation(fields: [misJobId], references: [id], onDelete: SetNull)
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([board, deletedAt])
+  @@index([stage])
+}
+
+enum MisStatus {
+  FRESH_PO
+  PLANNED
+  MATERIAL_READY
+  INTRANSIT
+  DELIVERED
+  ON_HOLD
+  CANCELLED
+}
+
+/// Domestic MIS: the master shipment record, one row per job.
+model MisJob {
+  id     String     @id @default(cuid())
+  /// Plain serial for new jobs; imported legacy numbers (e.g. "26-01-0671") are kept as text.
+  jobNo  String
+  status MisStatus?
+  /// manual | fresh-po | import
+  source String     @default("manual")
+
+  // Identification
+  poDate      DateTime? @db.Date
+  supplier    String?
+  customer    String?
+  productName String?
+
+  // Product & quantity
+  quantityKgs Decimal? @db.Decimal(14, 3)
+  batchNo     String?
+  grossWtKg   Decimal? @db.Decimal(14, 3)
+  packing     String?
+  unitCount   String?
+  hsCode      String?
+
+  // Schedule
+  plannedEtd          DateTime? @db.Date
+  plannedEta          DateTime? @db.Date
+  cxQuoteApprovalTime DateTime?
+  sxReadinessTime     DateTime?
+  actualEtd           DateTime? @db.Date
+  actualEta           DateTime? @db.Date
+
+  // POCs
+  logisticsPoc       String?
+  agSupplyPoc        String?
+  agDemandPoc        String?
+  supplyPoc          String?
+  customerPocDetails String?
+
+  // Addresses
+  pickupAddress String?
+  pickupPincode String?
+  dropAddress   String?
+  dropPincode   String?
+
+  // Logistics
+  logisticsType        String?
+  vehicleType          String?
+  transporterDetails   String?
+  totalLogisticsCost   Decimal? @db.Decimal(14, 2)
+  logisticsCostAgToPay Decimal? @db.Decimal(14, 2)
+  logisticsPaymentTerm String?
+  originType           String?
+  destinationType      String?
+  distanceApprox       Decimal? @db.Decimal(10, 1)
+  movementType         String?
+
+  // Commercials & tax
+  taxableValue    Decimal?  @db.Decimal(16, 2)
+  /// YYYY-MM
+  taxInvoiceMonth String?
+  taxInvoicedDate DateTime? @db.Date
+
+  // Transport payment
+  transportPaymentStatus String?
+  transportPaidSoFar     Decimal?  @db.Decimal(14, 2)
+  transportPaidOn        DateTime? @db.Date
+  transportPaymentRef    String?
+
+  // Tracking
+  blockersRemarks     String?
+  planningActionables String?
+  cxSxAlignmentTime   String?
+  statusConfirmedDate String?
+
+  freshPo   FreshPo?
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([jobNo])
+  @@index([deletedAt, status])
+}
+
+/// A document attached to a Domestic B2B record (PO, COA, POD, e-way bill, screenshot…).
+/// Polymorphic: entityType is "FreshPo" | "MisJob" | "Feedback" | …; field names the slot.
+model OpsFile {
+  id           String   @id @default(cuid())
+  entityType   String
+  entityId     String
+  /// FreshPo: PO | PI | COA | MSDS | OTHER. MisJob: taxInvoice | eWayBill | coa | transportDoc | pod.
+  field        String
+  fileName     String
+  contentType  String?
+  size         Int?
+  /// Key in file storage (src/lib/storage.ts); null for an external link.
+  storageKey   String?
+  url          String?
+  uploadedById String?
+  createdAt    DateTime @default(now())
+
+  @@index([entityType, entityId])
+}
+
+/// D-0 quotation board: transporter quotes and vehicle progress for a job dispatching that day.
+model DispatchQuote {
+  id                  String   @id @default(cuid())
+  jobNo               String
+  plannedFor          DateTime @db.Date
+  /// planned-today | manual
+  source              String   @default("planned-today")
+  customer            String?
+  supplier            String?
+  distance            String?
+  pickupAddress       String?
+  deliveryAddress     String?
+  netWeight           String?
+  grossWt             String?
+  packing             String?
+  taxableValue        String?
+  paymentTerms        String?
+  agDemandPoc         String?
+  materialReadiness   String?
+  materialReadyTime   String?
+  /// Last completed step of the vehicle stepper.
+  vehicleStatus       String?
+  vehicleStages       String[]
+  vehicleArrangements String?
+  vehicleDetails      String?
+  vehicleType         String?
+  /// "Tx1".."Tx4"
+  approvedTx          String?
+  /// Four transporter quotes: [{ name, quote, tat, remarks }]
+  bids                Json     @default("[]")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@unique([jobNo, plannedFor])
+}
+
+/// Batch-level inward register (one row per batch received at an AG warehouse).
+model BatchInward {
+  id              String    @id @default(cuid())
+  jobNo           String?
+  inwardDate      DateTime? @db.Date
+  location        String
+  funnel          String?
+  supplyPoc       String?
+  grnNo           String?
+  manufacturer    String?
+  supplier        String?
+  productName     String
+  /// AG Catalogue Name: the material stock is kept under.
+  catalogueName   String?
+  type            String?
+  hsn             String?
+  batchNo         String?
+  units           Decimal?  @db.Decimal(14, 3)
+  packaging       String?
+  uom             String?
+  netWeight       Decimal   @db.Decimal(14, 3)
+  grossWeight     Decimal?  @db.Decimal(14, 3)
+  mfgDate         DateTime? @db.Date
+  expDate         DateTime? @db.Date
+  purchaseRate    Decimal?  @db.Decimal(14, 2)
+  remarks         String?
+  /// Outward Qty recorded on the imported sheet (CRM-entered outward is added on top).
+  sheetOutwardQty Decimal?  @db.Decimal(14, 3)
+  license         String?
+  /// Dedup key for imports: jobNo|grnNo|batchNo|productName|netWeight|inwardDate
+  lineKey         String
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([deletedAt])
+  @@index([batchNo])
+  @@index([lineKey])
+}
+
+/// Batch-level outward register. Only source "crm" lines reduce stock; "sheet" lines
+/// are already counted in the inward sheet's Outward Qty.
+model BatchOutward {
+  id            String    @id @default(cuid())
+  /// sheet | crm
+  source        String    @default("crm")
+  jobNo         String?
+  obDate        DateTime? @db.Date
+  warehouse     String?
+  funnel        String?
+  customer      String?
+  grnNo         String?
+  productName   String
+  catalogueName String?
+  batchNo       String?
+  qty           Decimal   @db.Decimal(14, 3)
+  saleRate      Decimal?  @db.Decimal(14, 2)
+  /// Dedup key for imports: jobNo|obDate|customer|batchNo|qty|grnNo
+  outKey        String
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([deletedAt])
+  @@index([batchNo])
+  @@index([outKey])
+}
+
+enum InventoryIssueKind {
+  LOST_FOUND
+  DAMAGE
+}
+
+/// Lost & Found and Damage & Relabelling registers (they do not move stock).
+model InventoryIssue {
+  id          String             @id @default(cuid())
+  kind        InventoryIssueKind
+  date        DateTime?          @db.Date
+  status      String?
+  jobNo       String?
+  productName String?
+  batchNo     String?
+  qtyKg       Decimal?           @db.Decimal(14, 3)
+  /// Remaining register fields (see the register definitions in the app).
+  data        Json               @default("{}")
+  entryKey    String?
+  deletedAt   DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([kind, deletedAt])
+}
+
+/// Last uploaded warehouse stock count (e.g. the warehouse MIS "Stock in Hand" tab).
+model WarehouseCount {
+  id         String    @id @default(cuid())
+  /// warehouse-mis
+  kind       String    @unique
+  fileName   String
+  countDate  DateTime? @db.Date
+  /// [{ name, batch, received, dispatched, closing }]
+  rows       Json
+  uploadedAt DateTime  @default(now())
+}
+
+enum FeedbackKind {
+  BUG
+  FEATURE
+}
+
+/// "Report a bug" / "Feature request" from the top bar.
+model Feedback {
+  id        String       @id @default(cuid())
+  kind      FeedbackKind
+  title     String
+  details   String?
+  page      String?
+  /// Blocking my work | Annoying | Minor (bugs)
+  priority  String?
+  /// New | In progress | Done | Won't do
+  status    String       @default("New")
+  reply     String?
+  userId    String?
+  user      User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 }
