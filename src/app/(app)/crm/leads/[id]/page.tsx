@@ -10,7 +10,7 @@ import { db } from "@/lib/db";
 import { formatDate, formatMoney } from "@/lib/format";
 import { can } from "@/lib/permissions";
 import type { LeadStatus } from "@/generated/prisma/enums";
-import { ActionButton } from "@/app/(app)/sales/_components/action-button";
+import { ActionButton } from "@/components/ui/action-button";
 import { ActivityCard } from "@/app/(app)/sales/_components/activity-card";
 import { convertLead, setLeadStatus } from "../actions";
 
@@ -32,7 +32,7 @@ export default async function LeadPage({ params }: PageProps<"/crm/leads/[id]">)
   });
   if (!lead) notFound();
 
-  const canEdit = can(user.role, "leads", "edit");
+  const canEdit = can(user, "leads", "edit");
   const isOpen = lead.status !== "CONVERTED" && lead.status !== "LOST";
 
   return (
@@ -62,7 +62,7 @@ export default async function LeadPage({ params }: PageProps<"/crm/leads/[id]">)
               <ButtonLink href={`/crm/leads/${id}/edit`} variant="secondary">
                 Edit
               </ButtonLink>
-              {isOpen && can(user.role, "customers", "edit") && (
+              {isOpen && can(user, "contacts", "edit") && (
                 <ActionButton
                   action={convertLead.bind(null, id)}
                   variant="primary"
@@ -89,7 +89,7 @@ export default async function LeadPage({ params }: PageProps<"/crm/leads/[id]">)
             <Card>
               <CardBody className="text-sm">
                 Converted to customer{" "}
-                <Link href={`/crm/customers/${lead.customer.id}`} className="font-medium text-brand-700 hover:underline">
+                <Link href={`/contacts/${lead.customer.id}`} className="font-medium text-brand-700 hover:underline">
                   {lead.customer.name} ({lead.customer.code})
                 </Link>
                 .

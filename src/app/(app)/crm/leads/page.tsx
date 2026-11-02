@@ -54,7 +54,7 @@ export default async function LeadsPage({ searchParams }: PageProps<"/crm/leads"
       <PageHeader
         title="Leads"
         description="Prospects in your sales pipeline."
-        actions={can(user.role, "leads", "edit") && <ButtonLink href="/crm/leads/new">New lead</ButtonLink>}
+        actions={can(user, "leads", "edit") && <ButtonLink href="/crm/leads/new">New lead</ButtonLink>}
       />
       <Card>
         <ListToolbar

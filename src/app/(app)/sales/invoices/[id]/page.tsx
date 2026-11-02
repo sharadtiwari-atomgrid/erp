@@ -12,7 +12,7 @@ import { formatDate, formatMoney, humanize, num, toDateInput } from "@/lib/forma
 import { getCompany } from "@/lib/options";
 import { can } from "@/lib/permissions";
 import { round2, splitGst } from "@/lib/totals";
-import { ActionButton } from "../../_components/action-button";
+import { ActionButton } from "@/components/ui/action-button";
 import { ActivityCard } from "../../_components/activity-card";
 import { DocumentLines, DocumentTotals } from "../../_components/document-lines";
 import { isOverdue, startOfToday } from "../../_lib/documents";
@@ -46,7 +46,7 @@ export default async function InvoicePage({ params }: PageProps<"/sales/invoices
   const placeOfSupply = invoice.placeOfSupply ?? invoice.customer.state;
   const gst = splitGst(num(invoice.taxTotal), company.state, placeOfSupply);
 
-  const canEdit = can(user.role, "invoices", "edit");
+  const canEdit = can(user, "invoices", "edit");
   const canPay = canEdit && (invoice.status === "ISSUED" || invoice.status === "PARTIALLY_PAID") && balance > 0;
   const canCancel = canEdit && (invoice.status === "DRAFT" || invoice.status === "ISSUED") && invoice.payments.length === 0;
 
@@ -169,7 +169,7 @@ export default async function InvoicePage({ params }: PageProps<"/sales/invoices
                   {
                     label: "Customer",
                     value: (
-                      <Link href={`/crm/customers/${invoice.customer.id}`} className="text-brand-700 hover:underline">
+                      <Link href={`/contacts/${invoice.customer.id}`} className="text-brand-700 hover:underline">
                         {invoice.customer.name}
                       </Link>
                     ),

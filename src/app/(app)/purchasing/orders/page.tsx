@@ -13,6 +13,7 @@ import { pagination, param } from "@/lib/forms";
 import { can } from "@/lib/permissions";
 import { PurchaseOrderStatus } from "@/generated/prisma/enums";
 import type { Prisma } from "@/generated/prisma/client";
+import { branchWhere } from "@/lib/branch";
 
 export const metadata: Metadata = { title: "Purchase orders" };
 
@@ -24,6 +25,7 @@ export default async function PurchaseOrdersPage({ searchParams }: PageProps<"/p
   const { page, take, skip } = pagination(sp);
 
   const where: Prisma.PurchaseOrderWhereInput = {
+    ...(await branchWhere()),
     ...(q && {
       OR: [
         { number: { contains: q, mode: "insensitive" } },
@@ -50,7 +52,7 @@ export default async function PurchaseOrdersPage({ searchParams }: PageProps<"/p
       <PageHeader
         title="Purchase orders"
         description="Orders placed with suppliers and goods received against them."
-        actions={can(user.role, "purchaseOrders", "edit") && <ButtonLink href="/purchasing/orders/new">New purchase order</ButtonLink>}
+        actions={can(user, "purchaseOrders", "edit") && <ButtonLink href="/purchasing/orders/new">New purchase order</ButtonLink>}
       />
       <Card>
         <ListToolbar
@@ -85,7 +87,7 @@ export default async function PurchaseOrdersPage({ searchParams }: PageProps<"/p
                   </Link>
                 </TD>
                 <TD>
-                  <Link href={`/purchasing/suppliers/${o.supplierId}`} className="hover:underline">
+                  <Link href={`/contacts/${o.supplierId}`} className="hover:underline">
                     {o.supplier.name}
                   </Link>
                 </TD>

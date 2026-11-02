@@ -13,6 +13,7 @@ import { nextDocumentNumber } from "@/lib/sequence";
 import { adjustStock } from "@/lib/stock";
 import { computeDocument } from "@/lib/totals";
 import { canReceiveGoods } from "../_components/access";
+import { warehouseBranchId } from "@/lib/branch";
 
 /** Thrown inside a transaction to roll it back and show the message to the user. */
 class OrderError extends Error {}
@@ -35,7 +36,7 @@ const orderSchema = z
 function revalidateOrder(id: string, supplierId?: string) {
   revalidatePath("/purchasing/orders");
   revalidatePath(`/purchasing/orders/${id}`);
-  if (supplierId) revalidatePath(`/purchasing/suppliers/${supplierId}`);
+  if (supplierId) revalidatePath(`/contacts/${supplierId}`);
 }
 
 export async function createPurchaseOrder(_prev: ActionState, formData: FormData): Promise<ActionState> {
@@ -51,6 +52,7 @@ export async function createPurchaseOrder(_prev: ActionState, formData: FormData
     const created = await tx.purchaseOrder.create({
       data: {
         ...parsed.data,
+        branchId: await warehouseBranchId(tx, parsed.data.warehouseId),
         number,
         subtotal: doc.subtotal,
         taxTotal: doc.taxTotal,
@@ -81,7 +83,13 @@ export async function updatePurchaseOrder(id: string, _prev: ActionState, formDa
     await db.$transaction(async (tx) => {
       const { count } = await tx.purchaseOrder.updateMany({
         where: { id, status: "DRAFT" },
-        data: { ...parsed.data, subtotal: doc.subtotal, taxTotal: doc.taxTotal, total: doc.total },
+        data: {
+          ...parsed.data,
+          branchId: await warehouseBranchId(tx, parsed.data.warehouseId),
+          subtotal: doc.subtotal,
+          taxTotal: doc.taxTotal,
+          total: doc.total,
+        },
       });
       if (count === 0) throw new OrderError("Only draft purchase orders can be edited.");
       await tx.purchaseOrderLine.deleteMany({ where: { purchaseOrderId: id } });
@@ -145,7 +153,7 @@ export async function cancelPurchaseOrder(id: string): Promise<ActionState> {
 
 export async function receivePurchaseOrder(id: string, _prev: ActionState, formData: FormData): Promise<ActionState> {
   const user = await requireUser("purchaseOrders");
-  if (!canReceiveGoods(user.role)) redirect("/forbidden");
+  if (!canReceiveGoods(user)) redirect("/forbidden");
   const note = String(formData.get("note") ?? "").trim() || undefined;
 
   let order: { supplierId: string; productIds: string[] };

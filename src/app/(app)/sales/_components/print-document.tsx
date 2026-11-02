@@ -4,7 +4,7 @@ import { formatMoney, formatNumber, num } from "@/lib/format";
 import type { getCompany } from "@/lib/options";
 import { round2, splitGst } from "@/lib/totals";
 import { amountInWords } from "../_lib/amount-in-words";
-import { PrintButton } from "./print-button";
+import { PrintButton } from "@/components/ui/print-button";
 
 type Numeric = number | string | { toString(): string };
 type Company = Awaited<ReturnType<typeof getCompany>>;

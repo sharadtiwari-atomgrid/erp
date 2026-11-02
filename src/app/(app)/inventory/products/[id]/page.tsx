@@ -52,12 +52,12 @@ export default async function ProductPage({ params }: PageProps<"/inventory/prod
         back={{ href: "/inventory/products", label: "Products" }}
         actions={
           <>
-            {isGoods && can(user.role, "stock", "edit") && (
+            {isGoods && can(user, "stock", "edit") && (
               <ButtonLink href={`/inventory/stock/adjust?productId=${id}`} variant="secondary">
                 Adjust stock
               </ButtonLink>
             )}
-            {can(user.role, "products", "edit") && <ButtonLink href={`/inventory/products/${id}/edit`}>Edit</ButtonLink>}
+            {can(user, "products", "edit") && <ButtonLink href={`/inventory/products/${id}/edit`}>Edit</ButtonLink>}
           </>
         }
       />
@@ -100,7 +100,7 @@ export default async function ProductPage({ params }: PageProps<"/inventory/prod
                     <TH>Warehouse</TH>
                     <TH align="right">On hand</TH>
                     <TH align="right">Value</TH>
-                    {can(user.role, "stock", "edit") && <TH align="right">Actions</TH>}
+                    {can(user, "stock", "edit") && <TH align="right">Actions</TH>}
                   </tr>
                 </THead>
                 <TBody>
@@ -117,7 +117,7 @@ export default async function ProductPage({ params }: PageProps<"/inventory/prod
                         <OnHand value={num(l.quantity)} unit={product.unit} low={false} />
                       </TD>
                       <TD align="right">{formatMoney(num(l.quantity) * purchasePrice)}</TD>
-                      {can(user.role, "stock", "edit") && (
+                      {can(user, "stock", "edit") && (
                         <TD align="right">
                           <Link
                             href={`/inventory/stock/adjust?productId=${id}&warehouseId=${l.warehouse.id}`}

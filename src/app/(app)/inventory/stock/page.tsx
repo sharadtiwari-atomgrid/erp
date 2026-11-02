@@ -14,6 +14,7 @@ import { can } from "@/lib/permissions";
 import type { Prisma } from "@/generated/prisma/client";
 import { isLowStock } from "../_components/stock";
 import { OnHand } from "../_components/stock-badge";
+import { branchWhere } from "@/lib/branch";
 
 export const metadata: Metadata = { title: "Stock on hand" };
 
@@ -42,8 +43,8 @@ export default async function StockPage({ searchParams }: PageProps<"/inventory/
       orderBy: { name: "asc" },
       select: { id: true, sku: true, name: true, unit: true, type: true, purchasePrice: true, reorderLevel: true },
     }),
-    db.warehouse.findMany({ orderBy: { name: "asc" }, select: { id: true, code: true, name: true, isActive: true } }),
-    db.stockLevel.findMany({ where: { quantity: { not: 0 } }, select: { productId: true, warehouseId: true, quantity: true } }),
+    db.warehouse.findMany({ where: await branchWhere(), orderBy: { name: "asc" }, select: { id: true, code: true, name: true, isActive: true } }),
+    db.stockLevel.findMany({ where: { quantity: { not: 0 }, warehouse: await branchWhere() }, select: { productId: true, warehouseId: true, quantity: true } }),
   ]);
 
   // Inactive warehouses still show up while they hold stock.
@@ -78,8 +79,8 @@ export default async function StockPage({ searchParams }: PageProps<"/inventory/
   };
   const pageRows = rows.slice(skip, skip + take);
   const lowIds = rows.filter((r) => r.low).map((r) => r.id);
-  const canAdjust = can(user.role, "stock", "edit");
-  const canReorder = can(user.role, "purchaseOrders", "edit");
+  const canAdjust = can(user, "stock", "edit");
+  const canReorder = can(user, "purchaseOrders", "edit");
   const colSpan = warehouses.length + 5;
 
   return (

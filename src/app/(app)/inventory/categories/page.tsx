@@ -7,7 +7,7 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDate } from "@/lib/format";
 import { can } from "@/lib/permissions";
-import { ActionButton } from "../_components/action-button";
+import { ActionButton } from "@/components/ui/action-button";
 import { createCategory, deleteCategory, renameCategory } from "./actions";
 import { NewCategoryForm, RenameCategoryForm } from "./category-forms";
 
@@ -15,7 +15,7 @@ export const metadata: Metadata = { title: "Categories" };
 
 export default async function CategoriesPage() {
   const user = await requireUser("products");
-  const canEdit = can(user.role, "products", "edit");
+  const canEdit = can(user, "products", "edit");
   const categories = await db.productCategory.findMany({
     orderBy: { name: "asc" },
     include: { _count: { select: { products: true } } },

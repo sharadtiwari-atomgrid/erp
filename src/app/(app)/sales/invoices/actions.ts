@@ -13,6 +13,7 @@ import { computeDocument, round2 } from "@/lib/totals";
 import { PaymentMethod } from "@/generated/prisma/enums";
 import { attempt } from "../_lib/attempt";
 import { DocumentError, lineData } from "../_lib/documents";
+import { defaultBranchId } from "@/lib/branch";
 
 const invoiceSchema = z.object({
   customerId: f.id("Customer"),
@@ -33,7 +34,7 @@ const paymentSchema = z.object({
 function revalidateInvoice(id: string, customerId?: string) {
   revalidatePath("/sales/invoices");
   revalidatePath(`/sales/invoices/${id}`);
-  if (customerId) revalidatePath(`/crm/customers/${customerId}`);
+  if (customerId) revalidatePath(`/contacts/${customerId}`);
 }
 
 export async function createInvoice(_prev: ActionState, formData: FormData): Promise<ActionState> {
@@ -44,11 +45,13 @@ export async function createInvoice(_prev: ActionState, formData: FormData): Pro
   if (!items.ok) return items.state;
   const doc = computeDocument(items.lines);
 
+  const branchId = await defaultBranchId();
   const invoice = await db.$transaction(async (tx) => {
     const number = await nextDocumentNumber(tx, "INVOICE");
     const created = await tx.invoice.create({
       data: {
         ...parsed.data,
+        branchId,
         number,
         subtotal: doc.subtotal,
         taxTotal: doc.taxTotal,

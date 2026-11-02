@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui/page-header";
 import { requireUser } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { getBranchOptions } from "@/lib/options";
 import { createUser } from "../actions";
 import { UserForm } from "../user-form";
 
@@ -11,7 +13,11 @@ export default async function NewUserPage() {
   return (
     <div className="max-w-2xl">
       <PageHeader title="Add user" back={{ href: "/settings/users", label: "Users" }} />
-      <UserForm action={createUser} />
+      <UserForm
+        action={createUser}
+        roles={await db.accessRole.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } })}
+        branches={await getBranchOptions()}
+      />
     </div>
   );
 }

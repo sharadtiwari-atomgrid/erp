@@ -14,6 +14,7 @@ import { computeDocument } from "@/lib/totals";
 import type { QuotationStatus } from "@/generated/prisma/enums";
 import { attempt } from "../_lib/attempt";
 import { copyLines, DocumentError, lineData } from "../_lib/documents";
+import { warehouseBranchId } from "@/lib/branch";
 
 const quotationSchema = z.object({
   customerId: f.id("Customer"),
@@ -133,7 +134,7 @@ export async function setQuotationStatus(id: string, status: QuotationStatus): P
 /** Creates a draft sales order with the quotation's lines and marks the quotation CONVERTED. */
 export async function convertQuotation(id: string, _prev: ActionState, formData: FormData): Promise<ActionState> {
   const user = await requireUser("quotations", "edit");
-  if (!can(user.role, "salesOrders", "edit")) return { error: "You don’t have permission to create sales orders." };
+  if (!can(user, "salesOrders", "edit")) return { error: "You don’t have permission to create sales orders." };
   const warehouseId = String(formData.get("warehouseId") ?? "");
   if (!warehouseId) return { error: "Choose a warehouse to deliver from." };
 
@@ -157,6 +158,7 @@ export async function convertQuotation(id: string, _prev: ActionState, formData:
           customerId: quotation.customerId,
           quotationId: id,
           warehouseId,
+          branchId: await warehouseBranchId(tx, warehouseId),
           subtotal: quotation.subtotal,
           taxTotal: quotation.taxTotal,
           total: quotation.total,

@@ -71,3 +71,44 @@ export async function getOnHand(tx: Tx, productId: string, warehouseId: string):
   });
   return level ? Number(level.quantity) : 0;
 }
+
+/**
+ * Reserves up to `quantity` of available stock (in hand minus already
+ * reserved) for a sales or production order. Returns how much was reserved,
+ * which may be less than requested. Services are never reserved.
+ */
+export async function reserveStock(tx: Tx, input: { productId: string; warehouseId: string; quantity: number }): Promise<number> {
+  if (input.quantity <= 0) return 0;
+  const product = await tx.product.findUniqueOrThrow({ where: { id: input.productId }, select: { type: true } });
+  if (product.type === "SERVICE") return 0;
+
+  const level = await tx.stockLevel.findUnique({
+    where: { productId_warehouseId: { productId: input.productId, warehouseId: input.warehouseId } },
+  });
+  const available = level ? Number(level.quantity) - Number(level.reservedQty) : 0;
+  const reserve = Math.max(0, Math.min(available, input.quantity));
+  if (reserve > 0) {
+    await tx.stockLevel.update({ where: { id: level!.id }, data: { reservedQty: { increment: reserve } } });
+  }
+  return reserve;
+}
+
+/** Releases a previous reservation (never below zero). */
+export async function releaseStock(tx: Tx, input: { productId: string; warehouseId: string; quantity: number }) {
+  if (input.quantity <= 0) return;
+  const level = await tx.stockLevel.findUnique({
+    where: { productId_warehouseId: { productId: input.productId, warehouseId: input.warehouseId } },
+  });
+  if (!level) return;
+  const release = Math.min(Number(level.reservedQty), input.quantity);
+  if (release > 0) await tx.stockLevel.update({ where: { id: level.id }, data: { reservedQty: { decrement: release } } });
+}
+
+/** Moves quantity between "reserved" and "allocated" (picked) buckets; negative de-allocates. */
+export async function allocateStock(tx: Tx, input: { productId: string; warehouseId: string; quantity: number }) {
+  if (input.quantity === 0) return;
+  await tx.stockLevel.update({
+    where: { productId_warehouseId: { productId: input.productId, warehouseId: input.warehouseId } },
+    data: { allocatedQty: { increment: input.quantity } },
+  });
+}

@@ -5,29 +5,39 @@ import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Field, FormGrid, FormMessage, Input, Textarea } from "@/components/ui/form";
 import { SubmitButton } from "@/components/ui/submit-button";
+import type { ContactRole } from "@/generated/prisma/enums";
 import type { ActionState } from "@/lib/forms";
+import { CONTACT_ROLE_LABELS } from "./roles";
 
-export type SupplierFormValues = {
+export type ContactFormValues = {
   name: string;
+  roles: ContactRole[];
+  contactPerson: string | null;
+  pan: string | null;
   email: string | null;
   phone: string | null;
   gstin: string | null;
-  address: string | null;
+  billingAddress: string | null;
+  shippingAddress: string | null;
   city: string | null;
   state: string | null;
   pincode: string | null;
+  creditLimit: number;
   paymentTermsDays: number;
   notes: string | null;
   isActive: boolean;
 };
 
-export function SupplierForm({
+export function ContactForm({
   action,
   initial,
   cancelHref,
+  defaultRoles = ["CUSTOMER"],
 }: {
   action: (prev: ActionState, formData: FormData) => Promise<ActionState>;
-  initial?: SupplierFormValues;
+  initial?: ContactFormValues;
+  /** Pre-ticked roles for a new contact, e.g. from ?role=SUPPLIER. */
+  defaultRoles?: ContactRole[];
   cancelHref: string;
 }) {
   const [state, formAction] = useActionState(action, undefined);
@@ -40,9 +50,36 @@ export function SupplierForm({
         <CardHeader title="Details" />
         <CardBody>
           <FormGrid>
-            <Field label="Name" htmlFor="name" required errors={err.name} className="sm:col-span-2">
+            <Field label="Name" htmlFor="name" required errors={err.name}>
               <Input id="name" name="name" defaultValue={initial?.name} required />
             </Field>
+            <Field label="Contact person" htmlFor="contactPerson" errors={err.contactPerson}>
+              <Input id="contactPerson" name="contactPerson" defaultValue={initial?.contactPerson ?? ""} />
+            </Field>
+            <fieldset className="sm:col-span-2">
+              <legend className="mb-1.5 text-sm font-medium text-ink">
+                Roles<span className="ml-0.5 text-red-600">*</span>
+              </legend>
+              <div className="flex flex-wrap gap-x-5 gap-y-2">
+                {(Object.keys(CONTACT_ROLE_LABELS) as ContactRole[]).map((role) => (
+                  <label key={role} className="flex items-center gap-2 text-sm text-ink">
+                    <input
+                      type="checkbox"
+                      name="roles"
+                      value={role}
+                      defaultChecked={(initial?.roles ?? defaultRoles).includes(role)}
+                      className="h-4 w-4 rounded border-line"
+                    />
+                    {CONTACT_ROLE_LABELS[role]}
+                  </label>
+                ))}
+              </div>
+              {err.roles?.map((e) => (
+                <p key={e} className="mt-1 text-xs text-red-600">
+                  {e}
+                </p>
+              ))}
+            </fieldset>
             <Field label="Email" htmlFor="email" errors={err.email}>
               <Input id="email" name="email" type="email" defaultValue={initial?.email ?? ""} />
             </Field>
@@ -52,8 +89,14 @@ export function SupplierForm({
             <Field label="GSTIN" htmlFor="gstin" errors={err.gstin} hint="15-character GST number">
               <Input id="gstin" name="gstin" defaultValue={initial?.gstin ?? ""} maxLength={15} />
             </Field>
+            <Field label="PAN" htmlFor="pan" errors={err.pan}>
+              <Input id="pan" name="pan" defaultValue={initial?.pan ?? ""} maxLength={10} />
+            </Field>
             <Field label="Payment terms (days)" htmlFor="paymentTermsDays" errors={err.paymentTermsDays}>
               <Input id="paymentTermsDays" name="paymentTermsDays" type="number" min="0" defaultValue={initial?.paymentTermsDays ?? 30} />
+            </Field>
+            <Field label="Credit limit" htmlFor="creditLimit" errors={err.creditLimit} hint="0 means no limit">
+              <Input id="creditLimit" name="creditLimit" type="number" min="0" step="0.01" defaultValue={initial?.creditLimit ?? 0} />
             </Field>
             <div className="flex items-end pb-2">
               <label className="flex items-center gap-2 text-sm text-ink">
@@ -69,8 +112,11 @@ export function SupplierForm({
         <CardHeader title="Address" />
         <CardBody>
           <FormGrid>
-            <Field label="Address" htmlFor="address" errors={err.address} className="sm:col-span-2">
-              <Textarea id="address" name="address" defaultValue={initial?.address ?? ""} />
+            <Field label="Billing address" htmlFor="billingAddress" errors={err.billingAddress}>
+              <Textarea id="billingAddress" name="billingAddress" defaultValue={initial?.billingAddress ?? ""} />
+            </Field>
+            <Field label="Shipping address" htmlFor="shippingAddress" errors={err.shippingAddress}>
+              <Textarea id="shippingAddress" name="shippingAddress" defaultValue={initial?.shippingAddress ?? ""} />
             </Field>
             <Field label="City" htmlFor="city" errors={err.city}>
               <Input id="city" name="city" defaultValue={initial?.city ?? ""} />
@@ -96,7 +142,7 @@ export function SupplierForm({
         <ButtonLink href={cancelHref} variant="secondary">
           Cancel
         </ButtonLink>
-        <SubmitButton>Save supplier</SubmitButton>
+        <SubmitButton>Save contact</SubmitButton>
       </div>
     </form>
   );

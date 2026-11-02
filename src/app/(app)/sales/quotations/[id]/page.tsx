@@ -11,7 +11,7 @@ import { db } from "@/lib/db";
 import { formatDate } from "@/lib/format";
 import { getWarehouseOptions } from "@/lib/options";
 import { can } from "@/lib/permissions";
-import { ActionButton } from "../../_components/action-button";
+import { ActionButton } from "@/components/ui/action-button";
 import { ActivityCard } from "../../_components/activity-card";
 import { DocumentLines, DocumentTotals } from "../../_components/document-lines";
 import { isExpired, startOfToday } from "../../_lib/documents";
@@ -35,9 +35,9 @@ export default async function QuotationPage({ params }: PageProps<"/sales/quotat
   ]);
   if (!quotation) notFound();
 
-  const canEdit = can(user.role, "quotations", "edit");
+  const canEdit = can(user, "quotations", "edit");
   const open = quotation.status === "DRAFT" || quotation.status === "SENT";
-  const canConvert = canEdit && can(user.role, "salesOrders", "edit") && (open || quotation.status === "ACCEPTED");
+  const canConvert = canEdit && can(user, "salesOrders", "edit") && (open || quotation.status === "ACCEPTED");
 
   return (
     <>
@@ -83,7 +83,7 @@ export default async function QuotationPage({ params }: PageProps<"/sales/quotat
                   {
                     label: "Customer",
                     value: (
-                      <Link href={`/crm/customers/${quotation.customer.id}`} className="text-brand-700 hover:underline">
+                      <Link href={`/contacts/${quotation.customer.id}`} className="text-brand-700 hover:underline">
                         {quotation.customer.name} ({quotation.customer.code})
                       </Link>
                     ),

@@ -4,7 +4,6 @@ import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { Role } from "@/generated/prisma/enums";
 import { logActivity } from "@/lib/activity";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -13,7 +12,8 @@ import { f, parseForm, type ActionState } from "@/lib/forms";
 const baseSchema = {
   name: f.text("Name"),
   email: z.string().trim().toLowerCase().pipe(z.email("Enter a valid email")),
-  role: z.enum(Role),
+  roleId: f.id("Role"),
+  branchId: f.optionalText(),
   isActive: f.checkbox(),
 };
 
@@ -42,7 +42,7 @@ export async function createUser(_prev: ActionState, formData: FormData): Promis
   }
 
   const user = await db.user.create({ data: { ...data, passwordHash: await bcrypt.hash(password, 10) } });
-  await logActivity({ userId: admin.id, entityType: "User", entityId: user.id, action: "created", message: `User ${user.name} added as ${user.role}` });
+  await logActivity({ userId: admin.id, entityType: "User", entityId: user.id, action: "created", message: `User ${user.name} added` });
 
   revalidatePath("/settings/users");
   redirect("/settings/users");
@@ -54,8 +54,9 @@ export async function updateUser(id: string, _prev: ActionState, formData: FormD
   if (!parsed.ok) return parsed.state;
   const { password, ...data } = parsed.data;
 
-  if (id === admin.id && (data.role !== "ADMIN" || !data.isActive)) {
-    return { error: "You can't remove your own admin access or deactivate yourself." };
+  if (id === admin.id) {
+    const role = await db.accessRole.findUnique({ where: { id: data.roleId }, select: { fullAccess: true } });
+    if (!role?.fullAccess || !data.isActive) return { error: "You can't remove your own admin access or deactivate yourself." };
   }
   const clash = await db.user.findFirst({ where: { email: data.email, NOT: { id } } });
   if (clash) return { fieldErrors: { email: ["A user with this email already exists"] } };

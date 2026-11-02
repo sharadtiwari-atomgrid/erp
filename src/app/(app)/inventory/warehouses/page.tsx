@@ -9,13 +9,14 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatMoney, formatNumber, num } from "@/lib/format";
 import { can } from "@/lib/permissions";
+import { branchWhere } from "@/lib/branch";
 
 export const metadata: Metadata = { title: "Warehouses" };
 
 export default async function WarehousesPage() {
   const user = await requireUser("warehouses");
   const [warehouses, levels] = await Promise.all([
-    db.warehouse.findMany({ orderBy: { name: "asc" } }),
+    db.warehouse.findMany({ where: await branchWhere(), orderBy: { name: "asc" }, include: { branch: { select: { code: true } } } }),
     db.stockLevel.findMany({
       where: { quantity: { not: 0 } },
       select: { warehouseId: true, quantity: true, product: { select: { purchasePrice: true } } },
@@ -37,7 +38,7 @@ export default async function WarehousesPage() {
       <PageHeader
         title="Warehouses"
         description="Locations where you hold stock."
-        actions={can(user.role, "warehouses", "edit") && <ButtonLink href="/inventory/warehouses/new">New warehouse</ButtonLink>}
+        actions={can(user, "warehouses", "edit") && <ButtonLink href="/inventory/warehouses/new">New warehouse</ButtonLink>}
       />
       <Card>
         <Table>

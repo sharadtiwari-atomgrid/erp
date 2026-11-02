@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "Receive goods" };
 
 export default async function ReceiveGoodsPage({ params }: PageProps<"/purchasing/orders/[id]/receive">) {
   const user = await requireUser("purchaseOrders");
-  if (!canReceiveGoods(user.role)) redirect("/forbidden");
+  if (!canReceiveGoods(user)) redirect("/forbidden");
   const { id } = await params;
   const order = await db.purchaseOrder.findUnique({
     where: { id },

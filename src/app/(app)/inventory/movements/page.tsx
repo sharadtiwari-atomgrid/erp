@@ -13,6 +13,7 @@ import { StockMovementType } from "@/generated/prisma/enums";
 import type { Prisma } from "@/generated/prisma/client";
 import { MovementReference } from "../_components/movement-reference";
 import { SignedQty } from "../_components/stock-badge";
+import { branchWhere } from "@/lib/branch";
 
 export const metadata: Metadata = { title: "Stock movements" };
 
@@ -38,6 +39,7 @@ export default async function MovementsPage({ searchParams }: PageProps<"/invent
   const toDate = parseDay(to, true);
 
   const where: Prisma.StockMovementWhereInput = {
+    warehouse: await branchWhere(),
     ...(q && {
       OR: [
         { product: { sku: { contains: q, mode: "insensitive" } } },
@@ -63,7 +65,7 @@ export default async function MovementsPage({ searchParams }: PageProps<"/invent
       },
     }),
     db.stockMovement.count({ where }),
-    db.warehouse.findMany({ orderBy: { name: "asc" }, select: { id: true, code: true, name: true } }),
+    db.warehouse.findMany({ where: await branchWhere(), orderBy: { name: "asc" }, select: { id: true, code: true, name: true } }),
   ]);
 
   return (

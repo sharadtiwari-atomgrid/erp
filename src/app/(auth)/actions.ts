@@ -22,7 +22,7 @@ export async function login(_prev: ActionState, formData: FormData): Promise<Act
   const valid = user && user.isActive && (await bcrypt.compare(password, user.passwordHash));
   if (!valid) return { error: "Incorrect email or password." };
 
-  await createSession({ userId: user.id, role: user.role });
+  await createSession({ userId: user.id });
   // Only allow same-site relative redirects.
   redirect(next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard");
 }

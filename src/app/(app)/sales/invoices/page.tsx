@@ -14,6 +14,7 @@ import { can } from "@/lib/permissions";
 import type { Prisma } from "@/generated/prisma/client";
 import { InvoiceStatus } from "@/generated/prisma/enums";
 import { enumParam, isOverdue, startOfToday } from "../_lib/documents";
+import { branchWhere } from "@/lib/branch";
 
 export const metadata: Metadata = { title: "Invoices" };
 
@@ -27,6 +28,7 @@ export default async function InvoicesPage({ searchParams }: PageProps<"/sales/i
   const today = startOfToday();
 
   const where: Prisma.InvoiceWhereInput = {
+    ...(await branchWhere()),
     ...(q && {
       OR: [
         { number: { contains: q, mode: "insensitive" } },
@@ -54,7 +56,7 @@ export default async function InvoicesPage({ searchParams }: PageProps<"/sales/i
       <PageHeader
         title="Invoices"
         description="GST tax invoices and customer payments."
-        actions={can(user.role, "invoices", "edit") && <ButtonLink href="/sales/invoices/new">New invoice</ButtonLink>}
+        actions={can(user, "invoices", "edit") && <ButtonLink href="/sales/invoices/new">New invoice</ButtonLink>}
       />
       <Card>
         <ListToolbar
@@ -92,7 +94,7 @@ export default async function InvoicesPage({ searchParams }: PageProps<"/sales/i
                   </Link>
                 </TD>
                 <TD>
-                  <Link href={`/crm/customers/${inv.customer.id}`} className="hover:underline">
+                  <Link href={`/contacts/${inv.customer.id}`} className="hover:underline">
                     {inv.customer.name}
                   </Link>
                 </TD>

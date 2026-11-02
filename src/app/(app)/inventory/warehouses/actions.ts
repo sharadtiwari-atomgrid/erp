@@ -11,6 +11,7 @@ import { f, parseForm, type ActionState } from "@/lib/forms";
 const warehouseSchema = z.object({
   code: f.text("Code").transform((v) => v.toUpperCase()),
   name: f.text("Name"),
+  branchId: f.id("Branch"),
   address: f.optionalText(),
   isActive: f.checkbox(),
 });

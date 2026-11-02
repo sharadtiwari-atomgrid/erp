@@ -82,18 +82,20 @@ export async function setLeadStatus(id: string, status: LeadStatus): Promise<Act
 /** Creates a customer from the lead and marks the lead CONVERTED. */
 export async function convertLead(id: string): Promise<ActionState> {
   const user = await requireUser("leads", "edit");
-  if (!can(user.role, "customers", "edit")) return { error: "You don’t have permission to create customers." };
+  if (!can(user, "contacts", "edit")) return { error: "You don’t have permission to create customers." };
 
   const lead = await db.lead.findUnique({ where: { id } });
   if (!lead) return { error: "Lead not found." };
   if (lead.status === "CONVERTED") return { error: "This lead has already been converted." };
 
   const customer = await db.$transaction(async (tx) => {
-    const code = await nextDocumentNumber(tx, "CUSTOMER");
-    const created = await tx.customer.create({
+    const code = await nextDocumentNumber(tx, "CONTACT");
+    const created = await tx.contact.create({
       data: {
         code,
+        roles: ["CUSTOMER"],
         name: lead.company ?? lead.name,
+        contactPerson: lead.company ? lead.name : null,
         email: lead.email,
         phone: lead.phone,
         notes: [lead.company ? `Contact: ${lead.name}` : null, lead.notes].filter(Boolean).join("\n") || null,
@@ -101,7 +103,7 @@ export async function convertLead(id: string): Promise<ActionState> {
     });
     await tx.lead.update({ where: { id }, data: { status: "CONVERTED", customerId: created.id } });
     await logActivity(
-      { userId: user.id, entityType: "Customer", entityId: created.id, action: "created", message: `Customer ${created.name} created from lead` },
+      { userId: user.id, entityType: "Contact", entityId: created.id, action: "created", message: `Customer ${created.name} created from lead` },
       tx,
     );
     await logActivity(
@@ -113,6 +115,6 @@ export async function convertLead(id: string): Promise<ActionState> {
 
   revalidatePath("/crm/leads");
   revalidatePath(`/crm/leads/${id}`);
-  revalidatePath("/crm/customers");
-  redirect(`/crm/customers/${customer.id}`);
+  revalidatePath("/contacts");
+  redirect(`/contacts/${customer.id}`);
 }

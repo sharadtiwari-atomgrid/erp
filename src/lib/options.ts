@@ -1,9 +1,16 @@
 import "server-only";
 import { db } from "@/lib/db";
 import { num } from "@/lib/format";
+import type { ContactRole } from "@/generated/prisma/enums";
 import type { ProductOption } from "@/components/line-items-editor";
 
-/** Dropdown data shared by document forms. Only active records are returned. */
+/**
+ * Dropdown data shared by document forms. Only active records are returned,
+ * plus `includeId` when given, so editing a document whose contact or
+ * warehouse was later deactivated still shows its current value.
+ */
+
+const activeOr = (includeId?: string | null) => (includeId ? { OR: [{ isActive: true }, { id: includeId }] } : { isActive: true });
 
 export async function getProductOptions(): Promise<ProductOption[]> {
   const products = await db.product.findMany({
@@ -19,30 +26,31 @@ export async function getProductOptions(): Promise<ProductOption[]> {
   }));
 }
 
-export async function getCustomerOptions() {
-  return db.customer.findMany({
-    where: { isActive: true },
+export async function getContactOptions(role: ContactRole, includeId?: string | null) {
+  return db.contact.findMany({
+    where: { roles: { has: role }, ...activeOr(includeId) },
     orderBy: { name: "asc" },
     select: { id: true, code: true, name: true, state: true, paymentTermsDays: true },
   });
 }
 
-export async function getSupplierOptions() {
-  return db.supplier.findMany({
-    where: { isActive: true },
+export const getCustomerOptions = (includeId?: string | null) => getContactOptions("CUSTOMER", includeId);
+export const getSupplierOptions = (includeId?: string | null) => getContactOptions("SUPPLIER", includeId);
+export const getTransporterOptions = (includeId?: string | null) => getContactOptions("TRANSPORTER", includeId);
+
+/** Warehouses, limited to one branch when `branchId` is given. */
+export async function getWarehouseOptions(opts: { branchId?: string | null; includeId?: string | null } = {}) {
+  return db.warehouse.findMany({
+    where: { ...activeOr(opts.includeId), ...(opts.branchId && { branchId: opts.branchId }) },
     orderBy: { name: "asc" },
-    select: { id: true, code: true, name: true, paymentTermsDays: true },
+    select: { id: true, code: true, name: true, branchId: true },
   });
 }
 
-export async function getWarehouseOptions() {
-  return db.warehouse.findMany({
-    where: { isActive: true },
-    orderBy: { name: "asc" },
-    select: { id: true, code: true, name: true },
-  });
+export async function getBranchOptions(includeId?: string | null) {
+  return db.branch.findMany({ where: activeOr(includeId), orderBy: { name: "asc" }, select: { id: true, code: true, name: true } });
 }
 
 export async function getCompany() {
-  return (await db.companySettings.findUnique({ where: { id: 1 } })) ?? { name: "My Company", currency: "INR", state: null } as const;
+  return db.companySettings.upsert({ where: { id: 1 }, create: { id: 1 }, update: {} });
 }

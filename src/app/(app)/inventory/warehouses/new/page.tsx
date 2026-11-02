@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { requireUser } from "@/lib/auth";
 import { createWarehouse } from "../actions";
 import { WarehouseForm } from "../warehouse-form";
+import { getBranchOptions } from "@/lib/options";
 
 export const metadata: Metadata = { title: "New warehouse" };
 
@@ -11,7 +12,7 @@ export default async function NewWarehousePage() {
   return (
     <div className="max-w-3xl">
       <PageHeader title="New warehouse" back={{ href: "/inventory/warehouses", label: "Warehouses" }} />
-      <WarehouseForm action={createWarehouse} cancelHref="/inventory/warehouses" />
+      <WarehouseForm action={createWarehouse} cancelHref="/inventory/warehouses" branches={await getBranchOptions()} />
     </div>
   );
 }

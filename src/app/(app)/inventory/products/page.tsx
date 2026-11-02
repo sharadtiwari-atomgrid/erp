@@ -51,7 +51,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/invento
       <PageHeader
         title="Products"
         description="Goods you stock and services you sell."
-        actions={can(user.role, "products", "edit") && <ButtonLink href="/inventory/products/new">New product</ButtonLink>}
+        actions={can(user, "products", "edit") && <ButtonLink href="/inventory/products/new">New product</ButtonLink>}
       />
       <Card>
         <ListToolbar

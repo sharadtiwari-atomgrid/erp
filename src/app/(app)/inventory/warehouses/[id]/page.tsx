@@ -36,7 +36,7 @@ export default async function WarehousePage({ params }: PageProps<"/inventory/wa
     value: num(l.quantity) * num(l.product.purchasePrice),
   }));
   const totalValue = rows.reduce((s, r) => s + r.value, 0);
-  const canAdjust = can(user.role, "stock", "edit");
+  const canAdjust = can(user, "stock", "edit");
 
   return (
     <>
@@ -53,7 +53,7 @@ export default async function WarehousePage({ params }: PageProps<"/inventory/wa
             <ButtonLink href={`/inventory/movements?warehouse=${id}`} variant="secondary">
               Movements
             </ButtonLink>
-            {can(user.role, "warehouses", "edit") && <ButtonLink href={`/inventory/warehouses/${id}/edit`}>Edit</ButtonLink>}
+            {can(user, "warehouses", "edit") && <ButtonLink href={`/inventory/warehouses/${id}/edit`}>Edit</ButtonLink>}
           </>
         }
       />

@@ -10,7 +10,7 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDate, formatMoney, formatNumber, num } from "@/lib/format";
 import { can } from "@/lib/permissions";
-import { ActionButton } from "../../_components/action-button";
+import { ActionButton } from "@/components/ui/action-button";
 import { ActivityCard } from "../../_components/activity-card";
 import { DocumentTotals, ProductCell } from "../../_components/document-lines";
 import { cancelOrder, confirmOrder, createInvoiceFromOrder } from "../actions";
@@ -50,11 +50,11 @@ export default async function SalesOrderPage({ params }: PageProps<"/sales/order
   const totalDelivered = lines.reduce((s, l) => s + l.delivered, 0);
   const activeInvoice = order.invoices.find((i) => i.status !== "CANCELLED");
 
-  const canEdit = can(user.role, "salesOrders", "edit");
+  const canEdit = can(user, "salesOrders", "edit");
   const canDeliver =
-    (canEdit || can(user.role, "stock", "edit")) && (order.status === "CONFIRMED" || order.status === "PARTIALLY_DELIVERED");
+    (canEdit || can(user, "stock", "edit")) && (order.status === "CONFIRMED" || order.status === "PARTIALLY_DELIVERED");
   const canInvoice =
-    can(user.role, "invoices", "edit") && !activeInvoice && order.status !== "DRAFT" && order.status !== "CANCELLED";
+    can(user, "invoices", "edit") && !activeInvoice && order.status !== "DRAFT" && order.status !== "CANCELLED";
   const canCancel =
     canEdit && (order.status === "DRAFT" || order.status === "CONFIRMED") && totalDelivered === 0 && !activeInvoice;
 
@@ -208,7 +208,7 @@ export default async function SalesOrderPage({ params }: PageProps<"/sales/order
                   {
                     label: "Customer",
                     value: (
-                      <Link href={`/crm/customers/${order.customer.id}`} className="text-brand-700 hover:underline">
+                      <Link href={`/contacts/${order.customer.id}`} className="text-brand-700 hover:underline">
                         {order.customer.name}
                       </Link>
                     ),

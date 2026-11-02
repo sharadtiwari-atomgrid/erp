@@ -6,7 +6,7 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDate, formatMoney, formatNumber, num } from "@/lib/format";
 import { splitGst } from "@/lib/totals";
-import { PrintButton } from "../../../_components/print-button";
+import { PrintButton } from "@/components/ui/print-button";
 
 export const metadata: Metadata = { title: "Print purchase order" };
 
@@ -29,7 +29,7 @@ export default async function PrintPurchaseOrderPage({ params }: PageProps<"/pur
   // Inward supply: compare the supplier's state with ours for CGST/SGST vs IGST.
   const gst = splitGst(num(order.taxTotal), company?.state, order.supplier.state);
   const companyAddress = [company?.address, [company?.city, company?.state, company?.pincode].filter(Boolean).join(", ")].filter(Boolean).join("\n");
-  const supplierAddress = [order.supplier.address, [order.supplier.city, order.supplier.state, order.supplier.pincode].filter(Boolean).join(", ")]
+  const supplierAddress = [order.supplier.billingAddress, [order.supplier.city, order.supplier.state, order.supplier.pincode].filter(Boolean).join(", ")]
     .filter(Boolean)
     .join("\n");
 

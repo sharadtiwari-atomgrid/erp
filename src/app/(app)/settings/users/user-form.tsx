@@ -5,16 +5,20 @@ import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { Field, FormGrid, FormMessage, Input, Select } from "@/components/ui/form";
 import { SubmitButton } from "@/components/ui/submit-button";
-import type { Role } from "@/generated/prisma/enums";
 import type { ActionState } from "@/lib/forms";
-import { ROLE_LABELS } from "@/lib/permissions";
+
+type Option = { id: string; name: string };
 
 export function UserForm({
   action,
   initial,
+  roles,
+  branches,
 }: {
   action: (prev: ActionState, formData: FormData) => Promise<ActionState>;
-  initial?: { name: string; email: string; role: Role; isActive: boolean };
+  initial?: { name: string; email: string; roleId: string; branchId: string | null; isActive: boolean };
+  roles: Option[];
+  branches: Array<Option & { code: string }>;
 }) {
   const [state, formAction] = useActionState(action, undefined);
   const err = state?.fieldErrors ?? {};
@@ -30,11 +34,21 @@ export function UserForm({
             <Field label="Email" htmlFor="email" required errors={err.email}>
               <Input id="email" name="email" type="email" defaultValue={initial?.email} required />
             </Field>
-            <Field label="Role" htmlFor="role" required errors={err.role}>
-              <Select id="role" name="role" defaultValue={initial?.role ?? "VIEWER"}>
-                {Object.entries(ROLE_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
+            <Field label="Role" htmlFor="roleId" required errors={err.roleId} hint="Edit what each role can do in Roles & access">
+              <Select id="roleId" name="roleId" defaultValue={initial?.roleId ?? roles.find((r) => r.name === "Read-only")?.id}>
+                {roles.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.name}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="Branch access" htmlFor="branchId" errors={err.branchId} hint="Restrict the user to one branch's data">
+              <Select id="branchId" name="branchId" defaultValue={initial?.branchId ?? ""}>
+                <option value="">All branches</option>
+                {branches.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.code} — {b.name}
                   </option>
                 ))}
               </Select>
@@ -48,7 +62,7 @@ export function UserForm({
             >
               <Input id="password" name="password" type="password" autoComplete="new-password" required={!initial} />
             </Field>
-            <label className="flex items-center gap-2 text-sm text-ink">
+            <label className="flex items-center gap-2 self-end pb-2 text-sm text-ink">
               <input type="checkbox" name="isActive" defaultChecked={initial?.isActive ?? true} className="h-4 w-4 rounded border-line" />
               Active (can sign in)
             </label>

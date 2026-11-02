@@ -3,13 +3,14 @@
 import { useActionState } from "react";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
-import { Field, FormGrid, FormMessage, Input, Textarea } from "@/components/ui/form";
+import { Field, FormGrid, FormMessage, Input, Select, Textarea } from "@/components/ui/form";
 import { SubmitButton } from "@/components/ui/submit-button";
 import type { ActionState } from "@/lib/forms";
 
 export type WarehouseFormValues = {
   code: string;
   name: string;
+  branchId: string;
   address: string | null;
   isActive: boolean;
 };
@@ -18,10 +19,12 @@ export function WarehouseForm({
   action,
   initial,
   cancelHref,
+  branches,
 }: {
   action: (prev: ActionState, formData: FormData) => Promise<ActionState>;
   initial?: WarehouseFormValues;
   cancelHref: string;
+  branches: Array<{ id: string; code: string; name: string }>;
 }) {
   const [state, formAction] = useActionState(action, undefined);
   const err = state?.fieldErrors ?? {};
@@ -38,6 +41,15 @@ export function WarehouseForm({
             </Field>
             <Field label="Name" htmlFor="name" required errors={err.name}>
               <Input id="name" name="name" defaultValue={initial?.name} required />
+            </Field>
+            <Field label="Branch" htmlFor="branchId" required errors={err.branchId}>
+              <Select id="branchId" name="branchId" defaultValue={initial?.branchId ?? branches[0]?.id} required>
+                {branches.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.code} — {b.name}
+                  </option>
+                ))}
+              </Select>
             </Field>
             <Field label="Address" htmlFor="address" errors={err.address} className="sm:col-span-2">
               <Textarea id="address" name="address" defaultValue={initial?.address ?? ""} />

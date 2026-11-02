@@ -14,6 +14,7 @@ import { can } from "@/lib/permissions";
 import type { Prisma } from "@/generated/prisma/client";
 import { SalesOrderStatus } from "@/generated/prisma/enums";
 import { enumParam } from "../_lib/documents";
+import { branchWhere } from "@/lib/branch";
 
 export const metadata: Metadata = { title: "Sales orders" };
 
@@ -26,6 +27,7 @@ export default async function SalesOrdersPage({ searchParams }: PageProps<"/sale
   const { page, take, skip } = pagination(sp);
 
   const where: Prisma.SalesOrderWhereInput = {
+    ...(await branchWhere()),
     ...(q && {
       OR: [
         { number: { contains: q, mode: "insensitive" } },
@@ -52,7 +54,7 @@ export default async function SalesOrdersPage({ searchParams }: PageProps<"/sale
       <PageHeader
         title="Sales orders"
         description="Confirmed customer orders, deliveries and invoicing."
-        actions={can(user.role, "salesOrders", "edit") && <ButtonLink href="/sales/orders/new">New sales order</ButtonLink>}
+        actions={can(user, "salesOrders", "edit") && <ButtonLink href="/sales/orders/new">New sales order</ButtonLink>}
       />
       <Card>
         <ListToolbar
@@ -87,7 +89,7 @@ export default async function SalesOrdersPage({ searchParams }: PageProps<"/sale
                   </Link>
                 </TD>
                 <TD>
-                  <Link href={`/crm/customers/${o.customer.id}`} className="hover:underline">
+                  <Link href={`/contacts/${o.customer.id}`} className="hover:underline">
                     {o.customer.name}
                   </Link>
                 </TD>

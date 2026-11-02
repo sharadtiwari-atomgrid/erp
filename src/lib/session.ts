@@ -1,12 +1,11 @@
 import "server-only";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import type { Role } from "@/generated/prisma/enums";
 
 const COOKIE_NAME = "erp_session";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
-export type SessionPayload = { userId: string; role: Role };
+export type SessionPayload = { userId: string };
 
 function getKey() {
   const secret = process.env.SESSION_SECRET;
@@ -37,7 +36,7 @@ export async function readSession(): Promise<SessionPayload | null> {
   if (!token) return null;
   try {
     const { payload } = await jwtVerify<SessionPayload>(token, getKey());
-    return { userId: payload.userId, role: payload.role };
+    return { userId: payload.userId };
   } catch {
     return null;
   }

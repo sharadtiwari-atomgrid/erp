@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ActionButton } from "@/app/(app)/inventory/_components/action-button";
+import { ActionButton } from "@/components/ui/action-button";
 import { StatusBadge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, DetailList, StatCard } from "@/components/ui/card";
@@ -43,7 +43,7 @@ export default async function PurchaseOrderPage({ params }: PageProps<"/purchasi
     }),
   ]);
 
-  const canEdit = can(user.role, "purchaseOrders", "edit");
+  const canEdit = can(user, "purchaseOrders", "edit");
   const ordered = order.lines.reduce((s, l) => s + num(l.quantity), 0);
   const received = order.lines.reduce((s, l) => s + num(l.receivedQty), 0);
   const nothingReceived = order.lines.every((l) => num(l.receivedQty) === 0);
@@ -88,7 +88,7 @@ export default async function PurchaseOrderPage({ params }: PageProps<"/purchasi
                 </ActionButton>
               </>
             )}
-            {isOpen && canReceiveGoods(user.role) && <ButtonLink href={`/purchasing/orders/${id}/receive`}>Receive goods</ButtonLink>}
+            {isOpen && canReceiveGoods(user) && <ButtonLink href={`/purchasing/orders/${id}/receive`}>Receive goods</ButtonLink>}
           </>
         }
       />
@@ -117,7 +117,7 @@ export default async function PurchaseOrderPage({ params }: PageProps<"/purchasi
                 {
                   label: "Supplier",
                   value: (
-                    <Link href={`/purchasing/suppliers/${order.supplier.id}`} className="font-medium text-brand-700 hover:underline">
+                    <Link href={`/contacts/${order.supplier.id}`} className="font-medium text-brand-700 hover:underline">
                       {order.supplier.name}
                     </Link>
                   ),

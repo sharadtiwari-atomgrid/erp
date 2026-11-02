@@ -5,16 +5,19 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/cn";
 
-type Group = { label: string; items: Array<{ label: string; href: string }> };
+type Group = { label: string; color: string; items: Array<{ label: string; href: string }> };
 
 function NavLinks({ groups, onNavigate }: { groups: Group[]; onNavigate?: () => void }) {
   const pathname = usePathname();
   return (
-    <nav className="space-y-6">
+    <nav className="space-y-5">
       {groups.map((group) => (
         <div key={group.label}>
-          <p className="px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">{group.label}</p>
-          <ul className="mt-2 space-y-0.5">
+          <p className="flex items-center gap-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+            <span className="h-2 w-2 rounded-full" style={{ background: group.color }} aria-hidden />
+            {group.label}
+          </p>
+          <ul className="mt-1.5 space-y-0.5">
             {group.items.map((item) => {
               const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
               return (

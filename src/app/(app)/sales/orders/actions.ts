@@ -15,6 +15,7 @@ import { computeDocument } from "@/lib/totals";
 import type { SalesOrderStatus } from "@/generated/prisma/enums";
 import { attempt } from "../_lib/attempt";
 import { copyLines, DocumentError, lineData } from "../_lib/documents";
+import { warehouseBranchId } from "@/lib/branch";
 
 const orderSchema = z.object({
   customerId: f.id("Customer"),
@@ -51,6 +52,7 @@ export async function createOrder(_prev: ActionState, formData: FormData): Promi
     const created = await tx.salesOrder.create({
       data: {
         ...parsed.data,
+        branchId: await warehouseBranchId(tx, parsed.data.warehouseId),
         number,
         subtotal: doc.subtotal,
         taxTotal: doc.taxTotal,
@@ -85,7 +87,13 @@ export async function updateOrder(id: string, _prev: ActionState, formData: Form
 
       await tx.salesOrder.update({
         where: { id },
-        data: { ...parsed.data, subtotal: doc.subtotal, taxTotal: doc.taxTotal, total: doc.total },
+        data: {
+          ...parsed.data,
+          branchId: await warehouseBranchId(tx, parsed.data.warehouseId),
+          subtotal: doc.subtotal,
+          taxTotal: doc.taxTotal,
+          total: doc.total,
+        },
       });
       await tx.salesOrderLine.deleteMany({ where: { salesOrderId: id } });
       await tx.salesOrderLine.createMany({ data: doc.lines.map((l) => ({ ...lineData(l), salesOrderId: id })) });
@@ -159,7 +167,7 @@ export async function cancelOrder(id: string): Promise<ActionState> {
 export async function deliverOrder(id: string, _prev: ActionState, formData: FormData): Promise<ActionState> {
   // Warehouse staff can deliver orders they can't otherwise edit.
   const user = await requireUser("salesOrders", "view");
-  if (!can(user.role, "salesOrders", "edit") && !can(user.role, "stock", "edit")) {
+  if (!can(user, "salesOrders", "edit") && !can(user, "stock", "edit")) {
     return { error: "You don’t have permission to deliver orders." };
   }
 
@@ -254,6 +262,7 @@ export async function createInvoiceFromOrder(id: string): Promise<ActionState> {
           number,
           customerId: order.customerId,
           salesOrderId: id,
+          branchId: order.branchId,
           issueDate,
           dueDate: addDays(issueDate, order.customer.paymentTermsDays),
           placeOfSupply: order.customer.state,

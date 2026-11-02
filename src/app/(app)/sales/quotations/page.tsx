@@ -53,7 +53,7 @@ export default async function QuotationsPage({ searchParams }: PageProps<"/sales
       <PageHeader
         title="Quotations"
         description="Price offers sent to customers."
-        actions={can(user.role, "quotations", "edit") && <ButtonLink href="/sales/quotations/new">New quotation</ButtonLink>}
+        actions={can(user, "quotations", "edit") && <ButtonLink href="/sales/quotations/new">New quotation</ButtonLink>}
       />
       <Card>
         <ListToolbar
@@ -87,7 +87,7 @@ export default async function QuotationsPage({ searchParams }: PageProps<"/sales
                   </Link>
                 </TD>
                 <TD>
-                  <Link href={`/crm/customers/${qt.customer.id}`} className="hover:underline">
+                  <Link href={`/contacts/${qt.customer.id}`} className="hover:underline">
                     {qt.customer.name}
                   </Link>
                 </TD>

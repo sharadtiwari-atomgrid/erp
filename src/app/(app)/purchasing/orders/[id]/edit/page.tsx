@@ -18,7 +18,7 @@ export default async function EditPurchaseOrderPage({ params }: PageProps<"/purc
     include: {
       lines: { orderBy: { position: "asc" } },
       supplier: { select: { id: true, code: true, name: true } },
-      warehouse: { select: { id: true, code: true, name: true } },
+      warehouse: { select: { id: true, code: true, name: true, branchId: true } },
     },
   });
   if (!order) notFound();
@@ -26,7 +26,7 @@ export default async function EditPurchaseOrderPage({ params }: PageProps<"/purc
 
   const [suppliers, warehouses, products] = await Promise.all([getSupplierOptions(), getWarehouseOptions(), getProductOptions()]);
   // Keep the current supplier/warehouse selectable even if since deactivated.
-  if (!suppliers.some((s) => s.id === order.supplierId)) suppliers.push({ ...order.supplier, paymentTermsDays: 0 });
+  if (!suppliers.some((s) => s.id === order.supplierId)) suppliers.push({ ...order.supplier, state: null, paymentTermsDays: 0 });
   if (!warehouses.some((w) => w.id === order.warehouseId)) warehouses.push(order.warehouse);
 
   return (
