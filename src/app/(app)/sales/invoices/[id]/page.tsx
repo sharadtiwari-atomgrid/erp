@@ -18,6 +18,7 @@ import { DocumentLines, DocumentTotals } from "../../_components/document-lines"
 import { isOverdue, startOfToday } from "../../_lib/documents";
 import { cancelInvoice, issueInvoice, recordPayment } from "../actions";
 import { PaymentForm } from "./payment-form";
+import { InvoiceEwayBillsCard } from "../../../books/_components/invoice-eway-card";
 
 export const metadata: Metadata = { title: "Invoice" };
 
@@ -71,6 +72,11 @@ export default async function InvoicePage({ params }: PageProps<"/sales/invoices
             {canEdit && invoice.status === "DRAFT" && (
               <ButtonLink href={`/sales/invoices/${id}/edit`} variant="secondary">
                 Edit
+              </ButtonLink>
+            )}
+            {can(user, "returns", "edit") && invoice.status !== "DRAFT" && invoice.status !== "CANCELLED" && (
+              <ButtonLink href={`/returns/new?invoiceId=${id}`} variant="secondary">
+                Create return
               </ButtonLink>
             )}
             <ButtonLink href={`/sales/invoices/${id}/print`} variant="secondary">
@@ -199,6 +205,7 @@ export default async function InvoicePage({ params }: PageProps<"/sales/invoices
               />
             </CardBody>
           </Card>
+          <InvoiceEwayBillsCard invoiceId={id} invoiceStatus={invoice.status} user={user} />
           <ActivityCard entityType="Invoice" entityId={id} />
         </div>
       </div>
