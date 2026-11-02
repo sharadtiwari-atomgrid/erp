@@ -17,12 +17,13 @@ The application is organised into the sections of the ERPKaro feature map:
 
 Built with Next.js 16 (App Router, Server Actions), React 19, TypeScript, Tailwind CSS 4, Prisma 7 and PostgreSQL.
 
-## Status
+## Typical flows
 
-The data model covers every section above. The screens are being built in stages:
-
-- **Available:** branches, teams, roles & access, third-party contacts, items and categories, stock on hand, adjustments, transfers and the stock ledger, warehouses, leads, quotations, sales orders, purchase orders, GST invoices and payments, company settings, and the dashboard.
-- **In progress:** bins; inbound QC and QR labels; outbound picking, packing and handling units; manufacturing (hub settings, production orders, schedule, batches, needs analyser); logistics; e-way bills and Tally export; returns. Until outbound and inbound land, sales orders use direct delivery and purchase orders use direct goods receipt.
+- **Order to cash:** quotation → sales order (confirming reserves stock) → outbound order → picking → packing into handling units (QR labels) → dispatch → GST invoice → e-way bill → payment.
+- **Procure to stock:** purchase order → goods receipt (GRN) → QC (accept/reject, put away to a bin) → stock, with a QR label on the GRN.
+- **Make to stock / order / assemble:** sales order or stock need → Manufacturing Needs → production order → auto-schedule on machines → production batch → batch QC, which consumes components and posts finished goods.
+- **Logistics:** trip with vehicle and driver → attach packed outbound orders → ASN and delivery note → complete the trip.
+- **Returns:** return order → receive → inspect (repair / restock / scrap) → close with a credit amount.
 
 ## Getting started
 
