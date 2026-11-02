@@ -18,9 +18,9 @@ const roleSchema = z.object({
 /** Each module posts a `perm.<module>` radio value of none/view/edit. */
 function readPermissions(formData: FormData): Permissions {
   const out: Permissions = {};
-  for (const module of Object.keys(MODULES) as Module[]) {
-    const level = formData.get(`perm.${module}`);
-    if (level === "view" || level === "edit") out[module] = level;
+  for (const key of Object.keys(MODULES) as Module[]) {
+    const level = formData.get(`perm.${key}`);
+    if (level === "view" || level === "edit") out[key] = level;
   }
   return out;
 }
