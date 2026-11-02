@@ -1,33 +1,21 @@
-# ERP
+# Atomgrid ERP
 
-A web-based ERP for small and mid-sized Indian businesses, covering **Sales & CRM**, **Inventory** and **Purchasing**, with GST-aware invoicing and role-based access.
+A web-based ERP for Indian manufacturers and distributors. It covers make-to-stock (MTS), make-to-order (MTO) and assemble-to-order (ATO) businesses, from order to production to dispatch, with GST-aware invoicing, multi-branch operations and role-based access.
+
+The application is organised into the sections of the ERPKaro feature map:
+
+| Section | Modules |
+| --- | --- |
+| **Quick actions** | Branch management (multi-branch data, branch switcher), teams, role-based access control, third-party contacts (customers, suppliers, transporters) |
+| **Inventory** | Items with SKU, HSN, GST rate, item type (raw material / semi-finished / finished / trading / service) and supply mode (Buy / MTS / MTO / ATO); categories |
+| **Warehouse management** | Stock management (in hand, reserved, allocated, available, in QC), bin stock, inbound goods receipts with QC and QR labels, outbound picking sessions, packing sessions and handling units, stock ledger, adjustments and transfers |
+| **Order management** | Leads, quotations, sales orders with stock reservation, purchase orders, the **Manufacturing Needs** analyser (procure, produce or dispatch for each pending order line), returns |
+| **Manufacturing ops** | Hub settings (production units, machines and hours, BOMs with operations and cost roll-up), production orders, a production schedule calendar with finite-capacity auto-scheduling, production batches with batch QC that auto-updates inventory |
+| **Logistics** | Own and third-party fleet, drivers and assignments, operating hours, fuel logs, trips, ASN and delivery notes |
+| **Books / accounts** | GST tax invoices (CGST/SGST vs IGST), payments, receivables, e-way bills, Tally XML and CSV export |
+| **Return management** | Return orders with return QC: repair, restock or scrap |
 
 Built with Next.js 16 (App Router, Server Actions), React 19, TypeScript, Tailwind CSS 4, Prisma 7 and PostgreSQL.
-
-## Features
-
-**CRM & Sales**
-- Customers with GSTIN, addresses, credit limits and payment terms
-- Leads pipeline with conversion to customers
-- Quotations → Sales orders → Deliveries → Invoices → Payments
-- GST tax invoices with automatic CGST/SGST vs IGST split and a print view
-- Receivables and overdue tracking
-
-**Inventory**
-- Products and services with SKU, HSN code, GST rate, prices and reorder levels
-- Multiple warehouses, stock on hand per warehouse, stock valuation
-- Stock adjustments and inter-warehouse transfers
-- Full stock ledger: every change is an immutable stock movement
-
-**Purchasing**
-- Suppliers
-- Purchase orders with partial goods receipt into a warehouse
-
-**Platform**
-- Email/password sign-in with signed, HTTP-only session cookies
-- Roles: Administrator, Manager, Sales, Purchase, Warehouse, Read-only
-- Auto-numbered documents (`SO-00001`, `INV-00001`, …)
-- Activity log and a dashboard with KPIs and low-stock alerts
 
 ## Getting started
 
@@ -49,19 +37,36 @@ npm run dev
 
 Open http://localhost:3000.
 
-### Demo users
+### Demo data
 
-`npm run db:seed` creates one user per role, all sharing the demo password defined in `prisma/seed.ts` (override it with `SEED_PASSWORD`):
+`npm run db:seed` creates a demo manufacturer with:
+- two branches (Mumbai HQ, Pune Plant) and their teams
+- warehouses with bins
+- raw materials, components, trading goods and manufactured products with BOMs
+- a factory with five machines
+- customers, suppliers and a transporter
+- vehicles and drivers
 
-| Email | Role |
-| --- | --- |
-| admin@example.com | Administrator |
-| manager@example.com | Manager |
-| sales@example.com | Sales |
-| purchase@example.com | Purchase |
-| warehouse@example.com | Warehouse |
+It creates one user per default role. All of them share the demo password defined in `prisma/seed.ts`; override it with `SEED_PASSWORD`:
+
+| Email | Role | Branch |
+| --- | --- | --- |
+| admin@example.com | Administrator | All |
+| manager@example.com | Manager | All |
+| sales@example.com | Sales | Mumbai |
+| procurement@example.com | Procurement | All |
+| warehouse@example.com | Warehouse | Mumbai |
+| production@example.com | Production | Pune |
+| logistics@example.com | Logistics | All |
+| accounts@example.com | Accounts | All |
 
 Change these passwords, or delete the users, before using the app with real data.
+
+## Access control
+
+- **Roles** live in Settings → Roles & access. Each role sets *none / view / edit* for every module, or grants full access. You can create new roles.
+- **Branch restriction**: a user can be limited to one branch, and then sees only that branch's documents. Users without a restriction pick a branch, or "All branches", in the header.
+- Every page and server action checks access on the server with `requireUser(module, access)`. The sidebar only hides what a role can't use.
 
 ## Scripts
 
@@ -72,7 +77,7 @@ Change these passwords, or delete the users, before using the app with real data
 | `npm run typecheck` | TypeScript check |
 | `npm run lint` | ESLint |
 | `npm test` | Unit tests (Vitest) |
-| `npm run db:migrate` | Create/apply a migration after editing `prisma/schema.prisma` |
+| `npm run db:migrate` | Create or apply a migration after editing `prisma/schema.prisma` |
 | `npm run db:deploy` | Apply migrations in production |
 | `npm run db:seed` | Load demo data into an empty database |
 | `npm run db:reset` | Drop everything, re-migrate and re-seed |
@@ -82,51 +87,62 @@ Change these passwords, or delete the users, before using the app with real data
 
 ```
 prisma/
-  schema.prisma          Data model
-  seed.ts                Demo data
+  schema.prisma            Data model (one section per ERPKaro area)
+  seed.ts                  Demo data
 src/
   app/
-    (auth)/              Sign-in and sign-out
-    (app)/               Signed-in app (sidebar layout)
-      dashboard/
-      crm/               customers, leads
-      sales/             quotations, orders, invoices
-      inventory/         products, categories, stock, movements, warehouses
-      purchasing/        suppliers, orders
-      settings/          company, users
+    (auth)/                Sign-in and sign-out
+    (app)/                 Signed-in app (sidebar layout)
+      dashboard/           KPIs and quick actions
+      branches/ teams/ contacts/
+      inventory/           items, categories, stock, ledger, warehouses & bins
+      warehouse/           inbound (GRN + QC), outbound, picking
+      crm/leads/ sales/    leads, quotations, sales orders, invoices
+      purchasing/          purchase orders
+      manufacturing/       hub settings, production orders, schedule, batches, needs
+      logistics/           vehicles, drivers, fuel, trips, ASN/DN
+      books/               e-way bills, Tally export
+      returns/
+      settings/            company, users, roles
   components/
-    ui/                  Buttons, forms, tables, cards, badges
-    layout/              Sidebar and header
+    ui/                    Buttons, forms, tables, cards, badges, action and print buttons
+    layout/                Sidebar, header, branch switcher
     line-items-editor.tsx  Shared editor for document lines
   lib/
-    auth.ts              requireUser() — use at the top of every page and action
-    permissions.ts       Role → module access matrix
-    stock.ts             adjustStock() — the only way stock changes
-    sequence.ts          Document numbering
-    totals.ts            Line, document and GST calculations
-    forms.ts             zod helpers for Server Actions
-  proxy.ts               Redirects signed-out visitors to /login
+    auth.ts                requireUser(): use it at the top of every page and action
+    permissions.ts         Modules, access levels and default roles
+    branch.ts              Branch scope helpers (branchWhere, defaultBranchId)
+    stock.ts               adjustStock / reserveStock / releaseStock: the only way stock changes
+    sequence.ts            Document numbering (SO-00001, GRN-00001, MO-00001…)
+    totals.ts              Line, document and GST calculations
+    forms.ts               zod helpers for Server Actions
+  proxy.ts                 Redirects signed-out visitors to /login
 ```
 
 ## Conventions
 
-- **Authorization**: every page and server action starts with `await requireUser(module, "view" | "edit")`. The sidebar hides modules a role can't see, but the check on the server is what enforces access.
-- **Stock**: never write `StockLevel` directly. Call `adjustStock(tx, …)` inside a transaction. It records a `StockMovement` and updates the level, and it refuses to go negative.
-- **Documents** are editable only while in `DRAFT`. After that they change only through explicit status transitions (confirm, deliver, issue, receive, cancel).
+- **Stock**: never write `StockLevel` directly. Call the helpers in `src/lib/stock.ts` inside a transaction. Every change to stock in hand is recorded as an immutable `StockMovement`.
+- **Branches**: every operational document (orders, receipts, outbounds, production orders, trips, returns, invoices) carries a `branchId`, usually taken from its warehouse. Lists filter with `branchWhere()`.
+- **Documents** can be edited only in `DRAFT`. After that they change only through explicit status transitions. Each transition is guarded against double submission and recorded in the activity log.
 - **Money** is stored as `Decimal(14,2)` and converted with `num()` before it reaches client components.
+
+## Integrations
+
+- **E-way bills** are generated on the GST portal and recorded against invoices here, with validity worked out from the distance. There is no direct GSTN API integration yet.
+- **Tally**: Books → Tally export downloads a Tally-compatible XML of sales vouchers. Any accounting software that imports XML or CSV can use the exports.
 
 ## Deployment
 
 Any Node host with PostgreSQL works (Vercel, Railway, Render, Fly.io or a VM):
 
-1. Set `DATABASE_URL` and a long random `SESSION_SECRET`.
+1. Set `DATABASE_URL`, a long random `SESSION_SECRET`, and `NEXT_PUBLIC_APP_URL` (used in QR codes).
 2. Run `npm run db:deploy` on release.
 3. Run `npm run build`, then `npm start`.
 
 ## Roadmap
 
-- Accounting: chart of accounts, journals, GST returns (GSTR-1/3B) export
-- HR & payroll
-- Credit notes and sales returns, purchase bills and supplier payments
+- AI-assisted production scheduling on top of the current capacity-based auto-scheduler
+- Direct e-way bill and e-invoice (IRN) generation through a GSP
+- Full accounting: chart of accounts, journals, GSTR-1/3B
+- Purchase bills and supplier payments, credit notes
 - PDF and email delivery of documents
-- Multi-company and multi-currency
