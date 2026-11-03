@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Field, FormGrid, FormMessage, Input, Textarea } from "@/components/ui/form";
@@ -13,6 +13,8 @@ export type ContactFormValues = {
   name: string;
   roles: ContactRole[];
   contactPerson: string | null;
+  pocNames: string[];
+  multipleAddresses: boolean;
   pan: string | null;
   email: string | null;
   phone: string | null;
@@ -42,6 +44,7 @@ export function ContactForm({
 }) {
   const [state, formAction] = useActionState(action, undefined);
   const err = state?.fieldErrors ?? {};
+  const [transporter, setTransporter] = useState((initial?.roles ?? defaultRoles).includes("TRANSPORTER"));
 
   return (
     <form action={formAction} className="space-y-6">
@@ -68,6 +71,7 @@ export function ContactForm({
                       name="roles"
                       value={role}
                       defaultChecked={(initial?.roles ?? defaultRoles).includes(role)}
+                      onChange={role === "TRANSPORTER" ? (e) => setTransporter(e.target.checked) : undefined}
                       className="h-4 w-4 rounded border-line"
                     />
                     {CONTACT_ROLE_LABELS[role]}
@@ -86,8 +90,14 @@ export function ContactForm({
             <Field label="Phone" htmlFor="phone" errors={err.phone}>
               <Input id="phone" name="phone" defaultValue={initial?.phone ?? ""} />
             </Field>
-            <Field label="GSTIN" htmlFor="gstin" errors={err.gstin} hint="15-character GST number">
-              <Input id="gstin" name="gstin" defaultValue={initial?.gstin ?? ""} maxLength={15} />
+            <Field
+              label={transporter ? "Transporter ID (GSTIN)" : "GSTIN"}
+              htmlFor="gstin"
+              errors={err.gstin}
+              required={transporter}
+              hint={transporter ? "Required for transporters" : "15-character GST number"}
+            >
+              <Input id="gstin" name="gstin" defaultValue={initial?.gstin ?? ""} maxLength={15} required={transporter} />
             </Field>
             <Field label="PAN" htmlFor="pan" errors={err.pan}>
               <Input id="pan" name="pan" defaultValue={initial?.pan ?? ""} maxLength={10} />
@@ -102,6 +112,20 @@ export function ContactForm({
               <label className="flex items-center gap-2 text-sm text-ink">
                 <input type="checkbox" name="isActive" defaultChecked={initial?.isActive ?? true} className="h-4 w-4 rounded border-line" />
                 Active
+              </label>
+              {err.isActive?.map((e) => (
+                <span key={e} className="ml-2 text-xs text-red-600">
+                  {e}
+                </span>
+              ))}
+            </div>
+            <Field label="POC names" htmlFor="pocNames" errors={err.pocNames} hint="People at this company, one per line (used by the Domestic B2B POC pickers)">
+              <Textarea id="pocNames" name="pocNames" rows={3} defaultValue={(initial?.pocNames ?? []).join("\n")} />
+            </Field>
+            <div className="flex items-start pt-7">
+              <label className="flex items-center gap-2 text-sm text-ink">
+                <input type="checkbox" name="multipleAddresses" defaultChecked={initial?.multipleAddresses ?? false} className="h-4 w-4 rounded border-line" />
+                Delivers to multiple addresses (shown in Domestic MIS)
               </label>
             </div>
           </FormGrid>

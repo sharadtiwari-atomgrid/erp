@@ -35,6 +35,8 @@ export default async function ProductsPage({ searchParams }: PageProps<"/invento
         { sku: { contains: q, mode: "insensitive" } },
         { name: { contains: q, mode: "insensitive" } },
         { hsnCode: { contains: q } },
+        { casNo: { contains: q } },
+        { aliases: { has: q } },
       ],
     }),
     ...(categoryId && { categoryId }),

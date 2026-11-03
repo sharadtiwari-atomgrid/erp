@@ -17,6 +17,29 @@ The application is organised into the sections of the ERPKaro feature map:
 
 Built with Next.js 16 (App Router, Server Actions), React 19, TypeScript, Tailwind CSS 4, Prisma 7 and PostgreSQL.
 
+## Domestic B2B order management
+
+The **Domestic B2B** and **B2B views** sections bring Atomgrid's domestic order-management workflow into the ERP:
+
+- **Fresh PO / Long Hold PO**: purchase orders move through Demand → Supply → Logistics. Each team fills in its own section; POs older than 15 days move to Long Hold automatically. Includes Excel import with duplicate detection, paste from email, documents and history.
+- **Domestic MIS**: the master shipment record per job, with status gates, data checks, POD and e-way bill uploads that move the status on, import and export, and a shipment journey view.
+- **Quotation sheet (D-0)**: today's dispatches with four transporter quotes, approval written back to the job, and a vehicle progress stepper.
+- **Views**: Today, Dashboard with the monthly MIS pack, Shipments summary, In transit, Planned, Delivered, and a Daily digest exported as images.
+- **Transport**: payables ageing, transporter performance, and a transporter finder.
+- **Batch inventory**: inward and outward registers per batch, stock in hand with FEFO/FIFO dispatch planning, warehouse count comparison, lost & found, and damage & relabelling.
+- **Tools and masters**: COA generator (PDF/OCR), POC master, product name check, and bug and feature reports.
+
+To bring data across from the previous system's full export (kept on your machine, never committed):
+
+```bash
+npx tsx scripts/import-domestic-crm.ts "<path to export>.xlsx"       # customers, suppliers, transporters, products, POCs
+npx tsx scripts/import-domestic-crm-mis.ts "<path to export>.xlsx"   # Domestic MIS jobs
+```
+
+Fresh POs, batch registers and quotation rows import through each page's own **Import** button.
+
+Uploaded documents go to an S3-compatible bucket when the `BUCKET_*` variables are set, and to `.data/uploads` otherwise.
+
 ## Typical flows
 
 - **Order to cash:** quotation → sales order (confirming reserves stock) → outbound order → picking → packing into handling units (QR labels) → dispatch → GST invoice → e-way bill → payment.

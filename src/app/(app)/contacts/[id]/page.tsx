@@ -8,15 +8,17 @@ import { PageHeader } from "@/components/ui/page-header";
 import { EmptyRow, Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { formatDate, formatMoney, num } from "@/lib/format";
+import { formatDate, formatDateTime, formatMoney, num } from "@/lib/format";
+import { param } from "@/lib/forms";
 import { can } from "@/lib/permissions";
 import { CONTACT_ROLE_LABELS, CONTACT_ROLE_TONES } from "../roles";
 
 export const metadata: Metadata = { title: "Contact" };
 
-export default async function ContactPage({ params }: PageProps<"/contacts/[id]">) {
+export default async function ContactPage({ params, searchParams }: PageProps<"/contacts/[id]">) {
   const user = await requireUser("contacts");
   const { id } = await params;
+  const renamed = param(await searchParams, "renamed");
   const customer = await db.contact.findUnique({
     where: { id },
     include: {
@@ -30,13 +32,19 @@ export default async function ContactPage({ params }: PageProps<"/contacts/[id]"
   const isCustomer = customer.roles.includes("CUSTOMER");
   const isSupplier = customer.roles.includes("SUPPLIER");
 
-  const [billed, outstanding, purchased] = await Promise.all([
+  const [billed, outstanding, purchased, history] = await Promise.all([
     db.invoice.aggregate({ where: { customerId: id, status: { not: "CANCELLED" } }, _sum: { total: true } }),
     db.invoice.findMany({
       where: { customerId: id, status: { in: ["ISSUED", "PARTIALLY_PAID"] } },
       select: { total: true, amountPaid: true },
     }),
     db.purchaseOrder.aggregate({ where: { supplierId: id, status: { not: "CANCELLED" } }, _sum: { total: true } }),
+    db.activity.findMany({
+      where: { entityType: "Contact", entityId: id },
+      orderBy: { createdAt: "desc" },
+      take: 30,
+      include: { user: { select: { name: true } } },
+    }),
   ]);
   const outstandingAmount = outstanding.reduce((s, i) => s + num(i.total) - num(i.amountPaid), 0);
   const creditLimit = num(customer.creditLimit);
@@ -78,6 +86,12 @@ export default async function ContactPage({ params }: PageProps<"/contacts/[id]"
         }
       />
 
+      {renamed && (
+        <div role="status" className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+          Contact renamed. {renamed}
+        </div>
+      )}
+
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         {isSupplier && !isCustomer ? (
           <StatCard label="Total purchased" value={formatMoney(purchased._sum.total)} />
@@ -102,7 +116,9 @@ export default async function ContactPage({ params }: PageProps<"/contacts/[id]"
                 { label: "Contact person", value: customer.contactPerson },
                 { label: "Email", value: customer.email },
                 { label: "Phone", value: customer.phone },
-                { label: "GSTIN", value: customer.gstin },
+                { label: customer.roles.includes("TRANSPORTER") ? "Transporter ID (GSTIN)" : "GSTIN", value: customer.gstin },
+                { label: "POC names", value: customer.pocNames.length ? customer.pocNames.join("\n") : null },
+                { label: "Multiple addresses", value: customer.multipleAddresses ? "Yes: delivers to more than one address" : "No" },
                 { label: "PAN", value: customer.pan },
                 { label: "State", value: customer.state },
                 { label: "Billing address", value: [customer.billingAddress, customer.city, customer.pincode].filter(Boolean).join("\n") || null },
@@ -217,6 +233,38 @@ export default async function ContactPage({ params }: PageProps<"/contacts/[id]"
             </Table>
           </Card>
           )}
+
+          <Card>
+            <CardHeader title="History" />
+            <CardBody>
+              {history.length === 0 ? (
+                <p className="text-sm text-ink-faint">No changes recorded yet.</p>
+              ) : (
+                <ul className="space-y-3 text-sm">
+                  {history.map((a) => {
+                    const changes = (a.changes ?? {}) as Record<string, [unknown, unknown]>;
+                    return (
+                      <li key={a.id}>
+                        <div className="text-ink">{a.message}</div>
+                        <div className="text-xs text-ink-faint">
+                          {a.user?.name ?? "System"} · {formatDateTime(a.createdAt)}
+                        </div>
+                        {Object.keys(changes).length > 0 && (
+                          <ul className="mt-1 space-y-0.5 text-xs text-ink-soft">
+                            {Object.entries(changes).map(([field, [from, to]]) => (
+                              <li key={field}>
+                                <span className="font-medium">{field}</span>: {String(from ?? "—") || "—"} → {String(to ?? "—") || "—"}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </CardBody>
+          </Card>
         </div>
       </div>
     </>

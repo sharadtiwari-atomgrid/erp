@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { logout } from "@/app/(auth)/actions";
+import { FeedbackButtons } from "@/components/feedback/feedback-buttons";
 import { AppNav } from "@/components/layout/app-nav";
 import { BranchSwitcher } from "@/components/layout/branch-switcher";
 import { getBranchScope } from "@/lib/branch";
@@ -28,8 +30,16 @@ export async function BranchMenu() {
 
 export async function UserMenu() {
   const user = await requireUser();
+  // Page picker for bug reports / feature requests: the navigation labels this user can open.
+  const pages = NAVIGATION.flatMap((g) =>
+    g.items.filter((i) => can(user, i.module)).map((i) => ({ label: g.label === "B2B views" ? `B2B ${i.label.toLowerCase()}` : i.label, href: i.href })),
+  ).filter((p, i, all) => all.findIndex((x) => x.label === p.label) === i);
   return (
     <div className="flex items-center gap-3">
+      <FeedbackButtons pages={pages} />
+      <Link href="/settings/feedback" className="hidden rounded-md px-2 py-1 text-xs font-medium text-ink-soft hover:bg-muted hover:text-ink lg:inline">
+        {can(user, "settings") ? "Bugs & requests" : "My bugs & requests"}
+      </Link>
       <div className="text-right leading-tight">
         <p className="text-sm font-medium text-ink">{user.name}</p>
         <p className="text-xs text-ink-faint">{user.roleName}</p>

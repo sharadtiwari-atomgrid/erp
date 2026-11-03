@@ -6,7 +6,7 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Field, FormGrid, FormMessage, Input, Select, Textarea } from "@/components/ui/form";
 import { SubmitButton } from "@/components/ui/submit-button";
 import type { ActionState } from "@/lib/forms";
-import { ITEM_TYPES, SUPPLY_MODES, type ItemTypeKey, type SupplyModeKey } from "./_item-meta";
+import { ITEM_TYPES, PRODUCT_CLASSES, PRODUCT_FUNNELS, SUPPLY_MODES, type ItemTypeKey, type SupplyModeKey } from "./_item-meta";
 
 export type ProductFormValues = {
   sku: string;
@@ -19,6 +19,10 @@ export type ProductFormValues = {
   weightKg: number | null;
   unit: string;
   hsnCode: string | null;
+  casNo: string | null;
+  productClass: string | null;
+  funnel: string | null;
+  aliases: string[];
   categoryId: string | null;
   salePrice: number;
   purchasePrice: number;
@@ -131,6 +135,40 @@ export function ProductForm({
               </label>
               <p className="mt-1 text-xs text-ink-faint">Inbound receipts must pass QC before this item is added to stock.</p>
             </div>
+          </FormGrid>
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardHeader title="Domestic B2B master" description="How this material appears on Fresh POs, Domestic MIS and the batch registers" />
+        <CardBody>
+          <FormGrid>
+            <Field label="CAS No." htmlFor="casNo" errors={err.casNo}>
+              <Input id="casNo" name="casNo" defaultValue={initial?.casNo ?? ""} placeholder="e.g. 0000-00-0" />
+            </Field>
+            <Field label="Class" htmlFor="productClass" errors={err.productClass}>
+              <Select id="productClass" name="productClass" defaultValue={initial?.productClass ?? ""}>
+                <option value="">Not set</option>
+                {PRODUCT_CLASSES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="Funnel" htmlFor="funnel" errors={err.funnel}>
+              <Select id="funnel" name="funnel" defaultValue={initial?.funnel ?? ""}>
+                <option value="">Not set</option>
+                {PRODUCT_FUNNELS.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="Other names (aliases)" htmlFor="aliases" errors={err.aliases} hint="Spellings used on inward / outward sheets, one per line">
+              <Textarea id="aliases" name="aliases" rows={3} defaultValue={(initial?.aliases ?? []).join("\n")} />
+            </Field>
           </FormGrid>
         </CardBody>
       </Card>

@@ -18,3 +18,7 @@ export const SUPPLY_MODES = {
 
 export type ItemTypeKey = keyof typeof ITEM_TYPES;
 export type SupplyModeKey = keyof typeof SUPPLY_MODES;
+
+/** Domestic B2B product master classification. */
+export const PRODUCT_CLASSES = ["Technical", "Formulation", "Intermediate", "Other"] as const;
+export const PRODUCT_FUNNELS = ["B2B", "B2C"] as const;

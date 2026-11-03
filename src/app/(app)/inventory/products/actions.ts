@@ -5,9 +5,14 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { ItemType, ProductType, SupplyMode } from "@/generated/prisma/enums";
 import { logActivity } from "@/lib/activity";
+import { diff, recordChange } from "@/lib/audit";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { f, parseForm, type ActionState } from "@/lib/forms";
+import { PRODUCT_CLASSES, PRODUCT_FUNNELS } from "./_item-meta";
+import { describeProductRename, renameProductEverywhere } from "./rename";
+
+const emptyToNull = (v: unknown) => (typeof v === "string" && v.trim() === "" ? null : v);
 
 const productSchema = z.object({
   sku: f.text("SKU").transform((v) => v.toUpperCase()),
@@ -23,6 +28,9 @@ const productSchema = z.object({
   ),
   unit: f.text("Unit"),
   hsnCode: f.optionalText(),
+  casNo: f.optionalText(),
+  productClass: z.preprocess(emptyToNull, z.enum(PRODUCT_CLASSES, { error: "Choose a valid class" }).nullable()),
+  funnel: z.preprocess(emptyToNull, z.enum(PRODUCT_FUNNELS, { error: "Choose B2B or B2C" }).nullable()),
   categoryId: f.optionalText(),
   salePrice: f.number({ label: "Sale price" }),
   purchasePrice: f.number({ label: "Purchase price" }),
@@ -35,6 +43,20 @@ const productSchema = z.object({
     message: "Use item type Service for service products (and only for them)",
   });
 
+/** Other names (inward / outward sheet spellings): one per line, "|" also separates; de-duplicated, never the product's own name. */
+function readAliases(raw: FormDataEntryValue | null, name: string): string[] {
+  const seen = new Set([name.trim().toLowerCase()]);
+  const out: string[] = [];
+  for (const part of String(raw ?? "").split(/[\n|]+/)) {
+    const a = part.replace(/\s+/g, " ").trim();
+    if (a && !seen.has(a.toLowerCase())) {
+      seen.add(a.toLowerCase());
+      out.push(a);
+    }
+  }
+  return out;
+}
+
 const skuTaken: ActionState = {
   error: "Please fix the highlighted fields.",
   fieldErrors: { sku: ["Another product already uses this SKU"] },
@@ -46,9 +68,10 @@ export async function createProduct(_prev: ActionState, formData: FormData): Pro
   if (!parsed.ok) return parsed.state;
 
   if (await db.product.findUnique({ where: { sku: parsed.data.sku }, select: { id: true } })) return skuTaken;
+  const aliases = readAliases(formData.get("aliases"), parsed.data.name);
 
   const product = await db.$transaction(async (tx) => {
-    const created = await tx.product.create({ data: parsed.data });
+    const created = await tx.product.create({ data: { ...parsed.data, aliases } });
     await logActivity(
       { userId: user.id, entityType: "Product", entityId: created.id, action: "created", message: `Product ${created.sku} ${created.name} created` },
       tx,
@@ -77,11 +100,37 @@ export async function updateProduct(id: string, _prev: ActionState, formData: Fo
     }
   }
 
-  const product = await db.product.update({ where: { id }, data: parsed.data });
-  await logActivity({ userId: user.id, entityType: "Product", entityId: id, action: "updated", message: `Product ${product.sku} ${product.name} updated` });
+  const before = await db.product.findUnique({ where: { id } });
+  if (!before) return { error: "This product no longer exists." };
+  const aliases = readAliases(formData.get("aliases"), parsed.data.name);
+  const renamed = parsed.data.name !== before.name;
+  // Another product with the same old name keeps the text on the records.
+  const shared = renamed ? await db.product.count({ where: { name: before.name, id: { not: id } } }) : 0;
+  let note = "";
+  const product = await db.$transaction(async (tx) => {
+    const after = await tx.product.update({ where: { id }, data: { ...parsed.data, aliases } });
+    if (renamed && !shared) note = describeProductRename(await renameProductEverywhere(tx, before.name, after.name));
+    else if (renamed) note = "Another product has the old name too, so Domestic B2B records were left unchanged.";
+    await recordChange(
+      {
+        userId: user.id,
+        entityType: "Product",
+        entityId: id,
+        action: renamed ? "renamed" : "updated",
+        message: renamed ? `Product renamed from ${before.name} to ${after.name}. ${note}` : `Product ${after.sku} ${after.name} updated`,
+        changes: diff(before, after),
+      },
+      tx,
+    );
+    return after;
+  });
 
   revalidatePath("/inventory/products");
   revalidatePath(`/inventory/products/${id}`);
   revalidatePath("/inventory/stock");
+  if (renamed) {
+    revalidatePath("/b2b", "layout");
+    redirect(`/inventory/products/${product.id}?renamed=${encodeURIComponent(note)}`);
+  }
   redirect(`/inventory/products/${id}`);
 }

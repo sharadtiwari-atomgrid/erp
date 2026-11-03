@@ -9,6 +9,7 @@ import { EmptyRow, Table, TBody, TD, TH, THead, TR } from "@/components/ui/table
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDateTime, formatMoney, formatNumber, humanize, num } from "@/lib/format";
+import { param } from "@/lib/forms";
 import { can } from "@/lib/permissions";
 import { getStockBreakdown, isLowStock } from "../../_components/stock";
 import { ITEM_TYPES, SUPPLY_MODES } from "../_item-meta";
@@ -17,9 +18,10 @@ import { MovementReference } from "../../_components/movement-reference";
 
 export const metadata: Metadata = { title: "Product" };
 
-export default async function ProductPage({ params }: PageProps<"/inventory/products/[id]">) {
+export default async function ProductPage({ params, searchParams }: PageProps<"/inventory/products/[id]">) {
   const user = await requireUser("products");
   const { id } = await params;
+  const renamed = param(await searchParams, "renamed");
   const product = await db.product.findUnique({
     where: { id },
     include: {
@@ -73,6 +75,12 @@ export default async function ProductPage({ params }: PageProps<"/inventory/prod
         }
       />
 
+      {renamed && (
+        <div role="status" className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+          Product renamed. {renamed}
+        </div>
+      )}
+
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="On hand"
@@ -102,6 +110,10 @@ export default async function ProductPage({ params }: PageProps<"/inventory/prod
                 { label: "Category", value: product.category?.name },
                 { label: "Unit", value: product.unit },
                 { label: "HSN / SAC", value: product.hsnCode },
+                { label: "CAS No.", value: product.casNo },
+                { label: "Class", value: product.productClass },
+                { label: "Funnel", value: product.funnel },
+                { label: "Other names", value: product.aliases.length ? product.aliases.join("\n") : null },
                 { label: "GST rate", value: `${formatNumber(product.taxRate, 2)}%` },
                 { label: "Description", value: product.description },
               ]}
