@@ -4,9 +4,8 @@
     "buildCommand": "npm run build"
   },
   "deploy": {
-    "preDeployCommand": ["npm run db:release"],
-    "startCommand": "npm start",
+    "startCommand": "npm run db:release && npm start",
     "healthcheckPath": "/api/health",
-    "healthcheckTimeout": 120
+    "healthcheckTimeout": 180
   }
 }
