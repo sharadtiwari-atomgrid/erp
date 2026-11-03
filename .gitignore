@@ -49,3 +49,8 @@ next-env.d.ts
 
 # local uploads and imported data (never commit business data)
 /.data/
+
+# Cloudflare build output and local secrets
+/.open-next/
+/.wrangler/
+.dev.vars
