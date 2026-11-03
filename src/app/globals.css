@@ -1,26 +1,83 @@
 @import "tailwindcss";
 
-@theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+/* Dark variant follows <html data-theme="dark"> (the header's Night mode switch). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+ * Atomgrid theme: chrome (sidebar) in the brand navy with lime highlights;
+ * pages are light grey with white cards; Atomgrid green for buttons, links
+ * and focus. Colours are CSS variables so Night mode can swap them.
+ */
+:root {
+  --c-brand-50: #eef6e2;
+  --c-brand-100: #dcecc4;
+  --c-brand-500: #5a9a25;
+  --c-brand-600: #4a821c;
+  --c-brand-700: #3f7318;
+  --c-brand-900: #2a4d10;
+
+  --c-bg: #f4f6fa;
+  --c-surface: #ffffff;
+  --c-muted: #f8fafd;
+  --c-line: #dde3ee;
+  --c-ink: #13203a;
+  --c-ink-soft: #3d4b66;
+  --c-ink-faint: #66738c;
+
+  --c-nav: #1b3a52;
+  --c-nav-2: #234863;
+  --c-nav-ink: #a9bccb;
+  --c-lime: #8dc63f;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --c-brand-50: #233417;
+  --c-brand-100: #2c4419;
+  --c-brand-500: #6aad31;
+  --c-brand-600: #5a9a25;
+  --c-brand-700: #a8d66c;
+  --c-brand-900: #d4eab4;
+
+  --c-bg: #0e1520;
+  --c-surface: #162130;
+  --c-muted: #1b2839;
+  --c-line: #2a3a50;
+  --c-ink: #e6edf6;
+  --c-ink-soft: #bfcbdb;
+  --c-ink-faint: #8c9bb2;
+
+  --c-nav: #0d1824;
+  --c-nav-2: #16263a;
+  --c-nav-ink: #9fb2c4;
+}
+
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
-  --color-brand-50: #eef4ff;
-  --color-brand-100: #dbe6fe;
-  --color-brand-500: #4f6bed;
-  --color-brand-600: #3b55d9;
-  --color-brand-700: #2f44b3;
-  --color-brand-900: #1e2a66;
+  --color-brand-50: var(--c-brand-50);
+  --color-brand-100: var(--c-brand-100);
+  --color-brand-500: var(--c-brand-500);
+  --color-brand-600: var(--c-brand-600);
+  --color-brand-700: var(--c-brand-700);
+  --color-brand-900: var(--c-brand-900);
 
-  --color-canvas: #f6f7f9;
-  --color-surface: #ffffff;
-  --color-muted: #f1f3f6;
-  --color-line: #e3e6eb;
-  --color-ink: #161a23;
-  --color-ink-soft: #545c6b;
-  --color-ink-faint: #8a92a0;
+  --color-canvas: var(--c-bg);
+  --color-surface: var(--c-surface);
+  --color-muted: var(--c-muted);
+  --color-line: var(--c-line);
+  --color-ink: var(--c-ink);
+  --color-ink-soft: var(--c-ink-soft);
+  --color-ink-faint: var(--c-ink-faint);
 
-  --color-sidebar: #111827;
-  --color-sidebar-ink: #c7cdd8;
+  --color-sidebar: var(--c-nav);
+  --color-sidebar-2: var(--c-nav-2);
+  --color-sidebar-ink: var(--c-nav-ink);
+  --color-lime: var(--c-lime);
+
+  /* Cards and tables use 12px corners, controls 6–8px. */
+  --radius-lg: 0.75rem;
 }
 
 html {
@@ -32,7 +89,15 @@ body {
   color: var(--color-ink);
 }
 
+/* Night mode: soften the light badge and alert tints used across the app. */
+html[data-theme="dark"] .bg-white {
+  background-color: var(--c-surface);
+}
+
 @media print {
+  html[data-theme="dark"] {
+    color-scheme: light;
+  }
   body {
     background: white;
   }

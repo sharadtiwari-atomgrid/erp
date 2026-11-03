@@ -3,23 +3,30 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { AtomgridLogo } from "@/components/layout/logo";
 import { cn } from "@/lib/cn";
 
 type Group = { label: string; color: string; items: Array<{ label: string; href: string }> };
 
 function NavLinks({ groups, onNavigate }: { groups: Group[]; onNavigate?: () => void }) {
   const pathname = usePathname();
+  // Highlight only the most specific item: "/b2b" must not light up on "/b2b/mis".
+  const matches = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+  const activeHref = groups
+    .flatMap((g) => g.items.map((i) => i.href))
+    .filter(matches)
+    .sort((x, y) => y.length - x.length)[0];
   return (
     <nav className="space-y-5">
       {groups.map((group) => (
         <div key={group.label}>
-          <p className="flex items-center gap-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+          <p className="flex items-center gap-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-ink/80">
             <span className="h-2 w-2 rounded-full" style={{ background: group.color }} aria-hidden />
             {group.label}
           </p>
           <ul className="mt-1.5 space-y-0.5">
             {group.items.map((item) => {
-              const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const active = item.href === activeHref;
               return (
                 <li key={item.href}>
                   <Link
@@ -27,7 +34,9 @@ function NavLinks({ groups, onNavigate }: { groups: Group[]; onNavigate?: () => 
                     onClick={onNavigate}
                     className={cn(
                       "block rounded-md px-3 py-1.5 text-sm transition-colors",
-                      active ? "bg-white/10 font-medium text-white" : "text-sidebar-ink hover:bg-white/5 hover:text-white",
+                      active
+                        ? "bg-sidebar-2 font-medium text-white shadow-[inset_3px_0_0_var(--c-lime)]"
+                        : "text-sidebar-ink hover:bg-sidebar-2/70 hover:text-white",
                     )}
                   >
                     {item.label}
@@ -44,11 +53,10 @@ function NavLinks({ groups, onNavigate }: { groups: Group[]; onNavigate?: () => 
 
 function Brand({ name }: { name: string }) {
   return (
-    <Link href="/dashboard" className="flex items-center gap-2.5 px-3">
-      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-brand-600 text-sm font-bold text-white">A</span>
-      <span className="min-w-0 leading-tight">
-        <span className="block truncate text-sm font-semibold text-white">{name}</span>
-        <span className="block text-[11px] text-slate-400">Atomgrid ERP</span>
+    <Link href="/dashboard" className="block px-2">
+      <AtomgridLogo />
+      <span className="mt-2 block truncate px-1 text-[11px] font-medium text-sidebar-ink">
+        ERP{name && name !== "Atomgrid" ? ` · ${name}` : ""}
       </span>
     </Link>
   );

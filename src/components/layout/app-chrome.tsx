@@ -2,6 +2,7 @@ import Link from "next/link";
 import { logout } from "@/app/(auth)/actions";
 import { FeedbackButtons } from "@/components/feedback/feedback-buttons";
 import { AppNav } from "@/components/layout/app-nav";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { BranchSwitcher } from "@/components/layout/branch-switcher";
 import { getBranchScope } from "@/lib/branch";
 import { requireUser } from "@/lib/auth";
@@ -52,6 +53,7 @@ export async function UserMenu() {
           .join("")
           .toUpperCase()}
       </span>
+      <ThemeToggle />
       <form action={logout}>
         <button type="submit" className="rounded-md px-2 py-1 text-xs font-medium text-ink-soft hover:bg-muted hover:text-ink">
           Sign out

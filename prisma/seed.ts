@@ -21,19 +21,7 @@ async function main() {
 
   // ── Company, roles, branches, users, teams ────────────────────────────────
   await db.companySettings.create({
-    data: {
-      id: 1,
-      name: "Acme Industries",
-      legalName: "Acme Industries Private Limited",
-      gstin: "27AABCA1234F1Z5",
-      pan: "AABCA1234F",
-      email: "accounts@acme.example",
-      phone: "+91 22 4000 1000",
-      address: "4th Floor, Trade Centre, Bandra Kurla Complex",
-      city: "Mumbai",
-      state: "Maharashtra",
-      pincode: "400051",
-    },
+    data: { id: 1, name: "Atomgrid", city: "Mumbai", state: "Maharashtra" },
   });
 
   const roles = new Map<string, string>();
@@ -53,7 +41,7 @@ async function main() {
 
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
   const userData = [
-    { name: "Asha Admin", email: "admin@example.com", role: "Administrator", branchId: null },
+    { name: "Atomgrid Admin", email: "admin@example.com", role: "Administrator", branchId: null },
     { name: "Manoj Manager", email: "manager@example.com", role: "Manager", branchId: null },
     { name: "Sana Sales", email: "sales@example.com", role: "Sales", branchId: mumbai.id },
     { name: "Pranav Procurement", email: "procurement@example.com", role: "Procurement", branchId: null },
