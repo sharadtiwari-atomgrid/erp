@@ -13,16 +13,16 @@ import { NAVIGATION } from "@/lib/navigation";
 import { can, type Module } from "@/lib/permissions";
 
 const QUICK_ACTIONS: Array<{ label: string; href: string; module: Module; section: string }> = [
-  { label: "New sales order", href: "/sales/orders/new", module: "salesOrders", section: "orders" },
-  { label: "New purchase order", href: "/purchasing/orders/new", module: "purchaseOrders", section: "orders" },
-  { label: "Receive goods", href: "/warehouse/inbound/new", module: "inbound", section: "warehouse" },
-  { label: "Outbound queue", href: "/warehouse/outbound", module: "outbound", section: "warehouse" },
-  { label: "New production order", href: "/manufacturing/orders/new", module: "production", section: "manufacturing" },
-  { label: "Manufacturing needs", href: "/manufacturing/needs", module: "mfgNeeds", section: "orders" },
-  { label: "Plan a trip", href: "/logistics/trips/new", module: "trips", section: "logistics" },
-  { label: "New invoice", href: "/sales/invoices/new", module: "invoices", section: "books" },
-  { label: "New contact", href: "/contacts/new", module: "contacts", section: "quick" },
-  { label: "Adjust stock", href: "/inventory/stock/adjust", module: "stock", section: "warehouse" },
+  { label: "New sales order", href: "/sales/orders/new", module: "salesOrders", section: "b2b" },
+  { label: "New purchase order", href: "/purchasing/orders/new", module: "purchaseOrders", section: "b2b" },
+  { label: "Receive goods", href: "/warehouse/inbound/new", module: "inbound", section: "inventory" },
+  { label: "Outbound queue", href: "/warehouse/outbound", module: "outbound", section: "inventory" },
+  { label: "New production order", href: "/manufacturing/orders/new", module: "production", section: "b2b" },
+  { label: "Manufacturing needs", href: "/manufacturing/needs", module: "mfgNeeds", section: "b2b" },
+  { label: "Plan a trip", href: "/logistics/trips/new", module: "trips", section: "b2b" },
+  { label: "New invoice", href: "/sales/invoices/new", module: "invoices", section: "finance" },
+  { label: "New contact", href: "/contacts/new", module: "contacts", section: "masters" },
+  { label: "Adjust stock", href: "/inventory/stock/adjust", module: "stock", section: "inventory" },
 ];
 const SECTION_COLOR = new Map(NAVIGATION.map((g) => [g.key, g.color]));
 

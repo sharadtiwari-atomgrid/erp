@@ -19,6 +19,16 @@ export const SEQUENCES = {
   ASN: { prefix: "ASN-", padding: 5 },
   DELIVERY_NOTE: { prefix: "DN-", padding: 5 },
   RETURN: { prefix: "RMA-", padding: 5 },
+  RD_PROJECT: { prefix: "RD-", padding: 4 },
+  RD_EXPERIMENT: { prefix: "EXP-", padding: 5 },
+  PILOT: { prefix: "PIL-", padding: 4 },
+  QC_SAMPLE: { prefix: "SMP-", padding: 5 },
+  LICENSE: { prefix: "LIC-", padding: 4 },
+  CERTIFICATE: { prefix: "CERT-", padding: 5 },
+  B2C_CUSTOMER: { prefix: "BC-", padding: 5 },
+  B2C_ORDER: { prefix: "B2C-", padding: 6 },
+  B2C_SHIPMENT: { prefix: "BSH-", padding: 6 },
+  B2C_RETURN: { prefix: "BRT-", padding: 5 },
 } as const;
 
 export type SequenceKey = keyof typeof SEQUENCES;

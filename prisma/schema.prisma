@@ -37,6 +37,8 @@ model Branch {
   productionOrders ProductionOrder[]
   trips            Trip[]
   returnOrders     ReturnOrder[]
+  licenses         License[]
+  b2cOrders        B2cOrder[]
 }
 
 /// Configurable role. `permissions` maps a module key (see src/lib/permissions.ts)
@@ -72,6 +74,7 @@ model User {
 
   teamMemberships TeamMember[]
   feedback        Feedback[]
+  rdProjects      RdProject[]      @relation("RdOwner")
   ledTeams        Team[]           @relation("TeamLead")
   leads           Lead[]
   stockMovements  StockMovement[]
@@ -476,6 +479,7 @@ model Product {
   bomComponentOf     BomLine[]
   productionOrders   ProductionOrder[]
   returnLines        ReturnLine[]
+  b2cOrderLines      B2cOrderLine[]
 
   @@index([name])
 }
@@ -503,6 +507,7 @@ model Warehouse {
   pickingSessions  PickingSession[]
   productionOrders ProductionOrder[]
   returnOrders     ReturnOrder[]
+  b2cOrders        B2cOrder[]
 }
 
 /// Stock numbers per product per warehouse. Only changed through the helpers
@@ -1621,4 +1626,417 @@ model Feedback {
   user      User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
+}
+
+// ═══ B2B: R&D and Pilots ════════════════════════════════════════════════════
+
+enum RdStage {
+  IDEA
+  FEASIBILITY
+  LAB
+  PILOT
+  SCALE_UP
+  COMMERCIAL
+  ON_HOLD
+  DROPPED
+}
+
+/// A development project: new molecule, formulation, process improvement…
+model RdProject {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  title       String
+  /// New molecule | Formulation | Process improvement | Cost reduction | Customer request | Other
+  category    String
+  objective   String?
+  productName String?
+  customer    String?
+  stage       RdStage   @default(IDEA)
+  /// 1 = highest … 5 = lowest
+  priority    Int       @default(3)
+  ownerId     String?
+  owner       User?     @relation("RdOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  startDate   DateTime? @db.Date
+  targetDate  DateTime? @db.Date
+  budget      Decimal?  @db.Decimal(14, 2)
+  notes       String?
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  experiments RdExperiment[]
+  pilots      PilotRun[]
+
+  @@index([stage])
+}
+
+enum ExperimentResult {
+  PENDING
+  SUCCESS
+  PARTIAL
+  FAILED
+}
+
+model RdExperiment {
+  id           String           @id @default(cuid())
+  code         String           @unique
+  projectId    String
+  project      RdProject        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  date         DateTime         @db.Date
+  title        String
+  hypothesis   String?
+  procedure    String?
+  observations String?
+  result       ExperimentResult @default(PENDING)
+  conductedBy  String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+enum PilotStatus {
+  PLANNED
+  RUNNING
+  COMPLETED
+  CANCELLED
+}
+
+enum PilotOutcome {
+  APPROVED
+  REWORK
+  REJECTED
+}
+
+/// A pilot batch run at a plant, job worker or customer site.
+model PilotRun {
+  id           String        @id @default(cuid())
+  code         String        @unique
+  projectId    String?
+  project      RdProject?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  productName  String
+  scaleKg      Decimal?      @db.Decimal(14, 3)
+  /// Plant / job worker / customer site
+  site         String?
+  customer     String?
+  plannedDate  DateTime?     @db.Date
+  actualDate   DateTime?     @db.Date
+  status       PilotStatus   @default(PLANNED)
+  outcome      PilotOutcome?
+  yieldPct     Decimal?      @db.Decimal(6, 2)
+  costTotal    Decimal?      @db.Decimal(14, 2)
+  observations String?
+  decision     String?
+  deletedAt    DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([status])
+}
+
+// ═══ B2B: QC Sampling, Licensing, Certificates ══════════════════════════════
+
+enum SampleDirection {
+  INCOMING // from a supplier
+  OUTGOING // to a customer
+  INTERNAL // retention / in-house
+}
+
+enum SampleStatus {
+  REQUESTED
+  SENT
+  RECEIVED
+  TESTING
+  APPROVED
+  REJECTED
+  CLOSED
+}
+
+model QcSample {
+  id             String          @id @default(cuid())
+  code           String          @unique
+  direction      SampleDirection
+  /// Pre-shipment | Lot approval | Customer trial | Retention | Competitor | Other
+  sampleType     String
+  productName    String
+  batchNo        String?
+  qty            Decimal?        @db.Decimal(12, 3)
+  uom            String?         @default("g")
+  /// Supplier or customer name (text, as in Domestic B2B)
+  party          String?
+  jobNo          String?
+  requestedBy    String?
+  requestedOn    DateTime        @db.Date
+  sentOn         DateTime?       @db.Date
+  receivedOn     DateTime?       @db.Date
+  courier        String?
+  awb            String?
+  status         SampleStatus    @default(REQUESTED)
+  resultSummary  String?
+  retentionUntil DateTime?       @db.Date
+  notes          String?
+  deletedAt      DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  tests QcTest[]
+
+  @@index([status])
+}
+
+model QcTest {
+  id            String    @id @default(cuid())
+  sampleId      String
+  sample        QcSample  @relation(fields: [sampleId], references: [id], onDelete: Cascade)
+  parameter     String
+  specification String?
+  method        String?
+  result        String?
+  unit          String?
+  /// null = not judged yet
+  pass          Boolean?
+  testedOn      DateTime? @db.Date
+  testedBy      String?
+  lab           String?
+  position      Int       @default(0)
+}
+
+/// A regulatory licence or registration with an expiry to track.
+model License {
+  id              String    @id @default(cuid())
+  code            String    @unique
+  /// CIB&RC registration | Manufacturing licence | Insecticide selling licence | Pollution consent | Factory licence | Drug licence | IEC | GST registration | Other
+  type            String
+  number          String?
+  authority       String?
+  branchId        String?
+  branch          Branch?   @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  state           String?
+  /// Products or scope covered
+  scope           String?
+  issuedOn        DateTime? @db.Date
+  validUntil      DateTime? @db.Date
+  /// Start the renewal this many days before expiry.
+  renewalLeadDays Int       @default(60)
+  /// Not started | In progress | Submitted | Renewed
+  renewalStatus   String?
+  notes           String?
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([validUntil])
+}
+
+/// Certificate library: COA, MSDS, ISO, GMP, test reports…
+model Certificate {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  /// COA | MSDS | ISO | GMP | Test report | Halal | FSSAI | Other
+  kind        String
+  title       String
+  productName String?
+  batchNo     String?
+  jobNo       String?
+  /// Supplier, customer or certifying body
+  party       String?
+  issuer      String?
+  issuedOn    DateTime? @db.Date
+  validUntil  DateTime? @db.Date
+  notes       String?
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([kind])
+}
+
+// ═══ B2C division ═══════════════════════════════════════════════════════════
+
+model B2cCustomer {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  phone     String?
+  email     String?
+  /// [{ label, line1, line2, city, state, pincode }]
+  addresses Json     @default("[]")
+  tags      String[]
+  notes     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders B2cOrder[]
+
+  @@index([phone])
+  @@index([name])
+}
+
+enum B2cOrderStatus {
+  PLACED
+  CONFIRMED
+  ALLOCATED
+  PACKED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RTO
+  RETURNED
+}
+
+enum B2cPaymentMode {
+  PREPAID
+  COD
+}
+
+enum B2cPaymentStatus {
+  PENDING
+  PAID
+  COD_PENDING
+  COD_REMITTED
+  PARTIALLY_REFUNDED
+  REFUNDED
+}
+
+model B2cOrder {
+  id              String           @id @default(cuid())
+  number          String           @unique
+  /// Website | Amazon | Flipkart | WhatsApp | Retail | Other
+  channel         String
+  channelOrderRef String?
+  customerId      String
+  customer        B2cCustomer      @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  orderDate       DateTime         @default(now())
+  status          B2cOrderStatus   @default(PLACED)
+  /// 1 = rush … 3 = normal
+  priority        Int              @default(3)
+  paymentMode     B2cPaymentMode   @default(PREPAID)
+  paymentStatus   B2cPaymentStatus @default(PENDING)
+  shipName        String?
+  shipPhone       String?
+  shipLine1       String?
+  shipLine2       String?
+  shipCity        String?
+  shipState       String?
+  shipPincode     String?
+  /// ERP warehouse that fulfils the order.
+  warehouseId     String
+  warehouse       Warehouse        @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  branchId        String
+  branch          Branch           @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  subtotal        Decimal          @default(0) @db.Decimal(14, 2)
+  discount        Decimal          @default(0) @db.Decimal(14, 2)
+  shippingCharge  Decimal          @default(0) @db.Decimal(14, 2)
+  taxTotal        Decimal          @default(0) @db.Decimal(14, 2)
+  total           Decimal          @default(0) @db.Decimal(14, 2)
+  notes           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  lines     B2cOrderLine[]
+  payments  B2cPayment[]
+  shipments B2cShipment[]
+  returns   B2cReturn[]
+
+  @@index([status])
+  @@index([orderDate])
+}
+
+model B2cOrderLine {
+  id           String   @id @default(cuid())
+  orderId      String
+  order        B2cOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  quantity     Decimal  @db.Decimal(14, 3)
+  unitPrice    Decimal  @db.Decimal(14, 2)
+  discountPct  Decimal  @default(0) @db.Decimal(5, 2)
+  taxRate      Decimal  @default(0) @db.Decimal(5, 2)
+  taxAmount    Decimal  @default(0) @db.Decimal(14, 2)
+  lineTotal    Decimal  @default(0) @db.Decimal(14, 2)
+  /// Stock reserved for this line (reserveStock in src/lib/stock.ts).
+  allocatedQty Decimal  @default(0) @db.Decimal(14, 3)
+  shippedQty   Decimal  @default(0) @db.Decimal(14, 3)
+  position     Int      @default(0)
+}
+
+enum B2cPaymentKind {
+  PAYMENT
+  REFUND
+  COD_REMITTANCE
+}
+
+model B2cPayment {
+  id         String         @id @default(cuid())
+  orderId    String
+  order      B2cOrder       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  kind       B2cPaymentKind @default(PAYMENT)
+  /// UPI | Card | Netbanking | Wallet | COD | Bank transfer
+  method     String
+  amount     Decimal        @db.Decimal(14, 2)
+  gatewayRef String?
+  /// Success | Pending | Failed
+  status     String         @default("Success")
+  date       DateTime       @default(now())
+  notes      String?
+  createdAt  DateTime       @default(now())
+}
+
+enum B2cShipmentStatus {
+  READY
+  PICKED_UP
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
+  DELIVERED
+  RTO_INITIATED
+  RTO_DELIVERED
+  LOST
+}
+
+model B2cShipment {
+  id          String            @id @default(cuid())
+  number      String            @unique
+  orderId     String
+  order       B2cOrder          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  courier     String?
+  awb         String?
+  trackingUrl String?
+  status      B2cShipmentStatus @default(READY)
+  weightKg    Decimal?          @db.Decimal(10, 3)
+  charges     Decimal?          @db.Decimal(12, 2)
+  codAmount   Decimal?          @db.Decimal(14, 2)
+  shippedOn   DateTime?
+  deliveredOn DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([status])
+}
+
+enum B2cReturnStatus {
+  REQUESTED
+  PICKED_UP
+  RECEIVED
+  INSPECTED
+  REFUNDED
+  CLOSED
+  REJECTED
+}
+
+model B2cReturn {
+  id           String          @id @default(cuid())
+  number       String          @unique
+  orderId      String
+  order        B2cOrder        @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  /// CUSTOMER_RETURN | RTO
+  type         String          @default("CUSTOMER_RETURN")
+  reason       String?
+  status       B2cReturnStatus @default(REQUESTED)
+  refundAmount Decimal         @default(0) @db.Decimal(14, 2)
+  /// [{ productId, qty, condition: RESTOCK | DAMAGED | SCRAP, restockedQty }]
+  lines        Json            @default("[]")
+  notes        String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([status])
 }

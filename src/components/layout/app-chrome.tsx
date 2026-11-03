@@ -6,7 +6,7 @@ import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { BranchSwitcher } from "@/components/layout/branch-switcher";
 import { getBranchScope } from "@/lib/branch";
 import { requireUser } from "@/lib/auth";
-import { NAVIGATION } from "@/lib/navigation";
+import { NAVIGATION, navItems } from "@/lib/navigation";
 import { getBranchOptions, getCompany } from "@/lib/options";
 import { can } from "@/lib/permissions";
 
@@ -14,11 +14,15 @@ import { can } from "@/lib/permissions";
 export async function Sidebar() {
   const user = await requireUser();
   const company = await getCompany();
+  const visible = (items: typeof NAVIGATION[number]["items"] = []) =>
+    items.filter((i) => can(user, i.module)).map(({ label, href }) => ({ label, href }));
   const groups = NAVIGATION.map((g) => ({
+    key: g.key,
     label: g.label,
     color: g.color,
-    items: g.items.filter((i) => can(user, i.module)).map(({ label, href }) => ({ label, href })),
-  })).filter((g) => g.items.length > 0);
+    items: visible(g.items),
+    subgroups: (g.subgroups ?? []).map((s) => ({ label: s.label, items: visible(s.items) })).filter((s) => s.items.length > 0),
+  })).filter((g) => g.items.length > 0 || g.subgroups.length > 0);
   return <AppNav groups={groups} companyName={company.name} />;
 }
 
@@ -32,9 +36,10 @@ export async function BranchMenu() {
 export async function UserMenu() {
   const user = await requireUser();
   // Page picker for bug reports / feature requests: the navigation labels this user can open.
-  const pages = NAVIGATION.flatMap((g) =>
-    g.items.filter((i) => can(user, i.module)).map((i) => ({ label: g.label === "B2B views" ? `B2B ${i.label.toLowerCase()}` : i.label, href: i.href })),
-  ).filter((p, i, all) => all.findIndex((x) => x.label === p.label) === i);
+  const pages = navItems()
+    .filter((i) => can(user, i.module))
+    .map((i) => ({ label: i.label, href: i.href }))
+    .filter((p, i, all) => all.findIndex((x) => x.label === p.label) === i);
   return (
     <div className="flex items-center gap-3">
       <FeedbackButtons pages={pages} />
