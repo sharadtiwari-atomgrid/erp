@@ -4,6 +4,9 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { CompanyForm } from "./company-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Company settings" };
 
 export default async function CompanySettingsPage() {

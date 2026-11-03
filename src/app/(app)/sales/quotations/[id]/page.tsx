@@ -17,6 +17,9 @@ import { DocumentLines, DocumentTotals } from "../../_components/document-lines"
 import { isExpired, startOfToday } from "../../_lib/documents";
 import { convertQuotation, setQuotationStatus } from "../actions";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Quotation" };
 
 export default async function QuotationPage({ params }: PageProps<"/sales/quotations/[id]">) {

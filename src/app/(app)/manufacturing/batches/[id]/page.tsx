@@ -18,6 +18,9 @@ import { componentRequirement, round3 } from "../../_lib/bom-math";
 import { availableByProduct } from "../../_lib/server";
 import { deleteBatch, finishBatch, recordBatchQc, startBatch } from "../actions";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Production batch" };
 
 export default async function BatchPage({ params }: PageProps<"/manufacturing/batches/[id]">) {

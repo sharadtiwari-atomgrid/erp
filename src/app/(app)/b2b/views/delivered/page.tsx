@@ -10,6 +10,9 @@ import { dmy, hasDoc } from "../_lib/rows";
 import { JobLink, Tag, Tile, WideTable, dash, kg } from "../_lib/ui";
 import { deliveredShipments, deliveredStats, monthLabel, type DeliveredShipment } from "../_lib/views";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Delivered shipments" };
 
 const OnTime = ({ slip, long }: { slip: number | null; long?: boolean }) =>

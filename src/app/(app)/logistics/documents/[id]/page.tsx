@@ -15,6 +15,9 @@ import { markDelivered } from "../actions";
 import { DeliveredForm } from "../document-forms";
 import { loadShippingDocument } from "../load";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Shipping document" };
 
 export default async function ShippingDocumentPage({ params }: PageProps<"/logistics/documents/[id]">) {

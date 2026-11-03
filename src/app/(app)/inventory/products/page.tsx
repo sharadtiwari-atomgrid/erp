@@ -18,6 +18,9 @@ import { ITEM_TYPES, SUPPLY_MODES } from "./_item-meta";
 import { getOnHandByProduct, isLowStock } from "../_components/stock";
 import { OnHand } from "../_components/stock-badge";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Products" };
 
 export default async function ProductsPage({ searchParams }: PageProps<"/inventory/products">) {

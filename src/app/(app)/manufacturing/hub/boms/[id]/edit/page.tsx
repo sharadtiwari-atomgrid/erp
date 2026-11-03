@@ -8,6 +8,9 @@ import { getComponentOptions, getMachineOptions, getManufacturedOptions } from "
 import { updateBom } from "../../actions";
 import { BomForm } from "../../bom-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Edit BOM" };
 
 export default async function EditBomPage({ params }: PageProps<"/manufacturing/hub/boms/[id]/edit">) {

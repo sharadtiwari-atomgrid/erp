@@ -5,6 +5,9 @@ import { todayIso } from "@/lib/ops/dates";
 import { loadTransporters, loadTransportJobs } from "../data";
 import { PerformanceBoard } from "./performance-board";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Transport performance" };
 
 export default async function TransportPerformancePage() {

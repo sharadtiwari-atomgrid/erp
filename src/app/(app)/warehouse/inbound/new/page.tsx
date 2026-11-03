@@ -8,6 +8,9 @@ import { getSupplierOptions, getWarehouseOptions } from "@/lib/options";
 import { createInbound } from "../actions";
 import { GrnForm } from "./grn-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "New GRN" };
 
 export default async function NewInboundPage() {

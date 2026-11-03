@@ -14,6 +14,9 @@ import { ActionButton } from "@/components/ui/action-button";
 import { ActivityCard } from "@/app/(app)/sales/_components/activity-card";
 import { convertLead, setLeadStatus } from "../actions";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Lead" };
 
 /** The next pipeline steps offered for each open status. */

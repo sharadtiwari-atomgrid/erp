@@ -8,6 +8,9 @@ import { formatNumber, humanize } from "@/lib/format";
 import { QrCode } from "../../../_components/qr-code";
 import { appBaseUrl } from "../../../_lib/qr";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Handling unit labels" };
 
 /** One printable QR label per handling unit (one per page when printed). */

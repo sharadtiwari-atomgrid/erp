@@ -7,6 +7,9 @@ import { num } from "@/lib/format";
 import { updateContact } from "../../actions";
 import { ContactForm } from "../../contact-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Edit contact" };
 
 export default async function EditContactPage({ params }: PageProps<"/contacts/[id]/edit">) {

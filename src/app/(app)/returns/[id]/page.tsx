@@ -18,6 +18,9 @@ import { loadReturnSource } from "../_lib/source";
 import { cancelReturn, closeReturn, inspectReturn, markRepaired, receiveReturn, saveCredit } from "../actions";
 import { InspectForm, ReceiveForm } from "./line-forms";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Return" };
 
 export default async function ReturnPage({ params }: PageProps<"/returns/[id]">) {

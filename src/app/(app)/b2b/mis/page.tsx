@@ -9,6 +9,9 @@ import { loadBatches, loadEditorJob, loadHistory, loadLiveJobs, loadMasters, sug
 import { MisEditor } from "./mis-editor";
 import { MisList } from "./mis-list";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Domestic MIS" };
 
 export default async function DomesticMisPage({ searchParams }: PageProps<"/b2b/mis">) {

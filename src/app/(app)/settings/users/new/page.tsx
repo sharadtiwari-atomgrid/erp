@@ -6,6 +6,9 @@ import { getBranchOptions } from "@/lib/options";
 import { createUser } from "../actions";
 import { UserForm } from "../user-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Add user" };
 
 export default async function NewUserPage() {

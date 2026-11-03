@@ -5,6 +5,9 @@ import { getBranchOptions, getTransporterOptions } from "@/lib/options";
 import { createDriver } from "../actions";
 import { DriverForm } from "../driver-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "New driver" };
 
 export default async function NewDriverPage() {

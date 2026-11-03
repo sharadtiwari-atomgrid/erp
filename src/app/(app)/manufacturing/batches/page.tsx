@@ -13,6 +13,9 @@ import { formatDateTime, formatNumber, humanize } from "@/lib/format";
 import { pagination, param } from "@/lib/forms";
 import { MfgStatusBadge } from "../_components/badges";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Production batches" };
 
 export default async function BatchesPage({ searchParams }: PageProps<"/manufacturing/batches">) {

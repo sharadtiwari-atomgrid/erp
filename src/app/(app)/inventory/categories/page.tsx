@@ -11,6 +11,9 @@ import { ActionButton } from "@/components/ui/action-button";
 import { createCategory, deleteCategory, renameCategory } from "./actions";
 import { NewCategoryForm, RenameCategoryForm } from "./category-forms";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Categories" };
 
 export default async function CategoriesPage() {

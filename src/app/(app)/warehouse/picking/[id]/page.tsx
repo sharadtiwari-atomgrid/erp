@@ -15,6 +15,9 @@ import { WarehouseStatusBadge } from "../../_components/status";
 import { loadPickSheet } from "../../_lib/pick-sheet";
 import { cancelPickingSession, saveSessionPicks } from "../actions";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Picking session" };
 
 export default async function PickingSessionPage({ params }: PageProps<"/warehouse/picking/[id]">) {

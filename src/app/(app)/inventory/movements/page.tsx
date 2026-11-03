@@ -15,6 +15,9 @@ import { MovementReference } from "../_components/movement-reference";
 import { SignedQty } from "../_components/stock-badge";
 import { branchWhere } from "@/lib/branch";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Stock movements" };
 
 /** Parses "YYYY-MM-DD" as a local date; `endOfDay` makes the "to" filter inclusive. */

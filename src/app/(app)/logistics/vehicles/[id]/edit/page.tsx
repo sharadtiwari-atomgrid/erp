@@ -8,6 +8,9 @@ import { getBranchOptions, getTransporterOptions } from "@/lib/options";
 import { updateVehicle } from "../../actions";
 import { VehicleForm } from "../../vehicle-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Edit vehicle" };
 
 export default async function EditVehiclePage({ params }: PageProps<"/logistics/vehicles/[id]/edit">) {

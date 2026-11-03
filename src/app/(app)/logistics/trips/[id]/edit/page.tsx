@@ -9,6 +9,9 @@ import { getDriverOptions, getVehicleOptions } from "../../../_lib/scope";
 import { updateTrip } from "../../actions";
 import { TripForm } from "../../trip-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Edit trip" };
 
 export default async function EditTripPage({ params }: PageProps<"/logistics/trips/[id]/edit">) {

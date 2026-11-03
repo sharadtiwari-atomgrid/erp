@@ -7,6 +7,9 @@ import { getStockLevelMap } from "../../_components/stock";
 import { transferStock } from "../actions";
 import { TransferStockForm } from "./transfer-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Transfer stock" };
 
 export default async function TransferStockPage() {

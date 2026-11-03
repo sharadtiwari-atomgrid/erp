@@ -18,6 +18,9 @@ import { OpsBadge } from "../../_components/badges";
 import { generateTripDocuments } from "../../documents/actions";
 import { attachOutbound, cancelTrip, completeTrip, detachOutbound, startTrip } from "../actions";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Trip" };
 
 export default async function TripPage({ params }: PageProps<"/logistics/trips/[id]">) {

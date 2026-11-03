@@ -11,6 +11,9 @@ import { can } from "@/lib/permissions";
 import { deleteForever, restoreFreshPo, restoreMisJob } from "./actions";
 import { ARCHIVE_DAYS, purgeExpired, timeLeft, type ArchiveKind } from "./data";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Archives" };
 
 const BOARD_LABELS = { FRESH: "Fresh PO", LONG_HOLD: "Long Hold PO", MIS: "Fresh PO (in Domestic MIS)" } as const;

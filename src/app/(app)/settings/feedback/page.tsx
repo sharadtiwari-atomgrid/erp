@@ -14,6 +14,9 @@ import { can } from "@/lib/permissions";
 import { fileUrl } from "@/lib/storage";
 import { FeedbackEditor } from "./feedback-editor";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Bugs & requests" };
 
 const STATUS_TONE = { New: "blue", "In progress": "amber", Done: "green", "Won't do": "gray" } as const;

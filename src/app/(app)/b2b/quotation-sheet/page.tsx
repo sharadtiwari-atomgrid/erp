@@ -8,6 +8,9 @@ import { normalizeBids, stagesOf } from "./_lib/board";
 import { prepareBoard } from "./_lib/prepare";
 import { QuotationBoard, type BoardRow } from "./board";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Quotation sheet (D-0)" };
 
 export default async function QuotationSheetPage() {

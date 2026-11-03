@@ -12,6 +12,9 @@ import { can } from "@/lib/permissions";
 import { addMember, removeMember, updateTeam } from "../actions";
 import { TeamForm } from "../team-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Team" };
 
 export default async function TeamPage({ params }: PageProps<"/teams/[id]">) {

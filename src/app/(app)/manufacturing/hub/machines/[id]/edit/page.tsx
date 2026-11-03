@@ -7,6 +7,9 @@ import { num } from "@/lib/format";
 import { updateMachine } from "../../../actions";
 import { MachineForm } from "../../../machine-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Edit machine" };
 
 export default async function EditMachinePage({ params }: PageProps<"/manufacturing/hub/machines/[id]/edit">) {

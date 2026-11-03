@@ -31,6 +31,9 @@ import {
   unscheduleOrder,
 } from "../actions";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Production order" };
 
 /** "YYYY-MM-DDTHH:mm" in local time for <input type="datetime-local">. */

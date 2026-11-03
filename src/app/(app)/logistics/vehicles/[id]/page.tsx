@@ -17,6 +17,9 @@ import { averageKmPerLitre, fuelEfficiency } from "../../_lib/fleet";
 import { getDriverOptions } from "../../_lib/scope";
 import { assignDriver, endAssignment } from "../actions";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Vehicle" };
 
 export default async function VehiclePage({ params }: PageProps<"/logistics/vehicles/[id]">) {

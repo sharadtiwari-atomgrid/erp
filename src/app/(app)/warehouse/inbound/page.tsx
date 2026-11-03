@@ -16,6 +16,9 @@ import type { Prisma } from "@/generated/prisma/client";
 import { InboundStatus } from "@/generated/prisma/enums";
 import { WarehouseStatusBadge } from "../_components/status";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Inbound" };
 
 export default async function InboundPage({ searchParams }: PageProps<"/warehouse/inbound">) {

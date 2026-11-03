@@ -8,6 +8,9 @@ import { getBranchOptions } from "@/lib/options";
 import { updateUnit } from "../../../actions";
 import { UnitForm } from "../../../unit-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Edit production unit" };
 
 export default async function EditUnitPage({ params }: PageProps<"/manufacturing/hub/units/[id]/edit">) {

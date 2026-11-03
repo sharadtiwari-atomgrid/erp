@@ -7,6 +7,9 @@ import { db } from "@/lib/db";
 import { formatDate, formatMoney, formatNumber, humanize, num } from "@/lib/format";
 import { getCompany } from "@/lib/options";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Print return" };
 
 const cell = "border border-slate-300 px-2 py-1.5";

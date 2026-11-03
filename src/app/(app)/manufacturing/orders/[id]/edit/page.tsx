@@ -8,6 +8,9 @@ import { updateProductionOrder } from "../../actions";
 import { getOrderFormData } from "../../form-data";
 import { ProductionOrderForm } from "../../order-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Edit production order" };
 
 export default async function EditProductionOrderPage({ params }: PageProps<"/manufacturing/orders/[id]/edit">) {

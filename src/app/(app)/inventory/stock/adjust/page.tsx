@@ -8,6 +8,9 @@ import { getStockLevelMap } from "../../_components/stock";
 import { adjustStockLevel } from "../actions";
 import { AdjustStockForm } from "./adjust-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Adjust stock" };
 
 export default async function AdjustStockPage({ searchParams }: PageProps<"/inventory/stock/adjust">) {

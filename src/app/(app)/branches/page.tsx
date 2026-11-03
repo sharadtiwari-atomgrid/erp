@@ -9,6 +9,9 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { can } from "@/lib/permissions";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Branches" };
 
 export default async function BranchesPage() {

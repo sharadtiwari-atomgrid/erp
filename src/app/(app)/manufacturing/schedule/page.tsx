@@ -17,6 +17,9 @@ import { endOfLocalDay, workingWindow } from "../_lib/scheduler";
 import { AutoScheduleForm } from "./auto-schedule-form";
 import { calendarRange, orderColor, parseLocalDate, placement, toLocalDateParam, type View } from "./calendar";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Production schedule" };
 
 const VIEWS: View[] = ["day", "week", "month"];

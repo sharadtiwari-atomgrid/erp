@@ -13,6 +13,9 @@ import { HubTabs } from "../../_components/hub-tabs";
 import { MfgStatusBadge } from "../../_components/badges";
 import { dailyLoad, toSchedulerMachine, utilisationPct } from "../../_lib/capacity";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Machines" };
 
 const WINDOW_DAYS = 7;

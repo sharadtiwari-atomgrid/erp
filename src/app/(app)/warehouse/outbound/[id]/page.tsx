@@ -26,6 +26,9 @@ import {
 } from "../actions";
 import { HandlingUnitForm } from "./hu-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Outbound order" };
 
 export default async function OutboundOrderPage({ params, searchParams }: PageProps<"/warehouse/outbound/[id]">) {

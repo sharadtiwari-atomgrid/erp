@@ -5,6 +5,9 @@ import { createWarehouse } from "../actions";
 import { WarehouseForm } from "../warehouse-form";
 import { getBranchOptions } from "@/lib/options";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "New warehouse" };
 
 export default async function NewWarehousePage() {

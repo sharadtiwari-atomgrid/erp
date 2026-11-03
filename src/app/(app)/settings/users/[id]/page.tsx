@@ -7,6 +7,9 @@ import { getBranchOptions } from "@/lib/options";
 import { updateUser } from "../actions";
 import { UserForm } from "../user-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Edit user" };
 
 export default async function EditUserPage({ params }: PageProps<"/settings/users/[id]">) {

@@ -20,6 +20,9 @@ import {
 import { ShipmentJourney, type JourneyJob } from "../../_shared/journey";
 import type { MisRow } from "../_lib/rows";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "In transit" };
 
 const KPIS: Array<{ key: TransitFilter; label: string; sub: string; tone: "default" | "teal" | "bad" | "violet" }> = [

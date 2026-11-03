@@ -16,6 +16,9 @@ import { SalesOrderStatus } from "@/generated/prisma/enums";
 import { enumParam } from "../_lib/documents";
 import { branchWhere } from "@/lib/branch";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Sales orders" };
 
 export default async function SalesOrdersPage({ searchParams }: PageProps<"/sales/orders">) {

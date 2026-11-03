@@ -15,6 +15,9 @@ import type { Prisma } from "@/generated/prisma/client";
 import { LeadStatus } from "@/generated/prisma/enums";
 import { enumParam } from "@/app/(app)/sales/_lib/documents";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Leads" };
 
 export default async function LeadsPage({ searchParams }: PageProps<"/crm/leads">) {

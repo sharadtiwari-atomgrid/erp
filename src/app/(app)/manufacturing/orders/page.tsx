@@ -18,6 +18,9 @@ import { can } from "@/lib/permissions";
 import { MfgStatusBadge, ModeBadge, PriorityBadge } from "../_components/badges";
 import { endOfLocalDay } from "../_lib/scheduler";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Production orders" };
 
 export default async function ProductionOrdersPage({ searchParams }: PageProps<"/manufacturing/orders">) {

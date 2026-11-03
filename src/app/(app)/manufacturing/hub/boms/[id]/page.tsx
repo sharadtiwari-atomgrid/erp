@@ -16,6 +16,9 @@ import { MfgStatusBadge, ModeBadge } from "../../../_components/badges";
 import { bomCostRollup } from "../../../_lib/bom-math";
 import { copyBomToNewVersion, deleteBom, makeBomDefault } from "../actions";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Bill of materials" };
 
 export default async function BomPage({ params }: PageProps<"/manufacturing/hub/boms/[id]">) {

@@ -9,6 +9,9 @@ import { toIstDateTimeInput } from "../../../books/_lib/eway";
 import { createShippingDocument } from "../actions";
 import { ShippingDocumentForm } from "../document-forms";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "New shipping document" };
 
 export default async function NewShippingDocumentPage({ searchParams }: PageProps<"/logistics/documents/new">) {

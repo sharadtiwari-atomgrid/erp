@@ -16,6 +16,9 @@ import { MfgStatusBadge } from "../../../_components/badges";
 import { deleteUnit } from "../../actions";
 import { formatWeekdays } from "../../weekdays";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Production unit" };
 
 export default async function UnitPage({ params }: PageProps<"/manufacturing/hub/units/[id]">) {

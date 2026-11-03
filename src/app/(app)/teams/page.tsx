@@ -11,6 +11,9 @@ import { db } from "@/lib/db";
 import { can } from "@/lib/permissions";
 import { TEAM_TYPE_LABELS } from "./labels";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Teams" };
 
 export default async function TeamsPage() {

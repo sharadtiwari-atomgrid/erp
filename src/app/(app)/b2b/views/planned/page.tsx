@@ -9,6 +9,9 @@ import { dmy } from "../_lib/rows";
 import { JobLink, MisStatusBadge, WideTable, dash, kg } from "../_lib/ui";
 import { plannedShipments } from "../_lib/views";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Planned shipments" };
 
 export default async function PlannedPage() {

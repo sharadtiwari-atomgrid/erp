@@ -17,6 +17,9 @@ import { absoluteUrl } from "../../_lib/qr";
 import { cancelInbound, completeQc } from "../actions";
 import { QcForm } from "./qc-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "GRN" };
 
 export default async function InboundReceiptPage({ params }: PageProps<"/warehouse/inbound/[id]">) {

@@ -8,6 +8,9 @@ import { DocumentForm } from "../../_components/document-form";
 import { toOptions } from "../../_lib/documents";
 import { createInvoice } from "../actions";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "New invoice" };
 
 export default async function NewInvoicePage({ searchParams }: PageProps<"/sales/invoices/new">) {

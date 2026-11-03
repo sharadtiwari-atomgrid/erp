@@ -7,6 +7,9 @@ import { db } from "@/lib/db";
 import { formatDate, formatNumber, humanize } from "@/lib/format";
 import { appOrigin, QrCode } from "../../../_components/qr-code";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Batch label" };
 
 /** Printable batch label; the QR code opens the batch page. */

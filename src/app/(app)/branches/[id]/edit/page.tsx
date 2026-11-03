@@ -6,6 +6,9 @@ import { db } from "@/lib/db";
 import { updateBranch } from "../../actions";
 import { BranchForm } from "../../branch-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Edit branch" };
 
 export default async function EditBranchPage({ params }: PageProps<"/branches/[id]/edit">) {

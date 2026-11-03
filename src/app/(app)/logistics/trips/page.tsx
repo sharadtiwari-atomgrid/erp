@@ -16,6 +16,9 @@ import { can } from "@/lib/permissions";
 import { enumParam } from "../../sales/_lib/documents";
 import { OpsBadge } from "../_components/badges";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Trips" };
 
 export default async function TripsPage({ searchParams }: PageProps<"/logistics/trips">) {

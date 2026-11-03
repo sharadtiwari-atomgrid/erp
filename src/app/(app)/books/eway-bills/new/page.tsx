@@ -12,6 +12,9 @@ import { toIstDateTimeInput } from "../../_lib/eway";
 import { createEwayBill } from "../actions";
 import { EwayBillForm } from "../eway-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Record e-way bill" };
 
 export default async function NewEwayBillPage({ searchParams }: PageProps<"/books/eway-bills/new">) {

@@ -12,6 +12,9 @@ import { getWarehouseOptions } from "@/lib/options";
 import { createPickingSession } from "../actions";
 import { SessionForm } from "./session-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "New picking session" };
 
 export default async function NewPickingSessionPage({ searchParams }: PageProps<"/warehouse/picking/new">) {

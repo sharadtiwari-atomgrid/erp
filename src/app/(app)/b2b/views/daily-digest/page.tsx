@@ -9,6 +9,9 @@ import { loadFpoRows, loadMisRows } from "../_lib/load";
 import { DigestBox, DigestToolbar, WarehouseUpload } from "./digest-client";
 import { DeliveredSheet, InventorySheet, PipelineSheet, SHEET_CSS, SummarySheet, TransitSheet, UpcomingSheet } from "./sheets";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Daily digest" };
 
 /** "dd/mm/yyyy hh:mm:ss" in IST. */

@@ -14,6 +14,9 @@ import { salesLineRemainders } from "../../_lib/outbound";
 import { createOutbound } from "../actions";
 import { OutboundForm } from "./outbound-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "New outbound order" };
 
 export default async function NewOutboundPage({ searchParams }: PageProps<"/warehouse/outbound/new">) {

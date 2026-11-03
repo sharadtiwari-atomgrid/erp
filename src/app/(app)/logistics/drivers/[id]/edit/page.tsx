@@ -8,6 +8,9 @@ import { getBranchOptions, getTransporterOptions } from "@/lib/options";
 import { updateDriver } from "../../actions";
 import { DriverForm } from "../../driver-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Edit driver" };
 
 export default async function EditDriverPage({ params }: PageProps<"/logistics/drivers/[id]/edit">) {

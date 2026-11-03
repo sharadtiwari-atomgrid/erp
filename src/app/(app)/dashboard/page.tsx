@@ -12,6 +12,9 @@ import { formatDateTime, formatMoney, formatNumber, num } from "@/lib/format";
 import { NAVIGATION } from "@/lib/navigation";
 import { can, type Module } from "@/lib/permissions";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 const QUICK_ACTIONS: Array<{ label: string; href: string; module: Module; section: string }> = [
   { label: "New sales order", href: "/sales/orders/new", module: "salesOrders", section: "b2b" },
   { label: "New purchase order", href: "/purchasing/orders/new", module: "purchaseOrders", section: "b2b" },

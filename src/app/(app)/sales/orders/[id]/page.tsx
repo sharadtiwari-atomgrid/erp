@@ -17,6 +17,9 @@ import { cancelOrder, confirmOrder, createInvoiceFromOrder, reserveOrderStock } 
 import { WarehouseStatusBadge } from "../../../warehouse/_components/status";
 import { salesLineRemainders } from "../../../warehouse/_lib/outbound";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Sales order" };
 
 export default async function SalesOrderPage({ params }: PageProps<"/sales/orders/[id]">) {

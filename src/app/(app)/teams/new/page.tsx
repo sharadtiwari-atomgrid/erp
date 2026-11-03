@@ -6,6 +6,9 @@ import { getBranchOptions } from "@/lib/options";
 import { createTeam } from "../actions";
 import { TeamForm } from "../team-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "New team" };
 
 export default async function NewTeamPage() {

@@ -9,6 +9,9 @@ import { getBranchOptions } from "@/lib/options";
 import { DEFAULT_LEDGERS } from "../_lib/tally";
 import { istDate } from "./data";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Tally export" };
 
 export default async function ExportPage() {

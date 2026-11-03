@@ -12,6 +12,9 @@ import { can } from "@/lib/permissions";
 import { moveBinStock } from "../../actions";
 import { MoveBinStockForm } from "../../bin-forms";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Bin stock" };
 
 const r3 = (n: number) => Math.round((n + Number.EPSILON) * 1000) / 1000;

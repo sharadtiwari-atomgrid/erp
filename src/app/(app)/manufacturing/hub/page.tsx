@@ -13,6 +13,9 @@ import { can } from "@/lib/permissions";
 import { HubTabs } from "../_components/hub-tabs";
 import { formatWeekdays } from "./weekdays";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Hub settings" };
 
 export default async function HubPage() {

@@ -14,6 +14,9 @@ import { can } from "@/lib/permissions";
 import { ExpiryValue } from "../_components/badges";
 import { fleetBranchWhere } from "../_lib/scope";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Drivers" };
 
 export default async function DriversPage({ searchParams }: PageProps<"/logistics/drivers">) {

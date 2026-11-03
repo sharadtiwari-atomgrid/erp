@@ -11,6 +11,9 @@ import { formatMoney, formatNumber, num } from "@/lib/format";
 import { can } from "@/lib/permissions";
 import { branchWhere } from "@/lib/branch";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Warehouses" };
 
 export default async function WarehousesPage() {

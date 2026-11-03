@@ -5,6 +5,9 @@ import { db } from "@/lib/db";
 import { createProduct } from "../actions";
 import { ProductForm } from "../product-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "New product" };
 
 export default async function NewProductPage() {

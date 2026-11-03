@@ -16,6 +16,9 @@ import { getStockBreakdown, isLowStock, type StockBreakdown } from "../_componen
 import { OnHand } from "../_components/stock-badge";
 import { branchWhere } from "@/lib/branch";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Stock management" };
 
 export default async function StockPage({ searchParams }: PageProps<"/inventory/stock">) {

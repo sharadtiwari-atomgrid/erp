@@ -7,6 +7,9 @@ import { formatDate, formatDateTime, formatNumber, humanize, num } from "@/lib/f
 import { getCompany } from "@/lib/options";
 import { loadShippingDocument } from "../../load";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Print shipping document" };
 
 const cell = "border border-slate-300 px-2 py-1.5";

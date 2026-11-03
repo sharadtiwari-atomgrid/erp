@@ -15,6 +15,9 @@ import { ActionButton } from "@/components/ui/action-button";
 import { addBin, setBinActive } from "../actions";
 import { AddBinForm } from "../bin-forms";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Warehouse" };
 
 export default async function WarehousePage({ params }: PageProps<"/inventory/warehouses/[id]">) {

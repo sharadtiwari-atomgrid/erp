@@ -8,6 +8,9 @@ import { parsePermissions } from "@/lib/permissions";
 import { deleteRole, updateRole } from "../actions";
 import { RoleForm } from "../role-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Edit role" };
 
 export default async function EditRolePage({ params }: PageProps<"/settings/roles/[id]">) {

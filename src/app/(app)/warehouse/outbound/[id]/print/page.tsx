@@ -10,6 +10,9 @@ import { QrCode } from "../../../_components/qr-code";
 import { WarehouseStatusBadge } from "../../../_components/status";
 import { appBaseUrl } from "../../../_lib/qr";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Packing list" };
 
 const cell = "border border-slate-300 px-2 py-1.5";

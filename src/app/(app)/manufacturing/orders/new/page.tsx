@@ -10,6 +10,9 @@ import { createProductionOrder } from "../actions";
 import { getOrderFormData } from "../form-data";
 import { ProductionOrderForm, type OrderFormValues } from "../order-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "New production order" };
 
 /**

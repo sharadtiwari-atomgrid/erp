@@ -16,6 +16,9 @@ import { HubTabs } from "../../_components/hub-tabs";
 import { ModeBadge } from "../../_components/badges";
 import { bomCostRollup } from "../../_lib/bom-math";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Bills of materials" };
 
 export default async function BomsPage({ searchParams }: PageProps<"/manufacturing/hub/boms">) {

@@ -18,6 +18,9 @@ import { PortalNote } from "../_components/portal-note";
 import { canCancelEwb, ewayDisplayStatus } from "../_lib/eway";
 import { cancelEwayBill } from "./actions";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "E-way bills" };
 
 export default async function EwayBillsPage({ searchParams }: PageProps<"/books/eway-bills">) {

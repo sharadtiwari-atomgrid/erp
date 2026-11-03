@@ -5,6 +5,9 @@ import { getBranchOptions } from "@/lib/options";
 import { createUnit } from "../../actions";
 import { UnitForm } from "../../unit-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "New production unit" };
 
 export default async function NewUnitPage() {

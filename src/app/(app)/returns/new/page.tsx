@@ -12,6 +12,9 @@ import { loadReturnSource } from "../_lib/source";
 import { createReturn } from "../actions";
 import { ReturnForm } from "../return-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "New return" };
 
 export default async function NewReturnPage({ searchParams }: PageProps<"/returns/new">) {

@@ -8,6 +8,9 @@ import { formatDate, formatMoney, formatNumber, num } from "@/lib/format";
 import { splitGst } from "@/lib/totals";
 import { PrintButton } from "@/components/ui/print-button";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Print purchase order" };
 
 export default async function PrintPurchaseOrderPage({ params }: PageProps<"/purchasing/orders/[id]/print">) {

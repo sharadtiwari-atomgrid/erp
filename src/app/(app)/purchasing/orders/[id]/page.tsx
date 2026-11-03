@@ -15,6 +15,9 @@ import { canReceiveGoods } from "../../_components/access";
 import { cancelPurchaseOrder, placePurchaseOrder } from "../actions";
 import { WarehouseStatusBadge } from "../../../warehouse/_components/status";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Purchase order" };
 
 export default async function PurchaseOrderPage({ params }: PageProps<"/purchasing/orders/[id]">) {

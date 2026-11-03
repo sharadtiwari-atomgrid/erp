@@ -8,6 +8,9 @@ import { DocumentForm } from "../../_components/document-form";
 import { toOptions } from "../../_lib/documents";
 import { createQuotation } from "../actions";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "New quotation" };
 
 export default async function NewQuotationPage({ searchParams }: PageProps<"/sales/quotations/new">) {

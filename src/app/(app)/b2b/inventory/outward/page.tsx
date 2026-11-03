@@ -8,6 +8,9 @@ import { loadInward, loadOutward } from "@/lib/batch-inventory/server";
 import { isAdmin, loadJobs, loadMasters } from "../_lib/server";
 import { OutwardSheet } from "./outward-sheet";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Batch outward" };
 
 export default async function OutwardPage({ searchParams }: PageProps<"/b2b/inventory/outward">) {

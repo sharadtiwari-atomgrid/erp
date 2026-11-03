@@ -4,6 +4,9 @@ import { requireUser } from "@/lib/auth";
 import { loadPlaces, loadTransporters, loadTransportJobs } from "../data";
 import { Finder } from "./finder";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Transport finder" };
 
 export default async function TransportFinderPage() {

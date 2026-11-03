@@ -20,6 +20,9 @@ import { cancelInvoice, issueInvoice, recordPayment } from "../actions";
 import { PaymentForm } from "./payment-form";
 import { InvoiceEwayBillsCard } from "../../../books/_components/invoice-eway-card";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Invoice" };
 
 export default async function InvoicePage({ params }: PageProps<"/sales/invoices/[id]">) {

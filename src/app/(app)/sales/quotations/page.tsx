@@ -15,6 +15,9 @@ import type { Prisma } from "@/generated/prisma/client";
 import { QuotationStatus } from "@/generated/prisma/enums";
 import { enumParam, isExpired, startOfToday } from "../_lib/documents";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Quotations" };
 
 export default async function QuotationsPage({ searchParams }: PageProps<"/sales/quotations">) {

@@ -16,6 +16,9 @@ import { InvoiceStatus } from "@/generated/prisma/enums";
 import { enumParam, isOverdue, startOfToday } from "../_lib/documents";
 import { branchWhere } from "@/lib/branch";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Invoices" };
 
 export default async function InvoicesPage({ searchParams }: PageProps<"/sales/invoices">) {

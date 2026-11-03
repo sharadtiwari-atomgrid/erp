@@ -18,6 +18,9 @@ import { round3 } from "../_lib/bom-math";
 import { analyseNeeds, type NeedProduct, type NeedResult, type Recommendation } from "../_lib/needs";
 import { availableByProduct, getPlantWarehouseId, OPEN_ORDER_STATUSES } from "../_lib/server";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Manufacturing needs" };
 
 const REC: Record<Recommendation, { label: string; tone: "green" | "blue" | "amber" | "violet"; hint: string }> = {

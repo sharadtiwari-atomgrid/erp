@@ -7,6 +7,9 @@ import { getComponentOptions, getMachineOptions, getManufacturedOptions } from "
 import { createBom } from "../actions";
 import { BomForm } from "../bom-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "New BOM" };
 
 export default async function NewBomPage({ searchParams }: PageProps<"/manufacturing/hub/boms/new">) {

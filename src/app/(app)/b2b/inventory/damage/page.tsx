@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { param } from "@/lib/forms";
 import { RegisterPage } from "../_lib/register-page";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Damage and Relabelling" };
 
 export default async function DamagePage({ searchParams }: PageProps<"/b2b/inventory/damage">) {

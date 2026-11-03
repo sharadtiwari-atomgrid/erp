@@ -14,6 +14,9 @@ import { pagination, param } from "@/lib/forms";
 import { can } from "@/lib/permissions";
 import { CONTACT_ROLE_LABELS, CONTACT_ROLE_TONES } from "./roles";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Third-party contacts" };
 
 export default async function ContactsPage({ searchParams }: PageProps<"/contacts">) {

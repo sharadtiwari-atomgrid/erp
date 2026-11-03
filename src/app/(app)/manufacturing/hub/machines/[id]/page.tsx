@@ -16,6 +16,9 @@ import { MfgStatusBadge } from "../../../_components/badges";
 import { dailyLoad, toSchedulerMachine, utilisationPct } from "../../../_lib/capacity";
 import { deleteMachine } from "../../actions";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Machine" };
 
 const DAYS = 14;

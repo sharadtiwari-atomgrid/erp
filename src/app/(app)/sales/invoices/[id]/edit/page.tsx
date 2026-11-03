@@ -9,6 +9,9 @@ import { DocumentForm } from "../../../_components/document-form";
 import { toLineInputs, toOptions } from "../../../_lib/documents";
 import { updateInvoice } from "../../actions";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Edit invoice" };
 
 export default async function EditInvoicePage({ params }: PageProps<"/sales/invoices/[id]/edit">) {

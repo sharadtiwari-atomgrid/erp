@@ -8,6 +8,9 @@ import { canReceiveGoods } from "../../../_components/access";
 import { receivePurchaseOrder } from "../../actions";
 import { ReceiveGoodsForm } from "./receive-form";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Receive goods" };
 
 export default async function ReceiveGoodsPage({ params }: PageProps<"/purchasing/orders/[id]/receive">) {

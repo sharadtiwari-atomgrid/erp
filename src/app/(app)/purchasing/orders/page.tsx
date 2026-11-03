@@ -15,6 +15,9 @@ import { PurchaseOrderStatus } from "@/generated/prisma/enums";
 import type { Prisma } from "@/generated/prisma/client";
 import { branchWhere } from "@/lib/branch";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Purchase orders" };
 
 export default async function PurchaseOrdersPage({ searchParams }: PageProps<"/purchasing/orders">) {

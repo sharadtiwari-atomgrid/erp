@@ -16,6 +16,9 @@ import { ITEM_TYPES, SUPPLY_MODES } from "../_item-meta";
 import { OnHand, SignedQty } from "../../_components/stock-badge";
 import { MovementReference } from "../../_components/movement-reference";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Product" };
 
 export default async function ProductPage({ params, searchParams }: PageProps<"/inventory/products/[id]">) {

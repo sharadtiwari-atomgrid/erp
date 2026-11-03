@@ -12,6 +12,9 @@ import { can } from "@/lib/permissions";
 import { addPoc, deletePoc, renamePoc } from "./actions";
 import { AddPocForm, RenamePocForm } from "./poc-forms";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "POCs" };
 
 export default async function PocsPage({ searchParams }: PageProps<"/contacts/pocs">) {

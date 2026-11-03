@@ -27,6 +27,9 @@ import {
   type PayBucket,
 } from "./_lib/kpis";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "B2B dashboard" };
 
 // Accessible chart palette on a light background.

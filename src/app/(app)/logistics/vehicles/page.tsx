@@ -19,6 +19,9 @@ import { enumParam } from "../../sales/_lib/documents";
 import { ExpiryFlag, OpsBadge } from "../_components/badges";
 import { fleetBranchWhere } from "../_lib/scope";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Vehicles" };
 
 export default async function VehiclesPage({ searchParams }: PageProps<"/logistics/vehicles">) {

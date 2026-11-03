@@ -6,6 +6,9 @@ import { can } from "@/lib/permissions";
 import { NameCheck } from "./name-check";
 import type { NameInUse } from "./product-names";
 
+// Signed-in, per-user page: render on request instead of an instant static shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Product name check" };
 
 /** Every product name in use: the product master, Domestic MIS, Fresh PO, and batch inward / outward (catalogue name, else product name). */
