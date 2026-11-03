@@ -8,12 +8,18 @@ import { SEQUENCES } from "../src/lib/sequence-keys";
 
 const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
 
-// Demo login for local development only. Override with SEED_PASSWORD.
-const DEMO_PASSWORD = process.env.SEED_PASSWORD ?? "Password123!";
+// Demo login for local development only. Hosted environments must set SEED_PASSWORD,
+// so the password published in this repository never works on a live site.
+const HOSTED = !!(process.env.RAILWAY_ENVIRONMENT || process.env.VERCEL || process.env.NODE_ENV === "production");
+const DEMO_PASSWORD = process.env.SEED_PASSWORD ?? (HOSTED ? "" : "Password123!");
 
 const code = (prefix: string, n: number, pad: number) => `${prefix}${String(n).padStart(pad, "0")}`;
 
 async function main() {
+  if (!DEMO_PASSWORD || DEMO_PASSWORD.length < 8) {
+    console.log("Skipping demo data: set SEED_PASSWORD (8+ characters) to load it on a hosted environment.");
+    return;
+  }
   if ((await db.user.count()) > 0) {
     console.log("Database already has users; skipping seed. Run `npm run db:reset` to start fresh.");
     return;
@@ -257,7 +263,7 @@ async function main() {
     })),
   });
 
-  console.log("Seeded demo data. Sign in as admin@example.com with the demo password from prisma/seed.ts.");
+  console.log(`Seeded demo data. Sign in as admin@example.com with ${process.env.SEED_PASSWORD ? "your SEED_PASSWORD" : "the demo password from prisma/seed.ts"}.`);
 }
 
 main()
