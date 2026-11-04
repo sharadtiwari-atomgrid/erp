@@ -39,6 +39,8 @@ model Branch {
   returnOrders     ReturnOrder[]
   licenses         License[]
   b2cOrders        B2cOrder[]
+  purchaseInvoices PurchaseInvoice[]
+  fixedAssets      FixedAsset[]
 }
 
 /// Configurable role. `permissions` maps a module key (see src/lib/permissions.ts)
@@ -153,17 +155,22 @@ model Contact {
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 
-  leads           Lead[]
-  quotations      Quotation[]
-  salesOrders     SalesOrder[]
-  invoices        Invoice[]
-  purchaseOrders  PurchaseOrder[]
-  inboundReceipts InboundReceipt[]
-  vehicles        Vehicle[]
-  drivers         Driver[]
-  eWayBills       EWayBill[]
-  returnOrders    ReturnOrder[]
-  shippingDocs    ShippingDocument[]
+  leads            Lead[]
+  quotations       Quotation[]
+  salesOrders      SalesOrder[]
+  invoices         Invoice[]
+  purchaseOrders   PurchaseOrder[]
+  inboundReceipts  InboundReceipt[]
+  vehicles         Vehicle[]
+  drivers          Driver[]
+  eWayBills        EWayBill[]
+  returnOrders     ReturnOrder[]
+  shippingDocs     ShippingDocument[]
+  glEntries        GlEntry[]
+  cashReceipts     CashReceipt[]      @relation("CashReceiptCustomer")
+  purchaseInvoices PurchaseInvoice[]  @relation("PurchaseInvoiceSupplier")
+  vendorPayments   VendorPayment[]    @relation("VendorPaymentSupplier")
+  tdsEntries       TdsEntry[]         @relation("TdsEntryContact")
 
   @@index([name])
 }
@@ -378,8 +385,9 @@ model PurchaseOrder {
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
 
-  lines           PurchaseOrderLine[]
-  inboundReceipts InboundReceipt[]
+  lines            PurchaseOrderLine[]
+  inboundReceipts  InboundReceipt[]
+  purchaseInvoices PurchaseInvoice[]
 
   @@index([status])
 }
@@ -465,21 +473,22 @@ model Product {
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
 
-  stockLevels        StockLevel[]
-  stockMovements     StockMovement[]
-  binStocks          BinStock[]
-  quotationLines     QuotationLine[]
-  salesOrderLines    SalesOrderLine[]
-  invoiceLines       InvoiceLine[]
-  purchaseOrderLines PurchaseOrderLine[]
-  inboundLines       InboundLine[]
-  outboundLines      OutboundLine[]
-  handlingUnitItems  HandlingUnitItem[]
-  boms               Bom[]
-  bomComponentOf     BomLine[]
-  productionOrders   ProductionOrder[]
-  returnLines        ReturnLine[]
-  b2cOrderLines      B2cOrderLine[]
+  stockLevels          StockLevel[]
+  stockMovements       StockMovement[]
+  binStocks            BinStock[]
+  quotationLines       QuotationLine[]
+  salesOrderLines      SalesOrderLine[]
+  invoiceLines         InvoiceLine[]
+  purchaseOrderLines   PurchaseOrderLine[]
+  inboundLines         InboundLine[]
+  outboundLines        OutboundLine[]
+  handlingUnitItems    HandlingUnitItem[]
+  boms                 Bom[]
+  bomComponentOf       BomLine[]
+  productionOrders     ProductionOrder[]
+  returnLines          ReturnLine[]
+  b2cOrderLines        B2cOrderLine[]
+  purchaseInvoiceLines PurchaseInvoiceLine[]
 
   @@index([name])
 }
@@ -631,7 +640,8 @@ model InboundReceipt {
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 
-  lines InboundLine[]
+  lines            InboundLine[]
+  purchaseInvoices PurchaseInvoice[]
 
   @@index([status])
 }
@@ -1127,10 +1137,11 @@ model Invoice {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
-  lines        InvoiceLine[]
-  payments     Payment[]
-  eWayBills    EWayBill[]
-  returnOrders ReturnOrder[]
+  lines               InvoiceLine[]
+  payments            Payment[]
+  eWayBills           EWayBill[]
+  returnOrders        ReturnOrder[]
+  receiptApplications CashReceiptApplication[]
 
   @@index([status])
   @@index([dueDate])
@@ -1161,15 +1172,18 @@ enum PaymentMethod {
 }
 
 model Payment {
-  id        String        @id @default(cuid())
-  invoiceId String
-  invoice   Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  date      DateTime      @default(now())
-  amount    Decimal       @db.Decimal(14, 2)
-  method    PaymentMethod @default(BANK_TRANSFER)
-  reference String?
-  notes     String?
-  createdAt DateTime      @default(now())
+  id            String        @id @default(cuid())
+  invoiceId     String
+  invoice       Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  date          DateTime      @default(now())
+  amount        Decimal       @db.Decimal(14, 2)
+  method        PaymentMethod @default(BANK_TRANSFER)
+  reference     String?
+  notes         String?
+  /// Bank or cash account the money went into (defaults by method when blank).
+  bankAccountId String?
+  bankAccount   BankAccount?  @relation(fields: [bankAccountId], references: [id], onDelete: SetNull)
+  createdAt     DateTime      @default(now())
 }
 
 enum EWayBillStatus {
@@ -2039,4 +2053,568 @@ model B2cReturn {
   updatedAt    DateTime        @updatedAt
 
   @@index([status])
+}
+
+// ═══ Finance (double-entry general ledger) ══════════════════════════════════
+// Every financial event is posted through src/lib/finance/posting.ts as one
+// balanced transaction of GlEntry rows (sum of debits = sum of credits).
+
+enum GlAccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  INCOME
+  EXPENSE
+}
+
+model GlAccount {
+  id            String        @id @default(cuid())
+  code          String        @unique
+  name          String
+  type          GlAccountType
+  /// Schedule III heading used by the reports, e.g. "Trade receivables".
+  category      String
+  /// Heading rows group posting accounts; nothing is posted to them.
+  isGroup       Boolean       @default(false)
+  parentId      String?
+  parent        GlAccount?    @relation("GlAccountTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children      GlAccount[]   @relation("GlAccountTree")
+  /// Cash flow statement class: OPERATING | INVESTING | FINANCING | CASH | NONE
+  cashFlowGroup String        @default("OPERATING")
+  /// Allowed in manual journals (control accounts like receivables are not).
+  directPosting Boolean       @default(true)
+  isSystem      Boolean       @default(false)
+  isActive      Boolean       @default(true)
+  description   String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  entries              GlEntry[]
+  journalLines         JournalLine[]
+  budgetLines          BudgetLine[]
+  bankAccounts         BankAccount[]
+  postingAccounts      PostingAccount[]
+  purchaseInvoiceLines PurchaseInvoiceLine[]
+
+  @@index([type])
+}
+
+/// Which ledger account each kind of posting uses (posting setup), e.g. RECEIVABLES → 1420.
+model PostingAccount {
+  key       String    @id
+  accountId String
+  account   GlAccount @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  updatedAt DateTime  @updatedAt
+}
+
+model FiscalYear {
+  id        String    @id @default(cuid())
+  /// e.g. "FY 2026-27"
+  name      String    @unique
+  startDate DateTime  @db.Date
+  endDate   DateTime  @db.Date
+  closed    Boolean   @default(false)
+  closedAt  DateTime?
+  createdAt DateTime  @default(now())
+
+  periods AccountingPeriod[]
+  budgets Budget[]
+}
+
+model AccountingPeriod {
+  id           String     @id @default(cuid())
+  fiscalYearId String
+  fiscalYear   FiscalYear @relation(fields: [fiscalYearId], references: [id], onDelete: Cascade)
+  /// e.g. "Apr 2026"
+  name         String
+  startDate    DateTime   @unique @db.Date
+  endDate      DateTime   @db.Date
+  closed       Boolean    @default(false)
+  closedAt     DateTime?
+}
+
+/// Analysis dimensions (division, department, branch, project…) for tagging entries.
+model Dimension {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  values DimensionValue[]
+}
+
+model DimensionValue {
+  id          String    @id @default(cuid())
+  dimensionId String
+  dimension   Dimension @relation(fields: [dimensionId], references: [id], onDelete: Cascade)
+  code        String
+  name        String
+  isActive    Boolean   @default(true)
+
+  @@unique([dimensionId, code])
+}
+
+enum JournalStatus {
+  DRAFT
+  POSTED
+  REVERSED
+}
+
+/// Manual journal voucher (General, Opening balances, Adjustment…).
+model Journal {
+  id            String        @id @default(cuid())
+  number        String        @unique
+  date          DateTime      @db.Date
+  /// General | Opening balance | Adjustment | Contra
+  kind          String        @default("General")
+  narration     String?
+  status        JournalStatus @default(DRAFT)
+  transactionNo Int?
+  reversalTxNo  Int?
+  branchId      String?
+  postedAt      DateTime?
+  postedById    String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  lines JournalLine[]
+
+  @@index([status])
+}
+
+model JournalLine {
+  id          String    @id @default(cuid())
+  journalId   String
+  journal     Journal   @relation(fields: [journalId], references: [id], onDelete: Cascade)
+  accountId   String
+  account     GlAccount @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  description String?
+  debit       Decimal   @default(0) @db.Decimal(16, 2)
+  credit      Decimal   @default(0) @db.Decimal(16, 2)
+  contactId   String?
+  /// { DIVISION: "B2B", DEPARTMENT: "SALES", … }
+  dimensions  Json      @default("{}")
+  position    Int       @default(0)
+}
+
+/// One line of the general ledger. Lines of one posting share a transactionNo.
+model GlEntry {
+  id            String    @id @default(cuid())
+  entryNo       Int       @unique @default(autoincrement())
+  transactionNo Int
+  postingDate   DateTime  @db.Date
+  accountId     String
+  account       GlAccount @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  debit         Decimal   @default(0) @db.Decimal(16, 2)
+  credit        Decimal   @default(0) @db.Decimal(16, 2)
+  description   String?
+  /// Sales invoice | Payment | Cash receipt | Purchase invoice | Vendor payment | Journal | Depreciation | Asset disposal | Opening | Year-end close | Reversal
+  documentType  String
+  documentNo    String?
+  /// Model name and id of the source document.
+  sourceType    String?
+  sourceId      String?
+  contactId     String?
+  contact       Contact?  @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  branchId      String?
+  dimensions    Json      @default("{}")
+  /// Set on both the original and the reversing transaction.
+  reversed      Boolean   @default(false)
+  reversalOfTx  Int?
+  createdById   String?
+  createdAt     DateTime  @default(now())
+
+  @@index([accountId, postingDate])
+  @@index([sourceType, sourceId])
+  @@index([transactionNo])
+  @@index([postingDate])
+  @@index([contactId])
+}
+
+// ── Cash management ─────────────────────────────────────────────────────────
+
+model BankAccount {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  name        String
+  /// BANK | CASH
+  kind        String    @default("BANK")
+  bankName    String?
+  accountNo   String?
+  ifsc        String?
+  branchName  String?
+  glAccountId String
+  glAccount   GlAccount @relation(fields: [glAccountId], references: [id], onDelete: Restrict)
+  currency    String    @default("INR")
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  statementLines  BankStatementLine[]
+  reconciliations BankReconciliation[]
+  cashReceipts    CashReceipt[]
+  vendorPayments  VendorPayment[]
+  payments        Payment[]
+}
+
+model BankStatementLine {
+  id              String      @id @default(cuid())
+  bankAccountId   String
+  bankAccount     BankAccount @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
+  date            DateTime    @db.Date
+  description     String
+  reference       String?
+  /// Positive = money in, negative = money out.
+  amount          Decimal     @db.Decimal(16, 2)
+  balance         Decimal?    @db.Decimal(16, 2)
+  /// UNMATCHED | MATCHED | IGNORED
+  status          String      @default("UNMATCHED")
+  /// GlEntry ids this line is matched to.
+  matchedEntryIds String[]
+  importBatch     String?
+  reconciledAt    DateTime?
+  createdAt       DateTime    @default(now())
+
+  @@index([bankAccountId, date])
+}
+
+model BankReconciliation {
+  id               String      @id @default(cuid())
+  bankAccountId    String
+  bankAccount      BankAccount @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
+  statementDate    DateTime    @db.Date
+  statementBalance Decimal     @db.Decimal(16, 2)
+  bookBalance      Decimal     @db.Decimal(16, 2)
+  difference       Decimal     @db.Decimal(16, 2)
+  /// DRAFT | COMPLETED
+  status           String      @default("DRAFT")
+  notes            String?
+  completedAt      DateTime?
+  createdAt        DateTime    @default(now())
+}
+
+// ── Receivables ─────────────────────────────────────────────────────────────
+
+/// Money received from a customer, applied against one or more sales invoices.
+model CashReceipt {
+  id              String        @id @default(cuid())
+  number          String        @unique
+  date            DateTime      @db.Date
+  customerId      String
+  customer        Contact       @relation("CashReceiptCustomer", fields: [customerId], references: [id], onDelete: Restrict)
+  bankAccountId   String
+  bankAccount     BankAccount   @relation(fields: [bankAccountId], references: [id], onDelete: Restrict)
+  amount          Decimal       @db.Decimal(16, 2)
+  method          PaymentMethod @default(BANK_TRANSFER)
+  reference       String?
+  /// TDS the customer deducted (credited to us as TDS receivable).
+  tdsAmount       Decimal       @default(0) @db.Decimal(16, 2)
+  /// Received but not yet applied to an invoice (customer advance).
+  unappliedAmount Decimal       @default(0) @db.Decimal(16, 2)
+  /// DRAFT | POSTED | CANCELLED
+  status          String        @default("DRAFT")
+  transactionNo   Int?
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  applications CashReceiptApplication[]
+}
+
+model CashReceiptApplication {
+  id        String      @id @default(cuid())
+  receiptId String
+  receipt   CashReceipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  invoiceId String
+  invoice   Invoice     @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+  amount    Decimal     @db.Decimal(16, 2)
+  /// The Payment row created on the invoice for this application.
+  paymentId String?
+}
+
+// ── Payables ────────────────────────────────────────────────────────────────
+
+enum PurchaseInvoiceStatus {
+  DRAFT
+  POSTED
+  PARTIALLY_PAID
+  PAID
+  CANCELLED
+}
+
+/// Supplier bill: item lines (from a PO / goods receipt) or expense lines (to a ledger account).
+model PurchaseInvoice {
+  id                String                @id @default(cuid())
+  number            String                @unique
+  supplierId        String
+  supplier          Contact               @relation("PurchaseInvoiceSupplier", fields: [supplierId], references: [id], onDelete: Restrict)
+  supplierInvoiceNo String?
+  invoiceDate       DateTime              @db.Date
+  dueDate           DateTime?             @db.Date
+  purchaseOrderId   String?
+  purchaseOrder     PurchaseOrder?        @relation(fields: [purchaseOrderId], references: [id], onDelete: SetNull)
+  inboundReceiptId  String?
+  inboundReceipt    InboundReceipt?       @relation(fields: [inboundReceiptId], references: [id], onDelete: SetNull)
+  branchId          String
+  branch            Branch                @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  placeOfSupply     String?
+  status            PurchaseInvoiceStatus @default(DRAFT)
+  subtotal          Decimal               @default(0) @db.Decimal(16, 2)
+  taxTotal          Decimal               @default(0) @db.Decimal(16, 2)
+  total             Decimal               @default(0) @db.Decimal(16, 2)
+  amountPaid        Decimal               @default(0) @db.Decimal(16, 2)
+  /// Whether GST on this bill can be claimed as input tax credit.
+  itcEligible       Boolean               @default(true)
+  transactionNo     Int?
+  notes             String?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  lines        PurchaseInvoiceLine[]
+  applications VendorPaymentApplication[]
+  fixedAssets  FixedAsset[]
+
+  @@index([status])
+  @@index([dueDate])
+}
+
+model PurchaseInvoiceLine {
+  id                String          @id @default(cuid())
+  purchaseInvoiceId String
+  purchaseInvoice   PurchaseInvoice @relation(fields: [purchaseInvoiceId], references: [id], onDelete: Cascade)
+  /// Item line…
+  productId         String?
+  product           Product?        @relation(fields: [productId], references: [id], onDelete: Restrict)
+  /// …or expense / asset line posted straight to a ledger account.
+  glAccountId       String?
+  glAccount         GlAccount?      @relation(fields: [glAccountId], references: [id], onDelete: Restrict)
+  description       String?
+  hsnCode           String?
+  quantity          Decimal         @default(1) @db.Decimal(14, 3)
+  unitPrice         Decimal         @db.Decimal(14, 2)
+  discountPct       Decimal         @default(0) @db.Decimal(5, 2)
+  taxRate           Decimal         @default(0) @db.Decimal(5, 2)
+  taxAmount         Decimal         @default(0) @db.Decimal(14, 2)
+  lineTotal         Decimal         @default(0) @db.Decimal(14, 2)
+  position          Int             @default(0)
+}
+
+/// Money paid to a supplier / transporter, applied against purchase invoices.
+model VendorPayment {
+  id              String        @id @default(cuid())
+  number          String        @unique
+  date            DateTime      @db.Date
+  supplierId      String
+  supplier        Contact       @relation("VendorPaymentSupplier", fields: [supplierId], references: [id], onDelete: Restrict)
+  bankAccountId   String
+  bankAccount     BankAccount   @relation(fields: [bankAccountId], references: [id], onDelete: Restrict)
+  /// Amount that leaves the bank.
+  amount          Decimal       @db.Decimal(16, 2)
+  /// TDS withheld (paid to the government instead).
+  tdsAmount       Decimal       @default(0) @db.Decimal(16, 2)
+  tdsSectionId    String?
+  tdsSection      TdsSection?   @relation(fields: [tdsSectionId], references: [id], onDelete: SetNull)
+  method          PaymentMethod @default(BANK_TRANSFER)
+  reference       String?
+  unappliedAmount Decimal       @default(0) @db.Decimal(16, 2)
+  /// DRAFT | POSTED | CANCELLED
+  status          String        @default("DRAFT")
+  transactionNo   Int?
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  applications VendorPaymentApplication[]
+}
+
+model VendorPaymentApplication {
+  id                String          @id @default(cuid())
+  paymentId         String
+  payment           VendorPayment   @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  purchaseInvoiceId String
+  purchaseInvoice   PurchaseInvoice @relation(fields: [purchaseInvoiceId], references: [id], onDelete: Restrict)
+  /// Amount settled on the bill (cash paid + TDS share).
+  amount            Decimal         @db.Decimal(16, 2)
+}
+
+// ── Tax ─────────────────────────────────────────────────────────────────────
+
+model TdsSection {
+  id              String   @id @default(cuid())
+  /// e.g. "194C"
+  code            String   @unique
+  description     String
+  /// TDS | TCS
+  kind            String   @default("TDS")
+  rateIndividual  Decimal  @db.Decimal(6, 3)
+  rateCompany     Decimal  @db.Decimal(6, 3)
+  thresholdSingle Decimal? @db.Decimal(16, 2)
+  thresholdAnnual Decimal? @db.Decimal(16, 2)
+  isActive        Boolean  @default(true)
+
+  entries        TdsEntry[]
+  vendorPayments VendorPayment[]
+}
+
+model TdsEntry {
+  id           String     @id @default(cuid())
+  /// TDS | TCS
+  kind         String     @default("TDS")
+  sectionId    String
+  section      TdsSection @relation(fields: [sectionId], references: [id], onDelete: Restrict)
+  contactId    String
+  contact      Contact    @relation("TdsEntryContact", fields: [contactId], references: [id], onDelete: Restrict)
+  date         DateTime   @db.Date
+  documentType String
+  documentNo   String?
+  sourceId     String?
+  baseAmount   Decimal    @db.Decimal(16, 2)
+  rate         Decimal    @db.Decimal(6, 3)
+  amount       Decimal    @db.Decimal(16, 2)
+  /// e.g. "Q3 FY 2026-27"
+  quarter      String
+  /// PENDING | DEPOSITED | FILED
+  status       String     @default("PENDING")
+  challanNo    String?
+  challanDate  DateTime?  @db.Date
+  createdAt    DateTime   @default(now())
+
+  @@index([quarter])
+}
+
+/// Filing status of a GST return period (the figures are computed from posted documents).
+model GstReturn {
+  id        String    @id @default(cuid())
+  /// GSTR-1 | GSTR-3B
+  type      String
+  /// YYYY-MM
+  period    String
+  /// Draft | Filed
+  status    String    @default("Draft")
+  filedOn   DateTime? @db.Date
+  arn       String?
+  notes     String?
+  /// Figures as filed, kept for reference.
+  snapshot  Json?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([type, period])
+}
+
+// ── Fixed assets ────────────────────────────────────────────────────────────
+
+enum FixedAssetStatus {
+  ACTIVE
+  DISPOSED
+}
+
+model FixedAsset {
+  id                      String           @id @default(cuid())
+  code                    String           @unique
+  name                    String
+  /// Buildings | Plant & machinery | Furniture & fixtures | Vehicles | Office equipment | Computers | Other
+  category                String
+  branchId                String?
+  branch                  Branch?          @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  location                String?
+  purchaseInvoiceId       String?
+  purchaseInvoice         PurchaseInvoice? @relation(fields: [purchaseInvoiceId], references: [id], onDelete: SetNull)
+  acquisitionDate         DateTime         @db.Date
+  cost                    Decimal          @db.Decimal(16, 2)
+  salvageValue            Decimal          @default(0) @db.Decimal(16, 2)
+  /// SLM (straight line) | WDV (written-down value)
+  method                  String           @default("SLM")
+  usefulLifeYears         Decimal?         @db.Decimal(6, 2)
+  /// Annual rate % for WDV.
+  ratePct                 Decimal?         @db.Decimal(6, 3)
+  accumulatedDepreciation Decimal          @default(0) @db.Decimal(16, 2)
+  /// Last date depreciation has been charged up to.
+  depreciatedTo           DateTime?        @db.Date
+  status                  FixedAssetStatus @default(ACTIVE)
+  disposalDate            DateTime?        @db.Date
+  disposalAmount          Decimal?         @db.Decimal(16, 2)
+  notes                   String?
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime         @updatedAt
+
+  depreciationLines DepreciationLine[]
+}
+
+model DepreciationRun {
+  id            String   @id @default(cuid())
+  number        String   @unique
+  periodStart   DateTime @db.Date
+  periodEnd     DateTime @db.Date
+  /// DRAFT | POSTED
+  status        String   @default("DRAFT")
+  total         Decimal  @default(0) @db.Decimal(16, 2)
+  transactionNo Int?
+  createdAt     DateTime @default(now())
+
+  lines DepreciationLine[]
+}
+
+model DepreciationLine {
+  id               String          @id @default(cuid())
+  runId            String
+  run              DepreciationRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  assetId          String
+  asset            FixedAsset      @relation(fields: [assetId], references: [id], onDelete: Restrict)
+  openingBookValue Decimal         @db.Decimal(16, 2)
+  amount           Decimal         @db.Decimal(16, 2)
+}
+
+// ── Budgets & currencies ────────────────────────────────────────────────────
+
+model Budget {
+  id           String     @id @default(cuid())
+  name         String
+  fiscalYearId String
+  fiscalYear   FiscalYear @relation(fields: [fiscalYearId], references: [id], onDelete: Restrict)
+  /// Optional dimension filter, e.g. { DIVISION: "B2B" }
+  dimensions   Json       @default("{}")
+  notes        String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  lines BudgetLine[]
+
+  @@unique([name, fiscalYearId])
+}
+
+model BudgetLine {
+  id        String    @id @default(cuid())
+  budgetId  String
+  budget    Budget    @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  accountId String
+  account   GlAccount @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  /// First day of the month.
+  month     DateTime  @db.Date
+  amount    Decimal   @db.Decimal(16, 2)
+
+  @@unique([budgetId, accountId, month])
+}
+
+model Currency {
+  /// ISO code, e.g. "USD"
+  code     String  @id
+  name     String
+  symbol   String?
+  isBase   Boolean @default(false)
+  isActive Boolean @default(true)
+
+  rates ExchangeRate[]
+}
+
+model ExchangeRate {
+  id           String   @id @default(cuid())
+  currencyCode String
+  currency     Currency @relation(fields: [currencyCode], references: [code], onDelete: Cascade)
+  date         DateTime @db.Date
+  /// Rupees per one unit of the currency.
+  rate         Decimal  @db.Decimal(14, 6)
+
+  @@unique([currencyCode, date])
 }

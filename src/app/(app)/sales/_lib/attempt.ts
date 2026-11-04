@@ -1,4 +1,5 @@
 import "server-only";
+import { FinanceError } from "@/lib/finance/posting";
 import { InsufficientStockError } from "@/lib/stock";
 import { DocumentError } from "./documents";
 
@@ -10,7 +11,7 @@ export async function attempt<T>(fn: () => Promise<T>): Promise<{ ok: true; valu
   try {
     return { ok: true, value: await fn() };
   } catch (e) {
-    if (e instanceof DocumentError || e instanceof InsufficientStockError) return { ok: false, error: e.message };
+    if (e instanceof DocumentError || e instanceof InsufficientStockError || e instanceof FinanceError) return { ok: false, error: e.message };
     throw e;
   }
 }

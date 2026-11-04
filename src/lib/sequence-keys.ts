@@ -29,6 +29,12 @@ export const SEQUENCES = {
   B2C_ORDER: { prefix: "B2C-", padding: 6 },
   B2C_SHIPMENT: { prefix: "BSH-", padding: 6 },
   B2C_RETURN: { prefix: "BRT-", padding: 5 },
+  JOURNAL: { prefix: "JV-", padding: 5 },
+  CASH_RECEIPT: { prefix: "RCT-", padding: 5 },
+  PURCHASE_INVOICE: { prefix: "PINV-", padding: 5 },
+  VENDOR_PAYMENT: { prefix: "VPAY-", padding: 5 },
+  FIXED_ASSET: { prefix: "FA-", padding: 4 },
+  DEPRECIATION: { prefix: "DEP-", padding: 4 },
 } as const;
 
 export type SequenceKey = keyof typeof SEQUENCES;

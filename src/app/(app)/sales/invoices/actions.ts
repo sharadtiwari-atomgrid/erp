@@ -14,6 +14,8 @@ import { PaymentMethod } from "@/generated/prisma/enums";
 import { attempt } from "../_lib/attempt";
 import { DocumentError, lineData } from "../_lib/documents";
 import { defaultBranchId } from "@/lib/branch";
+import { postInvoicePayment, postSalesInvoice, reverseSalesInvoice } from "@/lib/finance/documents";
+import { todayIso } from "@/lib/ops/dates";
 
 const invoiceSchema = z.object({
   customerId: f.id("Customer"),
@@ -29,6 +31,7 @@ const paymentSchema = z.object({
   method: z.enum(PaymentMethod, { error: "Choose a payment method" }),
   reference: f.optionalText(),
   notes: f.optionalText(),
+  bankAccountId: f.optionalText(),
 });
 
 function revalidateInvoice(id: string, customerId?: string) {
@@ -112,22 +115,28 @@ export async function issueInvoice(id: string): Promise<ActionState> {
   if (!invoice) return { error: "Invoice not found." };
   if (invoice.status !== "DRAFT") return { error: "Only draft invoices can be issued." };
 
-  await db.$transaction(async (tx) => {
-    await tx.invoice.update({
-      where: { id },
-      data: {
-        status: "ISSUED",
-        dueDate: invoice.dueDate ?? addDays(invoice.issueDate, invoice.customer.paymentTermsDays),
-        placeOfSupply: invoice.placeOfSupply ?? invoice.customer.state,
-      },
-    });
-    await logActivity(
-      { userId: user.id, entityType: "Invoice", entityId: id, action: "issued", message: `Invoice ${invoice.number} issued for ${formatMoney(invoice.total)}` },
-      tx,
-    );
-  });
+  const result = await attempt(() =>
+    db.$transaction(async (tx) => {
+      await tx.invoice.update({
+        where: { id },
+        data: {
+          status: "ISSUED",
+          dueDate: invoice.dueDate ?? addDays(invoice.issueDate, invoice.customer.paymentTermsDays),
+          placeOfSupply: invoice.placeOfSupply ?? invoice.customer.state,
+        },
+      });
+      // Receivable, sales and output GST go to the general ledger on issue.
+      await postSalesInvoice(tx, id, user.id);
+      await logActivity(
+        { userId: user.id, entityType: "Invoice", entityId: id, action: "issued", message: `Invoice ${invoice.number} issued for ${formatMoney(invoice.total)}` },
+        tx,
+      );
+    }),
+  );
+  if (!result.ok) return { error: result.error };
 
   revalidateInvoice(id, invoice.customerId);
+  revalidatePath("/finance", "layout");
   return undefined;
 }
 
@@ -143,15 +152,21 @@ export async function cancelInvoice(id: string): Promise<ActionState> {
   }
   if (invoice._count.payments > 0) return { error: "Invoices with payments can’t be cancelled." };
 
-  await db.$transaction(async (tx) => {
-    await tx.invoice.update({ where: { id }, data: { status: "CANCELLED" } });
-    await logActivity(
-      { userId: user.id, entityType: "Invoice", entityId: id, action: "cancelled", message: `Invoice ${invoice.number} cancelled` },
-      tx,
-    );
-  });
+  const result = await attempt(() =>
+    db.$transaction(async (tx) => {
+      await tx.invoice.update({ where: { id }, data: { status: "CANCELLED" } });
+      // An issued invoice was posted; cancelling reverses it on today's date.
+      if (invoice.status === "ISSUED") await reverseSalesInvoice(tx, id, user.id, todayIso());
+      await logActivity(
+        { userId: user.id, entityType: "Invoice", entityId: id, action: "cancelled", message: `Invoice ${invoice.number} cancelled` },
+        tx,
+      );
+    }),
+  );
+  if (!result.ok) return { error: result.error };
 
   revalidateInvoice(id, invoice.customerId);
+  revalidatePath("/finance", "layout");
   if (invoice.salesOrderId) revalidatePath(`/sales/orders/${invoice.salesOrderId}`);
   return undefined;
 }
@@ -184,7 +199,8 @@ export async function recordPayment(id: string, _prev: ActionState, formData: Fo
       });
       if (count === 0) throw new DocumentError("This invoice was just updated. Reload and try again.");
 
-      await tx.payment.create({ data: { ...parsed.data, amount, invoiceId: id } });
+      const payment = await tx.payment.create({ data: { ...parsed.data, amount, invoiceId: id } });
+      await postInvoicePayment(tx, payment.id, user.id);
       await logActivity(
         {
           userId: user.id,
@@ -201,5 +217,6 @@ export async function recordPayment(id: string, _prev: ActionState, formData: Fo
   if (!result.ok) return { error: result.error };
 
   revalidateInvoice(id, result.value.customerId);
+  revalidatePath("/finance", "layout");
   return { success: `Payment of ${formatMoney(amount)} recorded.` };
 }
