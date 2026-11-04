@@ -138,13 +138,80 @@ export const NAVIGATION: NavGroup[] = [
     ],
   },
   {
+    // Organised like a standard ERP finance module (General Ledger, Receivables,
+    // Payables, Cash Management, Fixed Assets, Tax, Reports, Setup).
     key: "finance",
     label: "Finance",
     color: "#f08a7e",
-    items: [
-      { label: "Invoices", href: "/sales/invoices", module: "invoices" },
-      { label: "E-way bills", href: "/books/eway-bills", module: "eWayBills" },
-      { label: "Tally export", href: "/books/export", module: "eWayBills" },
+    subgroups: [
+      { label: "Overview", items: [{ label: "Finance overview", href: "/finance", module: "finance" }] },
+      {
+        label: "General Ledger",
+        items: [
+          { label: "Chart of accounts", href: "/finance/accounts", module: "finance" },
+          { label: "General journals", href: "/finance/journals", module: "finance" },
+          { label: "G/L entries", href: "/finance/entries", module: "finance" },
+          { label: "Accounting periods", href: "/finance/periods", module: "finance" },
+          { label: "Budgets", href: "/finance/budgets", module: "finance" },
+          { label: "Dimensions", href: "/finance/dimensions", module: "finance" },
+        ],
+      },
+      {
+        label: "Receivables",
+        items: [
+          { label: "Sales invoices", href: "/sales/invoices", module: "invoices" },
+          { label: "Cash receipts", href: "/finance/receipts", module: "finance" },
+          { label: "Aged receivables", href: "/finance/aged-receivables", module: "finance" },
+        ],
+      },
+      {
+        label: "Payables",
+        items: [
+          { label: "Purchase invoices", href: "/finance/purchase-invoices", module: "finance" },
+          { label: "Vendor payments", href: "/finance/vendor-payments", module: "finance" },
+          { label: "Aged payables", href: "/finance/aged-payables", module: "finance" },
+        ],
+      },
+      {
+        label: "Cash Management",
+        items: [
+          { label: "Bank accounts", href: "/finance/bank-accounts", module: "finance" },
+          { label: "Bank reconciliation", href: "/finance/bank-reconciliation", module: "finance" },
+          { label: "Cash flow forecast", href: "/finance/cash-flow-forecast", module: "finance" },
+        ],
+      },
+      {
+        label: "Fixed Assets",
+        items: [
+          { label: "Asset register", href: "/finance/fixed-assets", module: "finance" },
+          { label: "Depreciation", href: "/finance/depreciation", module: "finance" },
+        ],
+      },
+      {
+        label: "Tax (GST)",
+        items: [
+          { label: "GST returns", href: "/finance/gst-returns", module: "finance" },
+          { label: "TDS / TCS", href: "/finance/tds", module: "finance" },
+          { label: "E-way bills", href: "/books/eway-bills", module: "eWayBills" },
+        ],
+      },
+      {
+        label: "Reports",
+        items: [
+          { label: "Trial balance", href: "/finance/reports/trial-balance", module: "finance" },
+          { label: "Profit & loss", href: "/finance/reports/profit-and-loss", module: "finance" },
+          { label: "Balance sheet", href: "/finance/reports/balance-sheet", module: "finance" },
+          { label: "Cash flow statement", href: "/finance/reports/cash-flow", module: "finance" },
+        ],
+      },
+      {
+        label: "Setup",
+        items: [
+          { label: "Posting groups", href: "/finance/posting-groups", module: "finance" },
+          { label: "Currencies", href: "/finance/currencies", module: "finance" },
+          { label: "Tally export", href: "/books/export", module: "eWayBills" },
+        ],
+      },
     ],
   },
   {

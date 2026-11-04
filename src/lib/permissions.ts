@@ -23,6 +23,7 @@ export const MODULES = {
   production: { label: "Production orders, schedule & batches", section: "b2b" },
   fleet: { label: "Fleet (vehicles, drivers, fuel)", section: "b2b" },
   trips: { label: "Trips & shipping documents", section: "b2b" },
+  finance: { label: "Finance: ledger, cash, assets, tax & reports", section: "finance" },
   invoices: { label: "Invoices & payments", section: "finance" },
   eWayBills: { label: "E-way bills & exports", section: "finance" },
   b2bOrders: { label: "Domestic B2B: Fresh PO, Long Hold, Domestic MIS, D-0 quotes", section: "b2b" },
@@ -107,7 +108,7 @@ export const DEFAULT_ROLES: Array<{ name: string; description: string; fullAcces
   {
     name: "Accounts",
     description: "Invoices, payments, e-way bills and exports.",
-    permissions: { invoices: "edit", eWayBills: "edit", contacts: "view", salesOrders: "view", purchaseOrders: "view", returns: "view", transportOps: "view", b2bReports: "view", b2bOrders: "view" },
+    permissions: { finance: "edit", invoices: "edit", eWayBills: "edit", contacts: "view", salesOrders: "view", purchaseOrders: "view", returns: "view", transportOps: "view", b2bReports: "view", b2bOrders: "view" },
   },
   { name: "Read-only", description: "Can view everything except settings.", permissions: { ...all("view"), settings: "none" } },
 ];
