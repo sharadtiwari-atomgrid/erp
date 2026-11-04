@@ -1,0 +1,32 @@
+import type { PostingKey } from "@/lib/finance/chart";
+
+/** One line on what each posting key is used for (Finance › Posting setup). */
+export const POSTING_KEY_HELP: Record<PostingKey, string> = {
+  RECEIVABLES: "Debited when a sales invoice is issued; credited when the customer pays.",
+  PAYABLES: "Credited when a purchase invoice is posted; debited when the supplier is paid.",
+  SALES_GOODS: "Credited with the taxable value of goods on sales invoices.",
+  SALES_SERVICES: "Credited with the taxable value of services on sales invoices.",
+  PURCHASES: "Debited with item lines on purchase invoices.",
+  OUTPUT_CGST: "CGST charged on intra-state sales (credited).",
+  OUTPUT_SGST: "SGST charged on intra-state sales (credited).",
+  OUTPUT_IGST: "IGST charged on inter-state sales (credited).",
+  INPUT_CGST: "CGST paid on purchases, claimed as input tax credit (debited).",
+  INPUT_SGST: "SGST paid on purchases, claimed as input tax credit (debited).",
+  INPUT_IGST: "IGST paid on purchases, claimed as input tax credit (debited).",
+  TDS_PAYABLE: "TDS withheld from supplier payments, owed to the government.",
+  TCS_PAYABLE: "TCS collected from customers, owed to the government.",
+  TDS_RECEIVABLE: "TDS customers deducted from our receipts, claimable against our tax.",
+  CUSTOMER_ADVANCES: "Customer money received but not yet applied to an invoice.",
+  SUPPLIER_ADVANCES: "Money paid to suppliers before a bill is applied.",
+  CASH: "Cash receipts and payments made in cash.",
+  BANK: "Receipts and payments when no specific bank account is chosen.",
+  FIXED_ASSETS: "Cost of assets whose category has no specific account.",
+  ACCUMULATED_DEPRECIATION: "Credited by depreciation runs; reduces asset book value.",
+  DEPRECIATION_EXPENSE: "Debited by depreciation runs.",
+  ASSET_DISPOSAL_GAIN: "Profit when an asset is sold above its book value.",
+  ASSET_DISPOSAL_LOSS: "Loss when an asset is sold below its book value.",
+  RETAINED_EARNINGS: "Receives the year's profit or loss at year-end close.",
+  OPENING_BALANCE: "Balancing account for opening balance journals.",
+  ROUNDING: "Small rounding differences on documents.",
+  BANK_CHARGES: "Bank fees deducted from receipts or payments.",
+};

@@ -11,11 +11,14 @@ export function PaymentForm({
   action,
   balance,
   today,
+  bankAccounts = [],
 }: {
   action: (prev: ActionState, formData: FormData) => Promise<ActionState>;
   balance: number;
   /** "YYYY-MM-DD", passed from the server so the default doesn't depend on render time. */
   today: string;
+  /** Bank and cash accounts the money can be deposited to. */
+  bankAccounts?: Array<{ id: string; code: string; name: string; kind: string }>;
 }) {
   const [state, formAction] = useActionState(action, undefined);
   const err = state?.fieldErrors ?? {};
@@ -41,6 +44,16 @@ export function PaymentForm({
         </Field>
         <Field label="Reference" htmlFor="reference" errors={err.reference} hint="UTR, cheque no.…">
           <Input id="reference" name="reference" />
+        </Field>
+        <Field label="Deposit to" htmlFor="bankAccountId" errors={err.bankAccountId} className="col-span-2">
+          <Select id="bankAccountId" name="bankAccountId" defaultValue="">
+            <option value="">Default (cash for cash payments, else main bank)</option>
+            {bankAccounts.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name} ({b.code})
+              </option>
+            ))}
+          </Select>
         </Field>
       </div>
       <div className="flex justify-end">

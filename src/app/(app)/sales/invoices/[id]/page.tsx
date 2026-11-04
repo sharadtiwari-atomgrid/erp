@@ -7,6 +7,7 @@ import { Card, CardBody, CardHeader, DetailList, StatCard } from "@/components/u
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyRow, Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { requireUser } from "@/lib/auth";
+import { getBankAccountOptions } from "@/lib/finance/queries";
 import { db } from "@/lib/db";
 import { formatDate, formatMoney, humanize, num, toDateInput } from "@/lib/format";
 import { getCompany } from "@/lib/options";
@@ -28,7 +29,7 @@ export const metadata: Metadata = { title: "Invoice" };
 export default async function InvoicePage({ params }: PageProps<"/sales/invoices/[id]">) {
   const user = await requireUser("invoices");
   const { id } = await params;
-  const [invoice, company] = await Promise.all([
+  const [invoice, company, bankAccounts] = await Promise.all([
     db.invoice.findUnique({
       where: { id },
       include: {
@@ -39,6 +40,7 @@ export default async function InvoicePage({ params }: PageProps<"/sales/invoices
       },
     }),
     getCompany(),
+    getBankAccountOptions(),
   ]);
   if (!invoice) notFound();
 
@@ -166,7 +168,7 @@ export default async function InvoicePage({ params }: PageProps<"/sales/invoices
             <Card>
               <CardHeader title="Record payment" description={`Balance ${formatMoney(balance)}`} />
               <CardBody>
-                <PaymentForm action={recordPayment.bind(null, id)} balance={balance} today={toDateInput(new Date())} />
+                <PaymentForm action={recordPayment.bind(null, id)} balance={balance} today={toDateInput(new Date())} bankAccounts={bankAccounts} />
               </CardBody>
             </Card>
           )}
