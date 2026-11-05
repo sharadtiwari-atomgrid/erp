@@ -26,12 +26,29 @@ const orderSchema = z
     supplierId: f.id("Supplier"),
     warehouseId: f.id("Receiving warehouse"),
     orderDate: f.date(),
-    expectedDate: f.optionalDate(),
+    postingDate: f.optionalDate(),
+    expectedReceiptDate: f.optionalDate(),
+    vendorOrderNo: f.optionalText(),
+    payToVendorId: f.optionalText(),
+    shipToCode: f.optionalText(),
+    shipToName: f.optionalText(),
+    shipToAddress: f.optionalText(),
+    shipToCity: f.optionalText(),
+    shipToState: f.optionalText(),
+    shipToPincode: f.optionalText(),
+    paymentTermsCode: f.optionalText(),
+    paymentMethodCode: f.optionalText(),
+    shipmentMethodCode: f.optionalText(),
+    currencyCode: f.optionalText(),
+    externalDocumentNo: f.optionalText(),
+    purchaserCode: f.optionalText(),
+    postingDescription: f.optionalText(),
+    locationCode: f.optionalText(),
     notes: f.optionalText(),
   })
-  .refine((d) => !d.expectedDate || d.expectedDate >= d.orderDate, {
-    path: ["expectedDate"],
-    message: "Expected date cannot be before the order date",
+  .refine((d) => !d.expectedReceiptDate || d.expectedReceiptDate >= d.orderDate, {
+    path: ["expectedReceiptDate"],
+    message: "Expected receipt date cannot be before the order date",
   });
 
 const receiveSchema = z.object({
