@@ -167,7 +167,7 @@ export async function postJournal(id: string): Promise<ActionState> {
     db.$transaction(async (tx) => {
       const transactionNo = await postTransaction(tx, {
         date: isoFromDay(journal.date),
-        documentType: journal.kind === "Opening balance" ? "Opening" : "Journal",
+        documentType: journal.kind === "Opening balance" ? "Opening" : journal.kind,
         documentNo: journal.number,
         sourceType: "Journal",
         sourceId: journal.id,
