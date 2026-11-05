@@ -59,7 +59,7 @@ export default async function InvoicesPage({ searchParams }: PageProps<"/sales/i
       <PageHeader
         title="Sales Invoices"
         description="Sales invoices, customer payments and receivables."
-        actions={can(user, "invoices", "edit") && <ButtonLink href="/sales/invoices/new">New invoice</ButtonLink>}
+        actions={status !== "ISSUED" && can(user, "invoices", "edit") && <ButtonLink href="/sales/invoices/new">New invoice</ButtonLink>}
       />
       <Card>
         <ListToolbar
@@ -78,9 +78,9 @@ export default async function InvoicesPage({ searchParams }: PageProps<"/sales/i
         <Table>
           <THead>
             <tr>
-              <TH>Number</TH>
+              <TH>Document No.</TH>
               <TH>Customer</TH>
-              <TH>Issued</TH>
+              <TH>Posting Date</TH>
               <TH>Due</TH>
               <TH>Status</TH>
               <TH align="right">Total</TH>
