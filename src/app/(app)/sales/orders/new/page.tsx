@@ -30,7 +30,15 @@ export default async function NewSalesOrderPage({ searchParams }: PageProps<"/sa
           { name: "customerId", label: "Customer", type: "select", required: true, options: toOptions(customers), defaultValue: param(sp, "customerId"), placeholder: "Select a customer…" },
           { name: "warehouseId", label: "Deliver from", type: "select", required: true, options: toOptions(warehouses), defaultValue: warehouses[0]?.id, placeholder: "Select a warehouse…" },
           { name: "orderDate", label: "Order date", type: "date", required: true, defaultValue: toDateInput(new Date()) },
+          { name: "postingDate", label: "Posting date", type: "date", defaultValue: toDateInput(new Date()) },
           { name: "expectedDate", label: "Expected delivery", type: "date" },
+          { name: "shipmentDate", label: "Shipment date", type: "date" },
+          { name: "billToCustomerId", label: "Bill-to Customer", type: "select", options: toOptions(customers), defaultValue: param(sp, "customerId"), placeholder: "Same as sell-to…" },
+          { name: "paymentTermsCode", label: "Payment Terms Code", type: "text" },
+          { name: "paymentMethodCode", label: "Payment Method Code", type: "text" },
+          { name: "shipmentMethodCode", label: "Shipment Method Code", type: "text" },
+          { name: "currencyCode", label: "Currency Code", type: "text", defaultValue: "INR" },
+          { name: "externalDocumentNo", label: "External Document No.", type: "text" },
         ]}
       />
     </div>
