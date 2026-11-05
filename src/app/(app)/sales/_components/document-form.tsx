@@ -42,6 +42,7 @@ export function DocumentForm({
   notes?: string | null;
   cancelHref: string;
   submitLabel: string;
+  priceField?: "salePrice" | "purchasePrice";
 }) {
   const [state, formAction] = useActionState(action, undefined);
   const err = state?.fieldErrors ?? {};
@@ -90,7 +91,7 @@ export function DocumentForm({
       <Card>
         <CardHeader title="Line items" />
         <CardBody>
-          <LineItemsEditor products={products} priceField="salePrice" initialLines={initialLines} />
+          <LineItemsEditor products={products} priceField={priceField ?? "salePrice"} initialLines={initialLines} />
         </CardBody>
       </Card>
 
