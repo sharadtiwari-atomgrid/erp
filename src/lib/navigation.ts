@@ -151,9 +151,22 @@ export const NAVIGATION: NavGroup[] = [
           { label: "Chart of Accounts", href: "/finance/accounts", module: "finance" },
           { label: "General Journals", href: "/finance/journals", module: "finance" },
           { label: "General Ledger Entries", href: "/finance/entries", module: "finance" },
+          { label: "Customer Ledger Entries", href: "/finance/customer-ledger", module: "finance" },
+          { label: "Vendor Ledger Entries", href: "/finance/vendor-ledger", module: "finance" },
           { label: "Accounting Periods", href: "/finance/periods", module: "finance" },
           { label: "G/L Budgets", href: "/finance/budgets", module: "finance" },
           { label: "Dimensions", href: "/finance/dimensions", module: "finance" },
+        ],
+      },
+      {
+        label: "Voucher Transactions",
+        items: [
+          { label: "Bank Payment Voucher", href: "/finance/journals/new?kind=Bank%20Payment", module: "finance" },
+          { label: "Bank Receipt Voucher", href: "/finance/journals/new?kind=Bank%20Receipt", module: "finance" },
+          { label: "Cash Payment Voucher", href: "/finance/journals/new?kind=Cash%20Payment", module: "finance" },
+          { label: "Cash Receipt Voucher", href: "/finance/journals/new?kind=Cash%20Receipt", module: "finance" },
+          { label: "Contra Voucher", href: "/finance/journals/new?kind=Contra", module: "finance" },
+          { label: "Journal Voucher", href: "/finance/journals/new?kind=General", module: "finance" },
         ],
       },
       {
