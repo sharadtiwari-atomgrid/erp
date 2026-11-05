@@ -58,7 +58,6 @@ export default async function PurchaseOrderPage({ params }: PageProps<"/purchasi
   const nothingReceived = order.lines.every((l) => num(l.receivedQty) === 0);
   const isOpen = order.status === "ORDERED" || order.status === "PARTIALLY_RECEIVED";
   const receivedQty = order.lines.reduce((s, l) => s + num(l.receivedQty), 0);
-  const billedQty = receipts.length === 0 ? 0 : 0;
 
   return (
     <>
