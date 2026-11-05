@@ -160,6 +160,7 @@ export const NAVIGATION: NavGroup[] = [
         label: "Sales & Receivables",
         items: [
           { label: "Sales Invoices", href: "/sales/invoices", module: "invoices" },
+          { label: "Customers", href: "/contacts?role=CUSTOMER", module: "contacts" },
           { label: "Cash Receipt Journals", href: "/finance/receipts", module: "finance" },
           { label: "Aged Accounts Receivable", href: "/finance/aged-receivables", module: "finance" },
         ],
@@ -168,6 +169,7 @@ export const NAVIGATION: NavGroup[] = [
         label: "Purchases & Payables",
         items: [
           { label: "Purchase Invoices", href: "/finance/purchase-invoices", module: "finance" },
+          { label: "Vendors", href: "/contacts?role=SUPPLIER", module: "contacts" },
           { label: "Payment Journals", href: "/finance/vendor-payments", module: "finance" },
           { label: "Aged Accounts Payable", href: "/finance/aged-payables", module: "finance" },
         ],
@@ -177,7 +179,7 @@ export const NAVIGATION: NavGroup[] = [
         items: [
           { label: "Bank Accounts", href: "/finance/bank-accounts", module: "finance" },
           { label: "Bank Account Reconciliations", href: "/finance/bank-reconciliation", module: "finance" },
-          { label: "Cash Flow Forecasts", href: "/finance/cash-flow-forecast", module: "finance" },
+          { label: "Cash Flow Forecast", href: "/finance/cash-flow-forecast", module: "finance" },
         ],
       },
       {
