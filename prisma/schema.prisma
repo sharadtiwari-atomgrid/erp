@@ -160,6 +160,8 @@ model Contact {
   salesOrders      SalesOrder[]
   invoices         Invoice[]
   purchaseOrders   PurchaseOrder[]
+  salesOrderBillTo  SalesOrder[]     @relation("SalesOrderBillTo")
+  purchaseOrderPayTo PurchaseOrder[] @relation("PurchaseOrderPayTo")
   inboundReceipts  InboundReceipt[]
   vehicles         Vehicle[]
   drivers          Driver[]
@@ -315,9 +317,27 @@ model SalesOrder {
   branch       Branch           @relation(fields: [branchId], references: [id], onDelete: Restrict)
   warehouseId  String
   warehouse    Warehouse        @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
-  status       SalesOrderStatus @default(DRAFT)
-  orderDate    DateTime         @default(now())
-  expectedDate DateTime?
+  status               SalesOrderStatus @default(DRAFT)
+  orderDate            DateTime         @default(now())
+  postingDate          DateTime?
+  expectedDate         DateTime?
+  shipmentDate         DateTime?
+  billToCustomerId     String?
+  billToCustomer       Contact?        @relation("SalesOrderBillTo", fields: [billToCustomerId], references: [id], onDelete: SetNull)
+  shipToCode           String?
+  shipToName           String?
+  shipToAddress        String?
+  shipToCity           String?
+  shipToState          String?
+  shipToPincode        String?
+  paymentTermsCode     String?
+  paymentMethodCode    String?
+  shipmentMethodCode   String?
+  currencyCode         String?
+  externalDocumentNo   String?
+  salespersonCode      String?
+  postingDescription   String?
+  locationCode         String?
   subtotal     Decimal          @default(0) @db.Decimal(14, 2)
   taxTotal     Decimal          @default(0) @db.Decimal(14, 2)
   total        Decimal          @default(0) @db.Decimal(14, 2)
@@ -375,9 +395,27 @@ model PurchaseOrder {
   branch       Branch              @relation(fields: [branchId], references: [id], onDelete: Restrict)
   warehouseId  String
   warehouse    Warehouse           @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
-  status       PurchaseOrderStatus @default(DRAFT)
-  orderDate    DateTime            @default(now())
-  expectedDate DateTime?
+  status               PurchaseOrderStatus @default(DRAFT)
+  orderDate            DateTime            @default(now())
+  postingDate          DateTime?
+  expectedReceiptDate  DateTime?
+  vendorOrderNo        String?
+  payToVendorId        String?
+  payToVendor          Contact?           @relation("PurchaseOrderPayTo", fields: [payToVendorId], references: [id], onDelete: SetNull)
+  shipToCode            String?
+  shipToName            String?
+  shipToAddress         String?
+  shipToCity            String?
+  shipToState           String?
+  shipToPincode         String?
+  paymentTermsCode      String?
+  paymentMethodCode     String?
+  shipmentMethodCode    String?
+  currencyCode          String?
+  externalDocumentNo    String?
+  purchaserCode         String?
+  postingDescription    String?
+  locationCode          String?
   subtotal     Decimal             @default(0) @db.Decimal(14, 2)
   taxTotal     Decimal             @default(0) @db.Decimal(14, 2)
   total        Decimal             @default(0) @db.Decimal(14, 2)
