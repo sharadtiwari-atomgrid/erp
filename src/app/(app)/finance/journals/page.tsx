@@ -19,7 +19,7 @@ import { can } from "@/lib/permissions";
 import { JOURNAL_KINDS, JOURNAL_STATUS_TONE } from "../_gl/ledger";
 import { FilterField } from "../_gl/ui";
 
-export const metadata: Metadata = { title: "General journals" };
+export const metadata: Metadata = { title: "General Journals" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -47,15 +47,15 @@ export default async function FinanceJournalsPage({ searchParams }: PageProps<"/
   return (
     <>
       <PageHeader
-        title="General journals"
+        title="General Journals"
         description="Manual journal vouchers: adjustments, contras and opening balances."
         actions={
           canEdit && (
             <>
               <ButtonLink href="/finance/journals/new?kind=Opening%20balance" variant="secondary">
-                Opening balances
+                Opening Balances
               </ButtonLink>
-              <ButtonLink href="/finance/journals/new">New journal</ButtonLink>
+              <ButtonLink href="/finance/journals/new">New General Journal</ButtonLink>
             </>
           )
         }
@@ -93,9 +93,9 @@ export default async function FinanceJournalsPage({ searchParams }: PageProps<"/
           <THead>
             <tr>
               <TH>Number</TH>
-              <TH>Date</TH>
+              <TH>Posting Date</TH>
               <TH>Kind</TH>
-              <TH>Narration</TH>
+              <TH>Description</TH>
               <TH>Status</TH>
               <TH align="right">Transaction</TH>
               <TH align="right">Amount</TH>

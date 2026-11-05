@@ -18,7 +18,7 @@ import { can } from "@/lib/permissions";
 import { glBalances, OPENING_BATCH } from "../../_cash_fa/server";
 import { Amount, Note } from "../../_cash_fa/ui";
 
-export const metadata: Metadata = { title: "Bank account" };
+export const metadata: Metadata = { title: "Bank Account Card" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -79,7 +79,7 @@ export default async function BankAccountPage({ params, searchParams }: PageProp
           </span>
         }
         description={`${account.code} · ledger account ${account.glAccount.code} ${account.glAccount.name}`}
-        back={{ href: "/finance/bank-accounts", label: "Bank accounts" }}
+        back={{ href: "/finance/bank-accounts", label: "Bank Accounts" }}
         actions={
           <>
             <ButtonLink href={`/finance/bank-reconciliation/${id}`} variant="secondary">
@@ -132,8 +132,8 @@ export default async function BankAccountPage({ params, searchParams }: PageProp
             <Table>
               <THead>
                 <tr>
-                  <TH>Date</TH>
-                  <TH>Document</TH>
+                  <TH>Posting Date</TH>
+                  <TH>Document No.</TH>
                   <TH>Description</TH>
                   <TH align="right">Deposits (Dr)</TH>
                   <TH align="right">Withdrawals (Cr)</TH>
@@ -194,7 +194,7 @@ export default async function BankAccountPage({ params, searchParams }: PageProp
                 items={[
                   { label: "Type", value: account.kind === "CASH" ? "Cash" : "Bank" },
                   { label: "Bank", value: account.bankName },
-                  { label: "Account no.", value: account.accountNo },
+                  { label: "Account No.", value: account.accountNo },
                   { label: "IFSC", value: account.ifsc },
                   { label: "Branch", value: account.branchName },
                   { label: "Currency", value: account.currency },

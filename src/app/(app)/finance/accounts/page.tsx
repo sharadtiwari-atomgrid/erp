@@ -18,7 +18,7 @@ import { ACCOUNT_TYPES, ACCOUNT_TYPE_LABELS, typeTotals } from "../_gl/ledger";
 import { isoParam } from "../_gl/server";
 import { Amount, FilterField } from "../_gl/ui";
 
-export const metadata: Metadata = { title: "Chart of accounts" };
+export const metadata: Metadata = { title: "Chart of Accounts" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -38,14 +38,14 @@ export default async function FinanceAccountsPage({ searchParams }: PageProps<"/
   return (
     <>
       <PageHeader
-        title="Chart of accounts"
+        title="Chart of Accounts"
         description={`Ledger accounts by Schedule III heading, with balances as on ${formatDmy(asOf)}.`}
         actions={
           <>
             <a href={`/finance/accounts/export?${exportQs}`} className={buttonClass("secondary")}>
               Export to Excel
             </a>
-            {can(user, "finance", "edit") && <ButtonLink href="/finance/accounts/new">New account</ButtonLink>}
+            {can(user, "finance", "edit") && <ButtonLink href="/finance/accounts/new">New G/L Account</ButtonLink>}
           </>
         }
       />

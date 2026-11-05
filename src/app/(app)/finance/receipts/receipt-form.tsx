@@ -77,7 +77,7 @@ export function ReceiptForm({
                 ))}
               </Select>
             </Field>
-            <Field label="Date" htmlFor="date" required errors={err.date}>
+            <Field label="Posting Date" htmlFor="date" required errors={err.date}>
               <Input id="date" name="date" type="date" defaultValue={today} required />
             </Field>
             <Field label="Amount received" htmlFor="amount" required errors={err.amount}>
@@ -116,7 +116,7 @@ export function ReceiptForm({
 
       <Card>
         <CardHeader
-          title="Apply to invoices"
+          title="Apply Entries"
           description="Each amount settles an invoice (cash plus any TDS). Whatever is left stays on the receipt as a customer advance."
           actions={
             <>
@@ -145,7 +145,7 @@ export function ReceiptForm({
           rows={[
             { label: "Amount received", value: received },
             { label: "TDS deducted", value: tdsValue, tone: "muted" },
-            { label: "Applied to invoices", value: applied },
+            { label: "Applied Entries", value: applied },
             { label: unapplied < 0 ? "Over-applied" : "Unapplied (customer advance)", value: unapplied, strong: true, tone: unapplied < -0.004 ? "danger" : undefined },
           ]}
         />

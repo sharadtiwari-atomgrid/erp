@@ -114,7 +114,7 @@ export default async function FinanceCurrenciesPage() {
                 <Table>
                   <THead>
                     <tr>
-                      <TH>Date</TH>
+                      <TH>Posting Date</TH>
                       <TH align="right">Rate</TH>
                       {canEdit && <TH align="right">Edit</TH>}
                     </tr>

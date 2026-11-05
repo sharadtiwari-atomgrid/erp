@@ -8,7 +8,7 @@ import { getCategories } from "../../../_gl/accounts";
 import { updateAccount } from "../../actions";
 import { AccountForm } from "../../account-form";
 
-export const metadata: Metadata = { title: "Edit account" };
+export const metadata: Metadata = { title: "Edit G/L Account" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;

@@ -140,8 +140,8 @@ export function AdvancesCard({ title, description, rows, partyLabel }: { title: 
       <Table>
         <THead>
           <tr>
-            <TH>Document</TH>
-            <TH>Date</TH>
+            <TH>Document No.</TH>
+            <TH>Posting Date</TH>
             <TH>{partyLabel}</TH>
             <TH align="right">Amount</TH>
             <TH align="right">Unapplied</TH>

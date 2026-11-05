@@ -85,7 +85,7 @@ export function AssetForm({
             <Field label="Location" htmlFor="location" errors={err.location} hint="e.g. Plant 2, first floor">
               <Input id="location" name="location" defaultValue={initial?.location ?? ""} />
             </Field>
-            <Field label="Purchase invoice" htmlFor="purchaseInvoiceId" errors={err.purchaseInvoiceId} hint="If bought through a posted bill whose line went to the asset account, no acquisition posting is needed">
+            <Field label="Purchase Invoice" htmlFor="purchaseInvoiceId" errors={err.purchaseInvoiceId} hint="If bought through a posted purchase invoice whose line went to the asset account, no acquisition posting is needed">
               <Select id="purchaseInvoiceId" name="purchaseInvoiceId" defaultValue={initial?.purchaseInvoiceId ?? ""}>
                 <option value="">None</option>
                 {invoices.map((i) => (

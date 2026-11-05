@@ -11,7 +11,7 @@ import { ageDocuments } from "../_ar_ap/aging";
 import { AdvancesCard, AgingTable, AsOfToolbar } from "../_ar_ap/aging-report";
 import { receivablesAsOf } from "../_ar_ap/server";
 
-export const metadata: Metadata = { title: "Aged receivables" };
+export const metadata: Metadata = { title: "Aged Accounts Receivable" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -35,7 +35,7 @@ export default async function AgedReceivablesPage({ searchParams }: PageProps<"/
 
   return (
     <>
-      <PageHeader title="Aged receivables" description={`Open customer invoices on ${formatDmy(asOf)}, by days past due.`} />
+      <PageHeader title="Aged Accounts Receivable" description={`Open customer invoices on ${formatDmy(asOf)}, by days past due.`} />
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Total receivable" value={formatMoney(aged.total)} hint={`${aged.parties.length} customer${aged.parties.length === 1 ? "" : "s"}`} />
         <StatCard label="Overdue" value={formatMoney(overdue)} tone={overdue > 0 ? "warning" : "default"} />

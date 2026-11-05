@@ -11,7 +11,7 @@ import { describeFilters, filterQuery, loadFilterOptions, pageReader, readFilter
 import { ReportFilterBar } from "../_lib/filter-bar";
 import { StatementTable } from "../_lib/statement-table";
 
-export const metadata: Metadata = { title: "Profit & loss" };
+export const metadata: Metadata = { title: "Income Statement" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -26,7 +26,7 @@ export default async function ProfitAndLossPage({ searchParams }: PageProps<"/fi
   return (
     <>
       <PageHeader
-        title="Statement of profit and loss"
+        title="Income Statement"
         description={`Schedule III (Division II) · ${report.subtitle}${scope ? ` · ${scope}` : ""}`}
         back={{ href: "/finance", label: "Finance" }}
         actions={

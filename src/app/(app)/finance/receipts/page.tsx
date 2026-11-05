@@ -15,7 +15,7 @@ import { dayFromIso, formatDmy, todayIso } from "@/lib/ops/dates";
 import { can } from "@/lib/permissions";
 import { Amount, DocStatus } from "../_ar_ap/ui";
 
-export const metadata: Metadata = { title: "Cash receipts" };
+export const metadata: Metadata = { title: "Cash Receipt Journals" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -59,12 +59,12 @@ export default async function ReceiptsPage({ searchParams }: PageProps<"/finance
   return (
     <>
       <PageHeader
-        title="Cash receipts"
+        title="Cash Receipt Journals"
         description="Money received from customers, applied to their open invoices and posted to bank or cash."
         actions={
           <>
             <ButtonLink href="/finance/aged-receivables" variant="secondary">
-              Aged receivables
+              Aged Accounts Receivable
             </ButtonLink>
             {can(user, "finance", "edit") && <ButtonLink href="/finance/receipts/new">New receipt</ButtonLink>}
           </>
@@ -84,7 +84,7 @@ export default async function ReceiptsPage({ searchParams }: PageProps<"/finance
           <THead>
             <tr>
               <TH>Number</TH>
-              <TH>Date</TH>
+              <TH>Posting Date</TH>
               <TH>Customer</TH>
               <TH>Deposited to</TH>
               <TH>Method</TH>

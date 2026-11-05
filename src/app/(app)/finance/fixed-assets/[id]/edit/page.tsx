@@ -10,7 +10,7 @@ import { assetFormOptions } from "../../../_cash_fa/asset-data";
 import { updateAsset } from "../../actions";
 import { AssetForm } from "../../asset-form";
 
-export const metadata: Metadata = { title: "Edit fixed asset" };
+export const metadata: Metadata = { title: "Edit Fixed Asset" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;

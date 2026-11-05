@@ -20,7 +20,7 @@ import { can } from "@/lib/permissions";
 import { dueWithin, overdue } from "../_ar_ap/aging";
 import { DocStatus } from "../_ar_ap/ui";
 
-export const metadata: Metadata = { title: "Purchase invoices" };
+export const metadata: Metadata = { title: "Purchase Invoices" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -73,24 +73,24 @@ export default async function PurchaseInvoicesPage({ searchParams }: PageProps<"
   return (
     <>
       <PageHeader
-        title="Purchase invoices"
-        description="Supplier bills for goods, services, expenses and assets, posted to payables."
+        title="Purchase Invoices"
+        description="Purchase invoices for goods, services, expenses and assets, posted to payables."
         actions={
           <>
             <ButtonLink href="/finance/vendor-payments" variant="secondary">
-              Vendor payments
+              Payment Journals
             </ButtonLink>
-            {can(user, "finance", "edit") && <ButtonLink href="/finance/purchase-invoices/new">New purchase invoice</ButtonLink>}
+            {can(user, "finance", "edit") && <ButtonLink href="/finance/purchase-invoices/new">New Purchase Invoice</ButtonLink>}
           </>
         }
       />
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Open payables" value={formatMoney(sum(openDocs))} hint={`${openDocs.length} unpaid bill${openDocs.length === 1 ? "" : "s"}`} />
+        <StatCard label="Open payables" value={formatMoney(sum(openDocs))} hint={`${openDocs.length} unpaid purchase invoice${openDocs.length === 1 ? "" : "s"}`} />
         <Link href="/finance/purchase-invoices?status=DUE_WEEK" className="block rounded-lg focus-visible:outline-2 focus-visible:outline-brand-600">
-          <StatCard label="Bills due this week" value={formatMoney(sum(dueWeek))} hint={`${dueWeek.length} bill${dueWeek.length === 1 ? "" : "s"} due by ${formatDmy(addDaysIso(today, 6))}`} tone={dueWeek.length ? "warning" : "default"} />
+          <StatCard label="Purchase invoices due this week" value={formatMoney(sum(dueWeek))} hint={`${dueWeek.length} purchase invoice${dueWeek.length === 1 ? "" : "s"} due by ${formatDmy(addDaysIso(today, 6))}`} tone={dueWeek.length ? "warning" : "default"} />
         </Link>
         <Link href="/finance/purchase-invoices?status=OVERDUE" className="block rounded-lg focus-visible:outline-2 focus-visible:outline-brand-600">
-          <StatCard label="Overdue" value={formatMoney(sum(late))} hint={`${late.length} bill${late.length === 1 ? "" : "s"}`} tone={late.length ? "danger" : "default"} />
+          <StatCard label="Overdue" value={formatMoney(sum(late))} hint={`${late.length} purchase invoice${late.length === 1 ? "" : "s"}`} tone={late.length ? "danger" : "default"} />
         </Link>
         <Link href="/finance/purchase-invoices?status=DRAFT" className="block rounded-lg focus-visible:outline-2 focus-visible:outline-brand-600">
           <StatCard label="Drafts to post" value={drafts} />
@@ -99,7 +99,7 @@ export default async function PurchaseInvoicesPage({ searchParams }: PageProps<"
       <Card>
         <ListToolbar
           q={q}
-          placeholder="Search number, supplier or supplier invoice"
+          placeholder="Search number, vendor or vendor invoice"
           filter={{
             name: "status",
             value: status,
@@ -115,9 +115,9 @@ export default async function PurchaseInvoicesPage({ searchParams }: PageProps<"
           <THead>
             <tr>
               <TH>Number</TH>
-              <TH>Supplier</TH>
-              <TH>Supplier inv.</TH>
-              <TH>Date</TH>
+              <TH>Vendor</TH>
+              <TH>Vendor inv.</TH>
+              <TH>Posting Date</TH>
               <TH>Due</TH>
               <TH>Status</TH>
               <TH align="right">Total</TH>

@@ -23,7 +23,7 @@ import { ChallanForm } from "./challan-form";
 import { TaxNav } from "./_lib/nav";
 import { STATUSES, kindOf, recentQuarters, returnForm } from "./_lib/tds";
 
-export const metadata: Metadata = { title: "TDS / TCS" };
+export const metadata: Metadata = { title: "TDS & TCS Entries" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -91,7 +91,7 @@ export default async function FinanceTdsPage({ searchParams }: PageProps<"/finan
   return (
     <>
       <PageHeader
-        title="TDS / TCS"
+        title="TDS & TCS Entries"
         description={`${kind === "TDS" ? "Tax deducted at source on payments" : "Tax collected at source on sales"} · ${quarter === "all" ? "all quarters" : quarter}`}
         back={{ href: "/finance", label: "Finance" }}
         actions={
@@ -146,11 +146,11 @@ export default async function FinanceTdsPage({ searchParams }: PageProps<"/finan
         <Table>
           <THead>
             <tr>
-              <TH>Date</TH>
+              <TH>Posting Date</TH>
               <TH>Section</TH>
               <TH>Party</TH>
               <TH>PAN</TH>
-              <TH>Document</TH>
+              <TH>Document No.</TH>
               <TH align="right">Base amount</TH>
               <TH align="right">Rate</TH>
               <TH align="right">{kind}</TH>

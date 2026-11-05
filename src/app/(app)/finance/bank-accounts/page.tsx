@@ -13,7 +13,7 @@ import { can } from "@/lib/permissions";
 import { glBalances, OPENING_BATCH } from "../_cash_fa/server";
 import { Amount } from "../_cash_fa/ui";
 
-export const metadata: Metadata = { title: "Bank accounts" };
+export const metadata: Metadata = { title: "Bank Accounts" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -38,15 +38,15 @@ export default async function BankAccountsPage() {
   return (
     <>
       <PageHeader
-        title="Bank accounts"
+        title="Bank Accounts"
         description="Company bank and cash accounts. Each balance is the balance of its ledger account."
         actions={
           canEdit && (
             <>
               <ButtonLink href="/finance/bank-accounts/transfer" variant="secondary">
-                Transfer between accounts
+                Bank Account Transfer
               </ButtonLink>
-              <ButtonLink href="/finance/bank-accounts/new">New bank account</ButtonLink>
+              <ButtonLink href="/finance/bank-accounts/new">New Bank Account</ButtonLink>
             </>
           )
         }

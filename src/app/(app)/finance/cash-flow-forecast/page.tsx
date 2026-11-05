@@ -15,7 +15,7 @@ import { buildForecast, monthBuckets, weekBuckets, type ForecastItem, type Forec
 import { glBalances } from "../_cash_fa/server";
 import { Amount, Note, TabLinks } from "../_cash_fa/ui";
 
-export const metadata: Metadata = { title: "Cash flow forecast" };
+export const metadata: Metadata = { title: "Cash Flow Forecasts" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -84,7 +84,7 @@ export default async function CashFlowForecastPage({ searchParams }: PageProps<"
   return (
     <>
       <PageHeader
-        title="Cash flow forecast"
+        title="Cash Flow Forecasts"
         description={`Expected cash in and out from ${formatDmy(today)} to ${formatDmy(horizonEnd)}, starting from today's bank and cash balances.`}
         actions={
           <TabLinks
@@ -159,9 +159,9 @@ export default async function CashFlowForecastPage({ searchParams }: PageProps<"
         <Table>
           <THead>
             <tr>
-              <TH>Date</TH>
+              <TH>Posting Date</TH>
               <TH>Type</TH>
-              <TH>Document</TH>
+              <TH>Document No.</TH>
               <TH>Party</TH>
               <TH align="right">In</TH>
               <TH align="right">Out</TH>

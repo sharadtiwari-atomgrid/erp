@@ -22,7 +22,7 @@ export function NewBudgetForm({
   const err = state?.fieldErrors ?? {};
   return (
     <Card>
-      <CardHeader title="New budget" />
+      <CardHeader title="New G/L Budget" />
       <CardBody>
         <form action={formAction} className="space-y-4">
           <FormMessage state={state} />

@@ -18,7 +18,7 @@ import { LedgerEntriesCard } from "../../_ar_ap/ledger-card";
 import { DocStatus } from "../../_ar_ap/ui";
 import { cancelReceipt, deleteDraftReceipt, postReceipt } from "../actions";
 
-export const metadata: Metadata = { title: "Cash receipt" };
+export const metadata: Metadata = { title: "Cash Receipt" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -55,7 +55,7 @@ export default async function ReceiptPage({ params }: PageProps<"/finance/receip
           </span>
         }
         description={`${receipt.customer.name} · ${formatDmy(receipt.date)}`}
-        back={{ href: "/finance/receipts", label: "Cash receipts" }}
+        back={{ href: "/finance/receipts", label: "Cash Receipt Journals" }}
         actions={
           <>
             {canEdit && receipt.status === "DRAFT" && (
@@ -88,19 +88,19 @@ export default async function ReceiptPage({ params }: PageProps<"/finance/receip
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Amount received" value={formatMoney(amount)} />
         <StatCard label="TDS deducted" value={formatMoney(tds)} hint="Credited to TDS receivable" />
-        <StatCard label="Applied to invoices" value={formatMoney(applied)} hint={`${receipt.applications.length} invoice${receipt.applications.length === 1 ? "" : "s"}`} />
+        <StatCard label="Applied Entries" value={formatMoney(applied)} hint={`${receipt.applications.length} invoice${receipt.applications.length === 1 ? "" : "s"}`} />
         <StatCard label="Unapplied (advance)" value={formatMoney(receipt.status === "CANCELLED" ? 0 : unapplied)} tone={unapplied > 0 && receipt.status === "POSTED" ? "warning" : "default"} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <Card>
-            <CardHeader title="Applied to invoices" />
+            <CardHeader title="Applied Entries" />
             <Table>
               <THead>
                 <tr>
                   <TH>Invoice</TH>
-                  <TH>Date</TH>
+                  <TH>Posting Date</TH>
                   <TH>Due</TH>
                   <TH align="right">Invoice total</TH>
                   <TH align="right">Applied</TH>
@@ -141,7 +141,7 @@ export default async function ReceiptPage({ params }: PageProps<"/finance/receip
                     ),
                   },
                   { label: "Customer GSTIN", value: receipt.customer.gstin },
-                  { label: "Date", value: formatDmy(receipt.date) },
+                  { label: "Posting Date", value: formatDmy(receipt.date) },
                   { label: "Deposited to", value: `${receipt.bankAccount.name} (${receipt.bankAccount.code})` },
                   { label: "Method", value: receipt.method === "UPI" ? "UPI" : humanize(receipt.method) },
                   { label: "Reference", value: receipt.reference },

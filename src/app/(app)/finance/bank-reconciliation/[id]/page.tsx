@@ -19,7 +19,7 @@ import { Amount, Note } from "../../_cash_fa/ui";
 import { autoMatchLines, clearOpeningEntries, completeReconciliation, restoreLine, undoOpeningClear, unmatchLine } from "../actions";
 import { ReconcileWorkspace } from "./reconcile-workspace";
 
-export const metadata: Metadata = { title: "Reconcile bank account" };
+export const metadata: Metadata = { title: "Bank Acc. Reconciliation" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -67,14 +67,14 @@ export default async function ReconcilePage({ params, searchParams }: PageProps<
       <PageHeader
         title={`Reconcile ${bank.name}`}
         description={`${bank.code} · ledger account ${bank.glAccount.code} ${bank.glAccount.name}`}
-        back={{ href: "/finance/bank-reconciliation", label: "Bank reconciliation" }}
+        back={{ href: "/finance/bank-reconciliation", label: "Bank Account Reconciliations" }}
         actions={
           <>
             <ButtonLink href={`/finance/bank-reconciliation?bank=${id}`} variant="secondary">
               Import statement
             </ButtonLink>
             <ButtonLink href={`/finance/bank-accounts/${id}`} variant="secondary">
-              Bank account
+              Bank Account
             </ButtonLink>
             {canEdit && (
               <ActionButton action={autoMatchLines.bind(null, id)} variant="primary" pendingText="Matching…" disabled={unmatched.length === 0}>

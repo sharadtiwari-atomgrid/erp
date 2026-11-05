@@ -18,7 +18,7 @@ import { LedgerEntriesCard } from "../../_ar_ap/ledger-card";
 import { DocStatus } from "../../_ar_ap/ui";
 import { cancelPayment, deleteDraftPayment, postPayment } from "../actions";
 
-export const metadata: Metadata = { title: "Vendor payment" };
+export const metadata: Metadata = { title: "Vendor Payment" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -59,7 +59,7 @@ export default async function VendorPaymentPage({ params }: PageProps<"/finance/
           </span>
         }
         description={`${payment.supplier.name} · ${formatDmy(payment.date)}`}
-        back={{ href: "/finance/vendor-payments", label: "Vendor payments" }}
+        back={{ href: "/finance/vendor-payments", label: "Payment Journals" }}
         actions={
           <>
             {canEdit && payment.status === "DRAFT" && (
@@ -91,27 +91,27 @@ export default async function VendorPaymentPage({ params }: PageProps<"/finance/
 
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Paid from bank" value={formatMoney(cash)} />
-        <StatCard label="Applied to bills" value={formatMoney(applied)} hint={`${payment.applications.length} bill${payment.applications.length === 1 ? "" : "s"}`} />
+        <StatCard label="Applied Entries" value={formatMoney(applied)} hint={`${payment.applications.length} purchase invoice${payment.applications.length === 1 ? "" : "s"}`} />
         <StatCard label="TDS withheld" value={formatMoney(tds)} hint={payment.tdsSection ? `Section ${payment.tdsSection.code}` : "No TDS"} />
-        <StatCard label="Advance" value={formatMoney(advance)} hint="Not against a bill" />
+        <StatCard label="Advance" value={formatMoney(advance)} hint="Not against a purchase invoice" />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <Card>
-            <CardHeader title="Applied to bills" />
+            <CardHeader title="Applied Entries" />
             <Table>
               <THead>
                 <tr>
-                  <TH>Bill</TH>
-                  <TH>Supplier inv.</TH>
-                  <TH>Date</TH>
-                  <TH align="right">Bill total</TH>
+                  <TH>Purchase invoice</TH>
+                  <TH>Vendor inv.</TH>
+                  <TH>Posting Date</TH>
+                  <TH align="right">Purchase invoice total</TH>
                   <TH align="right">Settled</TH>
                 </tr>
               </THead>
               <TBody>
-                {payment.applications.length === 0 && <EmptyRow colSpan={5}>Not applied to any bill: the whole payment is an advance.</EmptyRow>}
+                {payment.applications.length === 0 && <EmptyRow colSpan={5}>Not applied to any purchase invoice: the whole payment is an advance.</EmptyRow>}
                 {payment.applications.map((a) => (
                   <TR key={a.id}>
                     <TD>
@@ -166,7 +166,7 @@ export default async function VendorPaymentPage({ params }: PageProps<"/finance/
               <DetailList
                 items={[
                   {
-                    label: "Supplier",
+                    label: "Vendor",
                     value: (
                       <Link href={`/contacts/${payment.supplier.id}`} className="text-brand-700 hover:underline">
                         {payment.supplier.name}
@@ -174,7 +174,7 @@ export default async function VendorPaymentPage({ params }: PageProps<"/finance/
                     ),
                   },
                   { label: "PAN / GSTIN", value: [payment.supplier.pan, payment.supplier.gstin].filter(Boolean).join(" · ") || null },
-                  { label: "Date", value: formatDmy(payment.date) },
+                  { label: "Posting Date", value: formatDmy(payment.date) },
                   { label: "Paid from", value: `${payment.bankAccount.name} (${payment.bankAccount.code})` },
                   { label: "Method", value: payment.method === "UPI" ? "UPI" : humanize(payment.method) },
                   { label: "Reference", value: payment.reference },

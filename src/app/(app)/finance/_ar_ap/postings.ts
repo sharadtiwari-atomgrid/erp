@@ -115,7 +115,7 @@ export function vendorPaymentPostingLines(input: {
   if (cash <= 0) throw new Error("Nothing is paid out of the bank.");
   const lines: LedgerLine[] = [];
   if (applied > 0) lines.push({ account: "PAYABLES", debit: applied, contactId: input.supplierId });
-  if (advance > 0) lines.push({ account: "SUPPLIER_ADVANCES", debit: advance, contactId: input.supplierId, description: "Advance to supplier (unapplied)" });
+  if (advance > 0) lines.push({ account: "SUPPLIER_ADVANCES", debit: advance, contactId: input.supplierId, description: "Advance to vendor (unapplied)" });
   lines.push({ account: { id: input.bankGlAccountId }, credit: cash });
   if (tds > 0) lines.push({ account: "TDS_PAYABLE", credit: tds, contactId: input.supplierId });
   return lines;

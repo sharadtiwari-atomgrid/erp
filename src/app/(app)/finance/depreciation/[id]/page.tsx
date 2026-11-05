@@ -16,7 +16,7 @@ import { can } from "@/lib/permissions";
 import { Note } from "../../_cash_fa/ui";
 import { deleteRun, postRun, recalculateRun, reverseRun } from "../actions";
 
-export const metadata: Metadata = { title: "Depreciation run" };
+export const metadata: Metadata = { title: "Depreciation Run" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -48,7 +48,7 @@ export default async function DepreciationRunPage({ params }: PageProps<"/financ
           </span>
         }
         description={`Depreciation for ${formatDmy(run.periodStart)} – ${formatDmy(run.periodEnd)}`}
-        back={{ href: "/finance/depreciation", label: "Depreciation" }}
+        back={{ href: "/finance/depreciation", label: "Calculate Depreciation" }}
         actions={
           canEdit && (
             <>

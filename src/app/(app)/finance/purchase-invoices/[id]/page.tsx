@@ -23,7 +23,7 @@ import { purchaseInvoicePostingLines } from "../../_ar_ap/postings";
 import { DocStatus } from "../../_ar_ap/ui";
 import { cancelBill, deleteDraftBill, postBill } from "../actions";
 
-export const metadata: Metadata = { title: "Purchase invoice" };
+export const metadata: Metadata = { title: "Purchase Invoice" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -70,8 +70,8 @@ export default async function PurchaseInvoicePage({ params }: PageProps<"/financ
             {late && <Badge tone="red">Overdue</Badge>}
           </span>
         }
-        description={`${bill.supplier.name}${bill.supplierInvoiceNo ? ` · supplier invoice ${bill.supplierInvoiceNo}` : ""}`}
-        back={{ href: "/finance/purchase-invoices", label: "Purchase invoices" }}
+        description={`${bill.supplier.name}${bill.supplierInvoiceNo ? ` · vendor invoice ${bill.supplierInvoiceNo}` : ""}`}
+        back={{ href: "/finance/purchase-invoices", label: "Purchase Invoices" }}
         actions={
           <>
             {canEdit && bill.status === "DRAFT" && (
@@ -86,7 +86,7 @@ export default async function PurchaseInvoicePage({ params }: PageProps<"/financ
                 pendingText="Cancelling…"
                 confirmMessage="Cancel this bill? Its posting is reversed today."
               >
-                Cancel bill
+                Cancel purchase invoice
               </ActionButton>
             )}
             {canEdit && bill.status === "DRAFT" && (
@@ -197,7 +197,7 @@ export default async function PurchaseInvoicePage({ params }: PageProps<"/financ
               <THead>
                 <tr>
                   <TH>Payment</TH>
-                  <TH>Date</TH>
+                  <TH>Posting Date</TH>
                   <TH>Status</TH>
                   <TH align="right">Settled</TH>
                 </tr>
@@ -248,15 +248,15 @@ export default async function PurchaseInvoicePage({ params }: PageProps<"/financ
               <DetailList
                 items={[
                   {
-                    label: "Supplier",
+                    label: "Vendor",
                     value: (
                       <Link href={`/contacts/${bill.supplier.id}`} className="text-brand-700 hover:underline">
                         {bill.supplier.name}
                       </Link>
                     ),
                   },
-                  { label: "Supplier GSTIN", value: bill.supplier.gstin },
-                  { label: "Supplier invoice no.", value: bill.supplierInvoiceNo },
+                  { label: "Vendor GSTIN", value: bill.supplier.gstin },
+                  { label: "Vendor invoice no.", value: bill.supplierInvoiceNo },
                   { label: "Invoice date", value: formatDmy(bill.invoiceDate) },
                   { label: "Branch", value: bill.branch.name },
                   { label: "Place of supply", value: placeOfSupply ? `${placeOfSupply}${bill.placeOfSupply ? "" : " (supplier’s state)"}` : null },

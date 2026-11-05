@@ -35,7 +35,7 @@ export function ApplicationsEditor({
       <THead>
         <tr>
           <TH>{docLabel}</TH>
-          <TH>Date</TH>
+          <TH>Posting Date</TH>
           <TH>Due</TH>
           <TH align="right">Total</TH>
           <TH align="right">Open balance</TH>

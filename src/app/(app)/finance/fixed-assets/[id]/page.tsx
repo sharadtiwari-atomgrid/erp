@@ -20,7 +20,7 @@ import { Note } from "../../_cash_fa/ui";
 import { disposeAsset, postAcquisition } from "../actions";
 import { AcquisitionForm, DisposalForm } from "./asset-actions";
 
-export const metadata: Metadata = { title: "Fixed asset" };
+export const metadata: Metadata = { title: "Fixed Asset Card" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -83,7 +83,7 @@ export default async function AssetPage({ params }: PageProps<"/finance/fixed-as
           </span>
         }
         description={`${asset.name} · ${asset.category}`}
-        back={{ href: "/finance/fixed-assets", label: "Asset register" }}
+        back={{ href: "/finance/fixed-assets", label: "Fixed Assets" }}
         actions={
           canEdit && (
             <ButtonLink href={`/finance/fixed-assets/${id}/edit`} variant="secondary">
@@ -115,7 +115,7 @@ export default async function AssetPage({ params }: PageProps<"/finance/fixed-as
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <Card>
-            <CardHeader title="Depreciation schedule" description="Projected by financial year from the next uncharged day, with the current settings." />
+            <CardHeader title="Depreciation Book" description="Projected by financial year from the next uncharged day, with the current settings." />
             <Table>
               <THead>
                 <tr>
@@ -177,15 +177,15 @@ export default async function AssetPage({ params }: PageProps<"/finance/fixed-as
           </Card>
 
           <Card>
-            <CardHeader title="Ledger postings" description="Acquisition and disposal entries for this asset." />
+            <CardHeader title="FA Ledger Entries" description="Acquisition and disposal entries for this asset." />
             <Table>
               <THead>
                 <tr>
-                  <TH>Date</TH>
+                  <TH>Posting Date</TH>
                   <TH>Type</TH>
                   <TH>Account</TH>
-                  <TH align="right">Debit</TH>
-                  <TH align="right">Credit</TH>
+                  <TH align="right">Debit Amount</TH>
+                  <TH align="right">Credit Amount</TH>
                 </tr>
               </THead>
               <TBody>
@@ -224,7 +224,7 @@ export default async function AssetPage({ params }: PageProps<"/finance/fixed-as
                     value: asset.method === "WDV" ? `${formatNumber(asset.ratePct)}% a year` : `${formatNumber(asset.usefulLifeYears)} years`,
                   },
                   {
-                    label: "Purchase invoice",
+                    label: "Purchase Invoice",
                     value: asset.purchaseInvoice ? (
                       <Link href={`/finance/purchase-invoices/${asset.purchaseInvoice.id}`} className="text-brand-700 hover:underline">
                         {asset.purchaseInvoice.number} · {asset.purchaseInvoice.supplier.name}
@@ -271,7 +271,7 @@ export default async function AssetPage({ params }: PageProps<"/finance/fixed-as
               <CardBody>
                 <DetailList
                   items={[
-                    { label: "Date", value: formatDmy(asset.disposalDate) },
+                    { label: "Disposal Date", value: formatDmy(asset.disposalDate) },
                     { label: "Sale amount", value: formatMoney(asset.disposalAmount) },
                     { label: "Book value at disposal", value: formatMoney(cost - accumulated) },
                     { label: "Profit / (loss)", value: formatMoney(num(asset.disposalAmount) - (cost - accumulated)) },

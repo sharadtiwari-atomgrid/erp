@@ -122,12 +122,12 @@ export function BillForm({
       <FormMessage state={state} />
       {notice && <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">{notice}</div>}
       <Card>
-        <CardHeader title="Bill" description="The number is assigned when you save." />
+        <CardHeader title="Purchase invoice" description="The number is assigned when you save." />
         <CardBody>
           <FormGrid className="lg:grid-cols-3">
-            <Field label="Supplier" htmlFor="supplierId" required errors={err.supplierId}>
+            <Field label="Vendor" htmlFor="supplierId" required errors={err.supplierId}>
               <Select id="supplierId" name="supplierId" value={supplierId} onChange={(e) => pickSupplier(e.target.value)} required>
-                <option value="">Select a supplier…</option>
+                <option value="">Select a vendor…</option>
                 {suppliers.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.name} ({s.code}){s.transporter ? " · transporter" : ""}
@@ -135,7 +135,7 @@ export function BillForm({
                 ))}
               </Select>
             </Field>
-            <Field label="Supplier invoice no." htmlFor="supplierInvoiceNo" errors={err.supplierInvoiceNo}>
+            <Field label="Vendor invoice no." htmlFor="supplierInvoiceNo" errors={err.supplierInvoiceNo}>
               <Input id="supplierInvoiceNo" name="supplierInvoiceNo" defaultValue={initial.supplierInvoiceNo} />
             </Field>
             <Field label="Branch" htmlFor="branchId" required errors={err.branchId}>
@@ -160,7 +160,7 @@ export function BillForm({
                 required
               />
             </Field>
-            <Field label="Due date" htmlFor="dueDate" errors={err.dueDate} hint={supplier ? `Supplier terms: ${supplier.paymentTermsDays} days` : "Blank = invoice date + supplier’s terms"}>
+            <Field label="Due date" htmlFor="dueDate" errors={err.dueDate} hint={supplier ? `Vendor terms: ${supplier.paymentTermsDays} days` : "Blank = invoice date + vendor’s terms"}>
               <Input id="dueDate" name="dueDate" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
             </Field>
             <Field label="Place of supply (state)" htmlFor="placeOfSupply" errors={err.placeOfSupply} hint={companyState ? `Your state: ${companyState}` : "Set your state in company settings"}>

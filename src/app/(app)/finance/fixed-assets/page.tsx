@@ -17,7 +17,7 @@ import { can } from "@/lib/permissions";
 import { assetRegister } from "../_cash_fa/asset-data";
 import { ASSET_CATEGORIES } from "../_cash_fa/constants";
 
-export const metadata: Metadata = { title: "Asset register" };
+export const metadata: Metadata = { title: "Fixed Assets" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -39,7 +39,7 @@ export default async function FixedAssetsPage({ searchParams }: PageProps<"/fina
   return (
     <>
       <PageHeader
-        title="Asset register"
+        title="Fixed Assets"
         description="Property, plant and equipment with cost, depreciation and net block."
         actions={
           <>

@@ -27,13 +27,13 @@ export async function PostingPreviewCard({ lines }: { lines: LedgerLine[] }) {
   const credit = lines.reduce((s, l) => s + (l.credit ?? 0), 0);
   return (
     <Card>
-      <CardHeader title="Posting preview" description="What posting will write to the general ledger." />
+      <CardHeader title="Preview Posting" description="What posting will write to the general ledger." />
       <Table>
         <THead>
           <tr>
             <TH>Account</TH>
-            <TH align="right">Debit</TH>
-            <TH align="right">Credit</TH>
+            <TH align="right">Debit Amount</TH>
+            <TH align="right">Credit Amount</TH>
           </tr>
         </THead>
         <TBody>

@@ -9,7 +9,7 @@ import { getCompany } from "@/lib/options";
 import { amountInWords } from "../../../../sales/_lib/amount-in-words";
 import { PrintSheet, printCell } from "../../../_ar_ap/ui";
 
-export const metadata: Metadata = { title: "Payment advice" };
+export const metadata: Metadata = { title: "Remittance Advice" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -42,12 +42,12 @@ export default async function PrintVendorPaymentPage({ params }: PageProps<"/fin
 
   return (
     <PrintSheet
-      title={payment.status === "CANCELLED" ? "Payment advice (cancelled)" : payment.status === "DRAFT" ? "Payment advice (draft)" : "Payment advice"}
+      title={payment.status === "CANCELLED" ? "Remittance Advice (cancelled)" : payment.status === "DRAFT" ? "Remittance Advice (draft)" : "Remittance Advice"}
       backHref={`/finance/vendor-payments/${id}`}
       company={company}
       meta={[
         { label: "Advice no.", value: payment.number },
-        { label: "Date", value: formatDmy(payment.date) },
+        { label: "Posting Date", value: formatDmy(payment.date) },
         { label: "Mode", value: mode },
         ...(payment.reference ? [{ label: "Reference", value: payment.reference }] : []),
       ]}
@@ -64,7 +64,7 @@ export default async function PrintVendorPaymentPage({ params }: PageProps<"/fin
           <tr>
             <th className={`${printCell} text-left`}>Your invoice</th>
             <th className={`${printCell} text-left`}>Our ref.</th>
-            <th className={`${printCell} text-left`}>Date</th>
+            <th className={`${printCell} text-left`}>Posting Date</th>
             <th className={`${printCell} text-right`}>Invoice total</th>
             <th className={`${printCell} text-right`}>Settled</th>
           </tr>

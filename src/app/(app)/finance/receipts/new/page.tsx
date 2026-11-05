@@ -11,7 +11,7 @@ import { istDay } from "../../_ar_ap/aging";
 import { createReceipt } from "../actions";
 import { ReceiptForm } from "../receipt-form";
 
-export const metadata: Metadata = { title: "New cash receipt" };
+export const metadata: Metadata = { title: "New Cash Receipt" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -24,7 +24,7 @@ export default async function NewReceiptPage({ searchParams }: PageProps<"/finan
 
   return (
     <div className="max-w-6xl">
-      <PageHeader title="New cash receipt" back={{ href: "/finance/receipts", label: "Cash receipts" }} />
+      <PageHeader title="New Cash Receipt" back={{ href: "/finance/receipts", label: "Cash Receipt Journals" }} />
       <ReceiptForm
         action={createReceipt}
         customers={customers.map((c) => ({ id: c.id, code: c.code, name: c.name }))}

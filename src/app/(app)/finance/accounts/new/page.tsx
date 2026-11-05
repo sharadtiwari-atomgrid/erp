@@ -7,7 +7,7 @@ import { getCategories } from "../../_gl/accounts";
 import { createAccount } from "../actions";
 import { AccountForm } from "../account-form";
 
-export const metadata: Metadata = { title: "New account" };
+export const metadata: Metadata = { title: "New G/L Account" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -21,7 +21,7 @@ export default async function NewAccountPage() {
   ]);
   return (
     <>
-      <PageHeader title="New account" back={{ href: "/finance/accounts", label: "Chart of accounts" }} />
+      <PageHeader title="New G/L Account" back={{ href: "/finance/accounts", label: "Chart of Accounts" }} />
       <AccountForm action={createAccount} headings={headings} categories={categories} cancelHref="/finance/accounts" />
     </>
   );

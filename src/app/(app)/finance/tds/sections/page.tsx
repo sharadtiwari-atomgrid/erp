@@ -16,7 +16,7 @@ import { TaxNav } from "../_lib/nav";
 import { kindOf } from "../_lib/tds";
 import { SectionForm } from "./section-form";
 
-export const metadata: Metadata = { title: "TDS / TCS sections" };
+export const metadata: Metadata = { title: "TDS & TCS Sections" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -37,7 +37,7 @@ export default async function TdsSectionsPage({ searchParams }: PageProps<"/fina
 
   return (
     <>
-      <PageHeader title="TDS / TCS sections" description="Sections, rates and thresholds used on payments and the quarterly returns." back={{ href: "/finance", label: "Finance" }} />
+      <PageHeader title="TDS & TCS Sections" description="Sections, rates and thresholds used on payments and the quarterly returns." back={{ href: "/finance", label: "Finance" }} />
       <TaxNav kind={kind} current="sections" />
       <Card>
         <Table>

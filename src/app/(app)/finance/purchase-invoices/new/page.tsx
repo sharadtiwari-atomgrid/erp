@@ -12,7 +12,7 @@ import { getBillFormOptions } from "../../_ar_ap/options";
 import { createPurchaseInvoice } from "../actions";
 import { BillForm, type BillFormValues } from "../bill-form";
 
-export const metadata: Metadata = { title: "New purchase invoice" };
+export const metadata: Metadata = { title: "New Purchase Invoice" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -129,7 +129,7 @@ export default async function NewPurchaseInvoicePage({ searchParams }: PageProps
 
   return (
     <div className="max-w-7xl">
-      <PageHeader title="New purchase invoice" back={{ href: "/finance/purchase-invoices", label: "Purchase invoices" }} />
+      <PageHeader title="New Purchase Invoice" back={{ href: "/finance/purchase-invoices", label: "Purchase Invoices" }} />
       <BillForm action={createPurchaseInvoice} initial={initial} {...options} cancelHref="/finance/purchase-invoices" notice={"notice" in from ? from.notice : undefined} />
     </div>
   );

@@ -81,7 +81,7 @@ export function VendorPaymentForm({
         <CardHeader title="Payment" description="The number is assigned when you save." />
         <CardBody>
           <FormGrid className="lg:grid-cols-3">
-            <Field label="Supplier" htmlFor="supplierId" required errors={err.supplierId}>
+            <Field label="Vendor" htmlFor="supplierId" required errors={err.supplierId}>
               <Select
                 id="supplierId"
                 name="supplierId"
@@ -92,7 +92,7 @@ export function VendorPaymentForm({
                 }}
                 required
               >
-                <option value="">Select a supplier…</option>
+                <option value="">Select a vendor…</option>
                 {suppliers.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.name} ({s.code}){s.transporter ? " · transporter" : ""}
@@ -100,7 +100,7 @@ export function VendorPaymentForm({
                 ))}
               </Select>
             </Field>
-            <Field label="Date" htmlFor="date" required errors={err.date}>
+            <Field label="Posting Date" htmlFor="date" required errors={err.date}>
               <Input id="date" name="date" type="date" defaultValue={today} required />
             </Field>
             <Field label="Method" htmlFor="method" required errors={err.method}>
@@ -124,7 +124,7 @@ export function VendorPaymentForm({
             <Field label="Reference" htmlFor="reference" errors={err.reference} hint="UTR, cheque no.…">
               <Input id="reference" name="reference" />
             </Field>
-            <Field label="Advance (not against a bill)" htmlFor="advance" errors={err.advance} hint="Posted to advances to suppliers.">
+            <Field label="Advance (not against a purchase invoice)" htmlFor="advance" errors={err.advance} hint="Posted to advances to vendors.">
               <Input id="advance" name="advance" type="number" min="0" step="0.01" value={advance} onChange={(e) => setAdvance(e.target.value)} />
             </Field>
             <Field
@@ -177,8 +177,8 @@ export function VendorPaymentForm({
 
       <Card>
         <CardHeader
-          title="Apply to bills"
-          description="Each amount settles a bill (cash plus the TDS withheld on it)."
+          title="Apply Entries"
+          description="Each amount settles a purchase invoice (cash plus the TDS withheld on it)."
           actions={
             <>
               <Input
@@ -219,11 +219,11 @@ export function VendorPaymentForm({
           onChange={setApply}
           today={today}
           docLabel="Bill"
-          emptyText={supplierId ? "This supplier has no open bills. You can still pay an advance." : "Choose a supplier to see their open bills."}
+          emptyText={supplierId ? "This vendor has no open purchase invoices. You can still pay an advance." : "Choose a vendor to see their open purchase invoices."}
         />
         <AmountSummary
           rows={[
-            { label: "Applied to bills", value: applied },
+            { label: "Applied Entries", value: applied },
             { label: "Less TDS withheld", value: tds, tone: "muted" },
             { label: "Plus advance", value: advanceValue, tone: "muted" },
             { label: "Paid from bank", value: cash, strong: true, tone: cash <= 0 ? "danger" : undefined },

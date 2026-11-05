@@ -20,7 +20,7 @@ import { deleteJournal, postJournal, reverseJournal, updateJournal } from "../ac
 import { journalFormOptions, journalFormValues } from "../form-data";
 import { JournalForm } from "../journal-form";
 
-export const metadata: Metadata = { title: "Journal" };
+export const metadata: Metadata = { title: "General Journal" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -53,7 +53,7 @@ export default async function JournalPage({ params }: PageProps<"/finance/journa
         </span>
       }
       description={`${journal.kind} journal · ${formatDmy(journal.date)}`}
-      back={{ href: "/finance/journals", label: "General journals" }}
+      back={{ href: "/finance/journals", label: "General Journals" }}
       actions={
         <>
           {canEdit && draft && (
@@ -111,8 +111,8 @@ export default async function JournalPage({ params }: PageProps<"/finance/journa
               <tr>
                 <TH>Account</TH>
                 <TH>Description</TH>
-                <TH align="right">Debit</TH>
-                <TH align="right">Credit</TH>
+                <TH align="right">Debit Amount</TH>
+                <TH align="right">Credit Amount</TH>
               </tr>
             </THead>
             <TBody>
@@ -148,9 +148,9 @@ export default async function JournalPage({ params }: PageProps<"/finance/journa
             <DetailList
               items={[
                 { label: "Kind", value: journal.kind },
-                { label: "Date", value: formatDmy(journal.date) },
+                { label: "Posting Date", value: formatDmy(journal.date) },
                 { label: "Branch", value: branch?.name },
-                { label: "Narration", value: journal.narration },
+                { label: "Description", value: journal.narration },
                 {
                   label: "Transaction",
                   value: journal.transactionNo && (

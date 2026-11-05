@@ -63,7 +63,7 @@ export function BankAccountForm({
             <Field label="Bank name" htmlFor="bankName" errors={err.bankName}>
               <Input id="bankName" name="bankName" defaultValue={initial?.bankName ?? ""} />
             </Field>
-            <Field label="Account no." htmlFor="accountNo" errors={err.accountNo}>
+            <Field label="Account No." htmlFor="accountNo" errors={err.accountNo}>
               <Input id="accountNo" name="accountNo" defaultValue={initial?.accountNo ?? ""} />
             </Field>
             <Field label="IFSC" htmlFor="ifsc" errors={err.ifsc} hint="11 characters">

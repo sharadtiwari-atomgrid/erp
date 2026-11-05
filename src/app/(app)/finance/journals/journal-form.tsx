@@ -84,10 +84,10 @@ export function JournalForm({
     <form action={formAction} className="space-y-6">
       <FormMessage state={state} />
       <Card>
-        <CardHeader title="Voucher" />
+        <CardHeader title="General Journal" />
         <CardBody>
           <FormGrid className="lg:grid-cols-4">
-            <Field label="Date" htmlFor="date" required>
+            <Field label="Posting Date" htmlFor="date" required>
               <Input id="date" name="date" type="date" defaultValue={initial.date} required />
             </Field>
             <Field label="Kind" htmlFor="kind" required>
@@ -109,7 +109,7 @@ export function JournalForm({
                 ))}
               </Select>
             </Field>
-            <Field label="Narration" htmlFor="narration" className="lg:col-span-4">
+            <Field label="Description" htmlFor="narration" className="lg:col-span-4">
               <Textarea id="narration" name="narration" rows={2} defaultValue={initial.narration} />
             </Field>
           </FormGrid>
@@ -141,8 +141,8 @@ export function JournalForm({
                 <th className="w-8 px-3 py-2">#</th>
                 <th className="min-w-56 px-2 py-2">Account</th>
                 <th className="min-w-48 px-2 py-2">Description</th>
-                <th className="w-36 px-2 py-2 text-right">Debit</th>
-                <th className="w-36 px-2 py-2 text-right">Credit</th>
+                <th className="w-36 px-2 py-2 text-right">Debit Amount</th>
+                <th className="w-36 px-2 py-2 text-right">Credit Amount</th>
                 <th className="min-w-44 px-2 py-2">Contact</th>
                 <th className="w-10 px-2 py-2" />
               </tr>

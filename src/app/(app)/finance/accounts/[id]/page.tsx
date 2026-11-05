@@ -22,7 +22,7 @@ import { isoParam, paymentInvoiceMap } from "../../_gl/server";
 import { Amount, FilterField } from "../../_gl/ui";
 import { deleteAccount, setAccountBlocked } from "../actions";
 
-export const metadata: Metadata = { title: "Account ledger" };
+export const metadata: Metadata = { title: "G/L Account Card" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -95,7 +95,7 @@ export default async function AccountPage({ params, searchParams }: PageProps<"/
           </span>
         }
         description={`${ACCOUNT_TYPE_LABELS[account.type]} · ${account.category}`}
-        back={{ href: "/finance/accounts", label: "Chart of accounts" }}
+        back={{ href: "/finance/accounts", label: "Chart of Accounts" }}
         actions={
           canEdit && (
             <>
@@ -114,7 +114,7 @@ export default async function AccountPage({ params, searchParams }: PageProps<"/
               <ButtonLink href={`/finance/accounts/${id}/edit`} variant="secondary">
                 Edit
               </ButtonLink>
-              {account.directPosting && account.isActive && <ButtonLink href="/finance/journals/new">New journal</ButtonLink>}
+              {account.directPosting && account.isActive && <ButtonLink href="/finance/journals/new">New General Journal</ButtonLink>}
             </>
           )
         }
@@ -152,11 +152,11 @@ export default async function AccountPage({ params, searchParams }: PageProps<"/
           <Table>
             <THead>
               <tr>
-                <TH>Date</TH>
-                <TH>Document</TH>
+                <TH>Posting Date</TH>
+                <TH>Document No.</TH>
                 <TH>Description</TH>
-                <TH align="right">Debit</TH>
-                <TH align="right">Credit</TH>
+                <TH align="right">Debit Amount</TH>
+                <TH align="right">Credit Amount</TH>
                 <TH align="right">Balance</TH>
               </tr>
             </THead>
@@ -213,7 +213,7 @@ export default async function AccountPage({ params, searchParams }: PageProps<"/
                   <td colSpan={6} className="px-4 py-3 text-center text-xs text-ink-soft">
                     Showing the first {LIMIT} of {inRange._count} entries. Narrow the date range, or{" "}
                     <Link href={`/finance/entries?account=${id}&from=${from}&to=${to}`} className="text-brand-700 hover:underline">
-                      open them in G/L entries
+                      open them in G/L Entries
                     </Link>
                     .
                   </td>

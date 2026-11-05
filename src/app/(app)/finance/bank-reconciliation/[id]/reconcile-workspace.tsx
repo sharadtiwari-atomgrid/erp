@@ -95,7 +95,7 @@ export function ReconcileWorkspace({
             <table className="min-w-full divide-y divide-line text-sm">
               <thead className="sticky top-0 bg-muted">
                 <tr className="text-left text-xs font-semibold uppercase tracking-wide text-ink-soft">
-                  <th className="px-3 py-2">Date</th>
+                  <th className="px-3 py-2">Posting Date</th>
                   <th className="px-3 py-2">Description</th>
                   <th className="px-3 py-2 text-right">Amount</th>
                   {canEdit && <th className="px-3 py-2" />}
@@ -162,10 +162,10 @@ export function ReconcileWorkspace({
               <thead className="sticky top-0 bg-muted">
                 <tr className="text-left text-xs font-semibold uppercase tracking-wide text-ink-soft">
                   <th className="w-8 px-3 py-2" />
-                  <th className="px-3 py-2">Date</th>
-                  <th className="px-3 py-2">Document</th>
-                  <th className="px-3 py-2 text-right">Debit</th>
-                  <th className="px-3 py-2 text-right">Credit</th>
+                  <th className="px-3 py-2">Posting Date</th>
+                  <th className="px-3 py-2">Document No.</th>
+                  <th className="px-3 py-2 text-right">Debit Amount</th>
+                  <th className="px-3 py-2 text-right">Credit Amount</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">

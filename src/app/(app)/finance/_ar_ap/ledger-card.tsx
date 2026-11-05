@@ -16,15 +16,15 @@ export async function LedgerEntriesCard({ sourceType, sourceId }: { sourceType: 
   const credit = entries.reduce((s, e) => s + num(e.credit), 0);
   return (
     <Card>
-      <CardHeader title="Ledger entries" description="What this document posted to the general ledger." />
+      <CardHeader title="G/L Entries" description="What this document posted to the general ledger." />
       <Table>
         <THead>
           <tr>
             <TH>Tx</TH>
-            <TH>Date</TH>
+            <TH>Posting Date</TH>
             <TH>Account</TH>
-            <TH align="right">Debit</TH>
-            <TH align="right">Credit</TH>
+            <TH align="right">Debit Amount</TH>
+            <TH align="right">Credit Amount</TH>
           </tr>
         </THead>
         <TBody>

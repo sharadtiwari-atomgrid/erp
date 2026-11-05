@@ -191,7 +191,7 @@ describe("posting lines", () => {
     const lines = vendorPaymentPostingLines({ bankGlAccountId: "bank", supplierId: "s1", applied: 11800, tds: 200, advance: 1000 });
     expect(lines).toEqual([
       { account: "PAYABLES", debit: 11800, contactId: "s1" },
-      { account: "SUPPLIER_ADVANCES", debit: 1000, contactId: "s1", description: "Advance to supplier (unapplied)" },
+      { account: "SUPPLIER_ADVANCES", debit: 1000, contactId: "s1", description: "Advance to vendor (unapplied)" },
       { account: { id: "bank" }, credit: 12600 },
       { account: "TDS_PAYABLE", credit: 200, contactId: "s1" },
     ]);

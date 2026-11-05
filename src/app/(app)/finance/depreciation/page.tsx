@@ -14,7 +14,7 @@ import { formatDmy, todayIso } from "@/lib/ops/dates";
 import { can } from "@/lib/permissions";
 import { createRun } from "./actions";
 
-export const metadata: Metadata = { title: "Depreciation" };
+export const metadata: Metadata = { title: "Calculate Depreciation" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -27,11 +27,11 @@ export default async function DepreciationPage() {
 
   return (
     <>
-      <PageHeader title="Depreciation" description="Calculate and post depreciation for active fixed assets, by month, quarter or financial year." />
+      <PageHeader title="Calculate Depreciation" description="Calculate and post depreciation for active fixed assets, by month, quarter or financial year." />
       {can(user, "finance", "edit") && (
         <Card className="mb-6">
           <CardHeader
-            title="New depreciation run"
+            title="New Depreciation Run"
             description={`Each of the ${activeAssets} active assets is charged from the day after it was last depreciated (or its acquisition date) to the end of the period, pro rata by days. You can review the lines before posting.`}
           />
           <CardBody>

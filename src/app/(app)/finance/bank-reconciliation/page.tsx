@@ -14,7 +14,7 @@ import { glBalances, OPENING_BATCH } from "../_cash_fa/server";
 import { Amount } from "../_cash_fa/ui";
 import { StatementImport } from "./statement-import";
 
-export const metadata: Metadata = { title: "Bank reconciliation" };
+export const metadata: Metadata = { title: "Bank Account Reconciliations" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -37,7 +37,7 @@ export default async function BankReconciliationPage({ searchParams }: PageProps
 
   return (
     <>
-      <PageHeader title="Bank reconciliation" description="Import bank statements, match them to the ledger and reconcile each account to its statement balance." />
+      <PageHeader title="Bank Account Reconciliations" description="Import bank statements, match them to the ledger and reconcile each account to its statement balance." />
       <div className="space-y-6">
         <Card>
           <CardHeader title="Accounts" />

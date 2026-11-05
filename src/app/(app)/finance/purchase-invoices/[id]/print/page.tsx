@@ -9,7 +9,7 @@ import { splitGst } from "@/lib/totals";
 import { amountInWords } from "../../../../sales/_lib/amount-in-words";
 import { PrintSheet, printCell } from "../../../_ar_ap/ui";
 
-export const metadata: Metadata = { title: "Print purchase invoice" };
+export const metadata: Metadata = { title: "Print Purchase Invoice" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -37,18 +37,18 @@ export default async function PrintPurchaseInvoicePage({ params }: PageProps<"/f
 
   return (
     <PrintSheet
-      title={bill.status === "CANCELLED" ? "Purchase invoice (cancelled)" : bill.status === "DRAFT" ? "Purchase invoice (draft)" : "Purchase invoice"}
+      title={bill.status === "CANCELLED" ? "Purchase Invoice (cancelled)" : bill.status === "DRAFT" ? "Purchase Invoice (draft)" : "Purchase Invoice"}
       backHref={`/finance/purchase-invoices/${id}`}
       company={company}
       meta={[
         { label: "Our ref.", value: bill.number },
-        { label: "Supplier inv. no.", value: bill.supplierInvoiceNo ?? "—" },
+        { label: "Vendor inv. no.", value: bill.supplierInvoiceNo ?? "—" },
         { label: "Invoice date", value: formatDmy(bill.invoiceDate) },
         { label: "Due date", value: formatDmy(bill.dueDate) || "—" },
         ...(bill.purchaseOrder ? [{ label: "PO", value: bill.purchaseOrder.number }] : []),
         ...(bill.inboundReceipt ? [{ label: "GRN", value: bill.inboundReceipt.number }] : []),
       ]}
-      partyLabel="Supplier"
+      partyLabel="Vendor"
       party={{ name: s.name, gstin: s.gstin, pan: s.pan, address: s.billingAddress, city: s.city, state: s.state, pincode: s.pincode }}
       footerNote={
         <>

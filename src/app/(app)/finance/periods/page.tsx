@@ -14,7 +14,7 @@ import { formatDmy, todayIso } from "@/lib/ops/dates";
 import { can } from "@/lib/permissions";
 import { closePeriodsThrough, closeYear, createNextYear, reopenYear, setPeriodClosed } from "./actions";
 
-export const metadata: Metadata = { title: "Accounting periods" };
+export const metadata: Metadata = { title: "Accounting Periods" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -35,7 +35,7 @@ export default async function FinancePeriodsPage() {
   return (
     <>
       <PageHeader
-        title="Accounting periods"
+        title="Accounting Periods"
         description="April–March financial years. Closed periods reject postings; closing a year moves income and expenses to retained earnings."
         actions={canEdit && <ActionButton action={createNextYear} variant="primary">Create next year</ActionButton>}
       />

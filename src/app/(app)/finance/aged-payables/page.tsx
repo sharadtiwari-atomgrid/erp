@@ -15,7 +15,7 @@ import { ageDocuments, dueWithin } from "../_ar_ap/aging";
 import { AdvancesCard, AgingTable, AsOfToolbar } from "../_ar_ap/aging-report";
 import { payablesAsOf } from "../_ar_ap/server";
 
-export const metadata: Metadata = { title: "Aged payables" };
+export const metadata: Metadata = { title: "Aged Accounts Payable" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -45,16 +45,16 @@ export default async function AgedPayablesPage({ searchParams }: PageProps<"/fin
 
   return (
     <>
-      <PageHeader title="Aged payables" description={`Open supplier bills on ${formatDmy(asOf)}, by days past due.`} />
+      <PageHeader title="Aged Accounts Payable" description={`Open purchase invoices on ${formatDmy(asOf)}, by days past due.`} />
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Total payable" value={formatMoney(aged.total)} hint={`${aged.parties.length} supplier${aged.parties.length === 1 ? "" : "s"}`} />
+        <StatCard label="Total payable" value={formatMoney(aged.total)} hint={`${aged.parties.length} vendor${aged.parties.length === 1 ? "" : "s"}`} />
         <StatCard label="Overdue" value={formatMoney(overdue)} tone={overdue > 0 ? "danger" : "default"} />
-        <StatCard label="Due in next 7 days" value={formatMoney(sum(due7))} hint={`${due7.length} bill${due7.length === 1 ? "" : "s"}`} tone={due7.length ? "warning" : "default"} />
-        <StatCard label="Due in next 30 days" value={formatMoney(sum(due30))} hint={`${due30.length} bill${due30.length === 1 ? "" : "s"}`} />
+        <StatCard label="Due in next 7 days" value={formatMoney(sum(due7))} hint={`${due7.length} purchase invoice${due7.length === 1 ? "" : "s"}`} tone={due7.length ? "warning" : "default"} />
+        <StatCard label="Due in next 30 days" value={formatMoney(sum(due30))} hint={`${due30.length} purchase invoice${due30.length === 1 ? "" : "s"}`} />
       </div>
       <div className="space-y-6">
         <Card>
-          <CardHeader title="Aging by supplier" description="Click a supplier to see their bills." />
+          <CardHeader title="Aging by vendor" description="Click a vendor to see their purchase invoices." />
           <AsOfToolbar asOf={asOf} exportHref={`/finance/aged-payables/export?asOf=${asOf}`}>
             <input type="hidden" name="due" value={due} />
           </AsOfToolbar>
@@ -62,7 +62,7 @@ export default async function AgedPayablesPage({ searchParams }: PageProps<"/fin
             parties={aged.parties}
             totals={aged.totals}
             total={aged.total}
-            partyLabel="Supplier"
+            partyLabel="Vendor"
             selected={party}
             partyHref={(p) => href({ party: p })}
             docHref={(id) => `/finance/purchase-invoices/${id}`}
@@ -72,7 +72,7 @@ export default async function AgedPayablesPage({ searchParams }: PageProps<"/fin
         <Card>
           <CardHeader
             title={`Due in the next ${due} days`}
-            description={`Bills not yet overdue, due ${formatDmy(asOf)} to ${formatDmy(addDaysIso(asOf, due - 1))}.`}
+            description={`Purchase invoices not yet overdue, due ${formatDmy(asOf)} to ${formatDmy(addDaysIso(asOf, due - 1))}.`}
             actions={
               <>
                 <Link href={href({ due: 7 })} className={buttonClass(due === 7 ? "primary" : "secondary", "sm")} scroll={false}>
@@ -87,9 +87,9 @@ export default async function AgedPayablesPage({ searchParams }: PageProps<"/fin
           <Table>
             <THead>
               <tr>
-                <TH>Bill</TH>
-                <TH>Supplier inv.</TH>
-                <TH>Supplier</TH>
+                <TH>Purchase invoice</TH>
+                <TH>Vendor inv.</TH>
+                <TH>Vendor</TH>
                 <TH>Due</TH>
                 <TH align="right">Balance</TH>
                 <TH />
@@ -128,9 +128,9 @@ export default async function AgedPayablesPage({ searchParams }: PageProps<"/fin
 
         <AdvancesCard
           title="Unapplied payments"
-          description="Advances paid to suppliers and not yet set against a bill."
+          description="Advances paid to vendors and not yet set against a purchase invoice."
           rows={advances}
-          partyLabel="Supplier"
+          partyLabel="Vendor"
         />
       </div>
     </>

@@ -41,7 +41,7 @@ export default async function PrintReceiptPage({ params }: PageProps<"/finance/r
       company={company}
       meta={[
         { label: "Receipt no.", value: receipt.number },
-        { label: "Date", value: formatDmy(receipt.date) },
+        { label: "Posting Date", value: formatDmy(receipt.date) },
         { label: "Mode", value: receipt.method === "UPI" ? "UPI" : humanize(receipt.method) },
         ...(receipt.reference ? [{ label: "Reference", value: receipt.reference }] : []),
       ]}

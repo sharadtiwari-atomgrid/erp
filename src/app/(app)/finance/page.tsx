@@ -13,27 +13,27 @@ import { daysPast, loadOverview } from "./_overview/data";
 import { RevenueChart } from "./_overview/revenue-chart";
 import { SyncSalesButton } from "./_overview/sync-button";
 
-export const metadata: Metadata = { title: "Finance overview" };
+export const metadata: Metadata = { title: "Finance Role Center" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
 
 const QUICK_ACTIONS = [
-  { label: "New journal", href: "/finance/journals/new" },
-  { label: "Record receipt", href: "/finance/receipts/new" },
-  { label: "New purchase invoice", href: "/finance/purchase-invoices/new" },
-  { label: "Pay supplier", href: "/finance/vendor-payments/new" },
-  { label: "Reconcile bank", href: "/finance/bank-reconciliation" },
-  { label: "Run depreciation", href: "/finance/depreciation" },
+  { label: "New General Journal", href: "/finance/journals/new" },
+  { label: "Cash Receipt Journal", href: "/finance/receipts/new" },
+  { label: "New Purchase Invoice", href: "/finance/purchase-invoices/new" },
+  { label: "Payment Journal", href: "/finance/vendor-payments/new" },
+  { label: "Bank Acc. Reconciliation", href: "/finance/bank-reconciliation" },
+  { label: "Calculate Depreciation", href: "/finance/depreciation" },
 ];
 
 const REPORTS = [
-  { label: "Trial balance", href: "/finance/reports/trial-balance" },
-  { label: "Profit & loss", href: "/finance/reports/profit-and-loss" },
-  { label: "Balance sheet", href: "/finance/reports/balance-sheet" },
-  { label: "Cash flow", href: "/finance/reports/cash-flow" },
-  { label: "GST returns", href: "/finance/gst-returns" },
-  { label: "TDS / TCS", href: "/finance/tds" },
+  { label: "Trial Balance", href: "/finance/reports/trial-balance" },
+  { label: "Income Statement", href: "/finance/reports/profit-and-loss" },
+  { label: "Balance Sheet", href: "/finance/reports/balance-sheet" },
+  { label: "Statement of Cash Flows", href: "/finance/reports/cash-flow" },
+  { label: "GST Returns", href: "/finance/gst-returns" },
+  { label: "TDS & TCS Entries", href: "/finance/tds" },
 ];
 
 function Tile({ href, ...props }: { href: string } & Parameters<typeof StatCard>[0]) {
@@ -54,29 +54,29 @@ export default async function FinancePage() {
   return (
     <>
       <PageHeader
-        title="Finance overview"
+        title="Finance Role Center"
         description={`Hello ${user.name.split(" ")[0]} · ${formatDmy(o.today)}${o.branchScoped ? " · figures for the selected branch" : ""}`}
         actions={
           <ButtonLink variant="secondary" href="/finance/reports/trial-balance">
-            Trial balance
+            Trial Balance
           </ButtonLink>
         }
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Tile href="/finance/bank-accounts" label="Cash & bank" value={formatMoney(o.cashBalance)} hint={`Across ${o.cashAccounts} cash and bank ledger accounts`} tone={o.cashBalance < 0 ? "danger" : "default"} />
+        <Tile href="/finance/bank-accounts" label="Cash Accounts Balance" value={formatMoney(o.cashBalance)} hint={`Across ${o.cashAccounts} cash and bank ledger accounts`} tone={o.cashBalance < 0 ? "danger" : "default"} />
         <Tile
           href="/finance/aged-receivables"
-          label="Receivables outstanding"
+          label="Sales Invoices Outstanding"
           value={formatMoney(o.receivables.total)}
           hint={`${o.receivables.count} invoices · ${formatMoney(o.receivables.overdue)} overdue (${o.receivables.overdueCount})`}
           tone={o.receivables.overdue > 0 ? "warning" : "default"}
         />
         <Tile
           href="/finance/aged-payables"
-          label="Payables outstanding"
+          label="Purchase Invoices Outstanding"
           value={formatMoney(o.payables.total)}
-          hint={`${o.payables.count} bills · ${formatMoney(o.payables.dueThisWeek)} due within 7 days (${o.payables.dueThisWeekCount})`}
+          hint={`${o.payables.count} purchase invoices · ${formatMoney(o.payables.dueThisWeek)} due within 7 days (${o.payables.dueThisWeekCount})`}
           tone={o.payables.dueThisWeek > 0 ? "warning" : "default"}
         />
         <Tile
@@ -100,7 +100,7 @@ export default async function FinancePage() {
           tone={o.tds.amount > 0 ? "warning" : "default"}
         />
         <Card className="sm:col-span-2">
-          <CardHeader title={canEdit ? "Quick actions" : "Reports"} />
+          <CardHeader title={canEdit ? "Actions" : "Financial Reports"} />
           <CardBody className="flex flex-wrap gap-2">
             {canEdit &&
               QUICK_ACTIONS.map((a) => (
@@ -126,7 +126,7 @@ export default async function FinancePage() {
         </Card>
 
         <Card>
-          <CardHeader title="Top overdue customers" description="Unpaid invoices past their due date." actions={<Link href="/finance/aged-receivables" className="text-xs font-medium text-brand-700 hover:underline">Aged receivables</Link>} />
+          <CardHeader title="Overdue Sales Invoices" description="Unpaid invoices past their due date." actions={<Link href="/finance/aged-receivables" className="text-xs font-medium text-brand-700 hover:underline">Aged Accounts Receivable</Link>} />
           {o.topOverdue.length === 0 ? (
             <CardBody>
               <p className="text-sm text-ink-faint">No overdue invoices.</p>
@@ -151,7 +151,7 @@ export default async function FinancePage() {
         </Card>
 
         <Card>
-          <CardHeader title="Bills due soon" description="Supplier bills due in the next 14 days or already overdue." actions={<Link href="/finance/aged-payables" className="text-xs font-medium text-brand-700 hover:underline">Aged payables</Link>} />
+          <CardHeader title="Purch. Invoices Due Next 14 Days" description="Purchase invoices due in the next 14 days or already overdue." actions={<Link href="/finance/aged-payables" className="text-xs font-medium text-brand-700 hover:underline">Aged Accounts Payable</Link>} />
           {o.billsDueSoon.length === 0 ? (
             <CardBody>
               <p className="text-sm text-ink-faint">Nothing due in the next two weeks.</p>
@@ -181,7 +181,7 @@ export default async function FinancePage() {
         </Card>
 
         <Card>
-          <CardHeader title="Recent postings" description="Journals, receipts and payments." actions={<Link href="/finance/entries" className="text-xs font-medium text-brand-700 hover:underline">G/L entries</Link>} />
+          <CardHeader title="Recent G/L Postings" description="Journals, receipts and payments." actions={<Link href="/finance/entries" className="text-xs font-medium text-brand-700 hover:underline">General Ledger Entries</Link>} />
           {o.recent.length === 0 ? (
             <CardBody>
               <p className="text-sm text-ink-faint">Nothing posted yet.</p>

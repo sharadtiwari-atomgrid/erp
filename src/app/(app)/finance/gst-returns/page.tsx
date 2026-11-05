@@ -22,7 +22,7 @@ import { markGstReturnFiled, reopenGstReturn } from "./actions";
 import { MarkFiledForm } from "./filed-form";
 import { keyFigures, loadGstReturns, resolvePeriod, type GstData } from "./_lib/load";
 
-export const metadata: Metadata = { title: "GST returns" };
+export const metadata: Metadata = { title: "GST Returns" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -139,7 +139,7 @@ function Gstr1View({ data }: { data: GstData }) {
               <TH>GSTIN</TH>
               <TH>Customer</TH>
               <TH>Invoice</TH>
-              <TH>Date</TH>
+              <TH>Posting Date</TH>
               <TH align="right">Invoice value</TH>
               <TH>Place of supply</TH>
               <TaxHeads />
@@ -171,7 +171,7 @@ function Gstr1View({ data }: { data: GstData }) {
           <THead>
             <tr>
               <TH>Invoice</TH>
-              <TH>Date</TH>
+              <TH>Posting Date</TH>
               <TH>Customer</TH>
               <TH align="right">Invoice value</TH>
               <TH>Place of supply</TH>
@@ -332,7 +332,7 @@ function Gstr3bView({ data }: { data: GstData }) {
               <TaxCells t={g.itc} />
             </TR>
             <TR>
-              <TD className="text-ink-soft">(D) Ineligible ITC (bills marked not eligible)</TD>
+              <TD className="text-ink-soft">(D) Ineligible ITC (purchase invoices marked not eligible)</TD>
               <TaxCells t={g.ineligible} />
             </TR>
             <TR className="font-semibold">
@@ -385,11 +385,11 @@ function Gstr3bView({ data }: { data: GstData }) {
         <Table>
           <THead>
             <tr>
-              <TH>Bill</TH>
-              <TH>Supplier invoice</TH>
-              <TH>Supplier</TH>
+              <TH>Purchase invoice</TH>
+              <TH>Vendor invoice</TH>
+              <TH>Vendor</TH>
               <TH>GSTIN</TH>
-              <TH>Date</TH>
+              <TH>Posting Date</TH>
               <TaxHeads />
             </tr>
           </THead>
@@ -431,7 +431,7 @@ export default async function FinanceGstReturnsPage({ searchParams }: PageProps<
   return (
     <>
       <PageHeader
-        title="GST returns"
+        title="GST Returns"
         description={`${periodLabel(period)} · ${data.company.name || "Company"}${data.company.gstin ? ` · GSTIN ${data.company.gstin}` : " · set the GSTIN in company settings"}`}
         back={{ href: "/finance", label: "Finance" }}
         actions={

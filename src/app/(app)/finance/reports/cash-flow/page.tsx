@@ -15,7 +15,7 @@ import { loadCashFlow } from "../_lib/build";
 import { describeFilters, filterQuery, loadFilterOptions, pageReader, readFilters } from "../_lib/data";
 import { ReportFilterBar } from "../_lib/filter-bar";
 
-export const metadata: Metadata = { title: "Cash flow statement" };
+export const metadata: Metadata = { title: "Statement of Cash Flows" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -59,7 +59,7 @@ export default async function CashFlowPage({ searchParams }: PageProps<"/finance
   return (
     <>
       <PageHeader
-        title="Cash flow statement"
+        title="Statement of Cash Flows"
         description={`Indirect method · ${formatDmy(filters.from)} to ${formatDmy(filters.to)}${scope ? ` · ${scope}` : ""}`}
         back={{ href: "/finance", label: "Finance" }}
         actions={

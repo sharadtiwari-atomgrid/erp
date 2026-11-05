@@ -10,7 +10,7 @@ import { formatDmy } from "@/lib/ops/dates";
 import { journalTotals } from "../../../_gl/ledger";
 import { dimensionText } from "../../../_gl/ui";
 
-export const metadata: Metadata = { title: "Print journal voucher" };
+export const metadata: Metadata = { title: "Print General Journal" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -54,8 +54,8 @@ export default async function PrintJournalPage({ params }: PageProps<"/finance/j
             <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-ink-soft">
               <th className="py-2">Account</th>
               <th className="py-2">Particulars</th>
-              <th className="py-2 text-right">Debit</th>
-              <th className="py-2 text-right">Credit</th>
+              <th className="py-2 text-right">Debit Amount</th>
+              <th className="py-2 text-right">Credit Amount</th>
             </tr>
           </thead>
           <tbody>

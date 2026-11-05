@@ -14,7 +14,7 @@ import { describeFilters, filterQuery, loadFilterOptions, pageReader, readFilter
 import { ReportFilterBar } from "../_lib/filter-bar";
 import { StatementTable } from "../_lib/statement-table";
 
-export const metadata: Metadata = { title: "Balance sheet" };
+export const metadata: Metadata = { title: "Balance Sheet" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -31,7 +31,7 @@ export default async function BalanceSheetPage({ searchParams }: PageProps<"/fin
   return (
     <>
       <PageHeader
-        title="Balance sheet"
+        title="Balance Sheet"
         description={`Schedule III · as on ${formatDmy(filters.asOn)}${scope ? ` · ${scope}` : ""}`}
         back={{ href: "/finance", label: "Finance" }}
         actions={

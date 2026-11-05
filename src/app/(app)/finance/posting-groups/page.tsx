@@ -14,7 +14,7 @@ import { InlineForm } from "../_gl/inline-form";
 import { POSTING_KEY_HELP } from "../_gl/posting-help";
 import { setPostingAccount } from "./actions";
 
-export const metadata: Metadata = { title: "Posting setup" };
+export const metadata: Metadata = { title: "General Posting Setup" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -32,7 +32,7 @@ export default async function FinancePostingGroupsPage() {
   return (
     <>
       <PageHeader
-        title="Posting setup"
+        title="General Posting Setup"
         description="Which ledger account each kind of automatic posting uses. Changes apply to new postings only; posted entries stay where they are."
       />
       <Card>

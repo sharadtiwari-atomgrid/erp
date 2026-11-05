@@ -10,7 +10,7 @@ import { getBillFormOptions } from "../../../_ar_ap/options";
 import { updatePurchaseInvoice } from "../../actions";
 import { BillForm } from "../../bill-form";
 
-export const metadata: Metadata = { title: "Edit purchase invoice" };
+export const metadata: Metadata = { title: "Edit Purchase Invoice" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;

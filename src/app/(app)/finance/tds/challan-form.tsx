@@ -53,9 +53,9 @@ export function ChallanForm({
                   onChange={(e) => setSelected(e.target.checked ? new Set(entries.map((x) => x.id)) : new Set())}
                 />
               </th>
-              <th className="px-3 py-2 text-left">Date</th>
+              <th className="px-3 py-2 text-left">Posting Date</th>
               <th className="px-3 py-2 text-left">Party</th>
-              <th className="px-3 py-2 text-left">Document</th>
+              <th className="px-3 py-2 text-left">Document No.</th>
               <th className="px-3 py-2 text-right">{kind}</th>
             </tr>
           </thead>

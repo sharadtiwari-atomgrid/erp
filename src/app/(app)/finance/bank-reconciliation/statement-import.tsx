@@ -74,7 +74,7 @@ export function StatementImport({ banks, defaultBankId }: { banks: Bank[]; defau
       <CardHeader title="Import a bank statement" description="CSV or Excel (.xlsx / .xls) as downloaded from the bank. Dates like dd/mm/yyyy are understood. Lines already imported (same date, amount and reference) are skipped." />
       <CardBody className="space-y-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Bank account" htmlFor="import-bank">
+          <Field label="Bank Account" htmlFor="import-bank">
             <Select id="import-bank" value={bankId} onChange={(e) => setBankId(e.target.value)}>
               <option value="">Choose…</option>
               {banks.map((b) => (
@@ -154,7 +154,7 @@ export function StatementImport({ banks, defaultBankId }: { banks: Bank[]; defau
                 <Table>
                   <THead>
                     <tr>
-                      <TH>Date</TH>
+                      <TH>Posting Date</TH>
                       <TH>Description</TH>
                       <TH>Reference</TH>
                       <TH align="right">Withdrawal</TH>

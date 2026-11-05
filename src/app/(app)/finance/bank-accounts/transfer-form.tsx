@@ -18,7 +18,7 @@ export function TransferForm({ accounts, today, defaultFrom }: { accounts: Trans
     <form action={formAction} className="space-y-6">
       <FormMessage state={state} />
       <Card>
-        <CardHeader title="Contra entry" description="Posts Dr the destination account / Cr the source account." />
+        <CardHeader title="Bank Account Transfer" description="Posts Dr the destination account / Cr the source account." />
         <CardBody>
           <FormGrid>
             <Field label="From (credit)" htmlFor="fromId" required errors={err.fromId}>
@@ -41,7 +41,7 @@ export function TransferForm({ accounts, today, defaultFrom }: { accounts: Trans
                 ))}
               </Select>
             </Field>
-            <Field label="Date" htmlFor="date" required errors={err.date}>
+            <Field label="Posting Date" htmlFor="date" required errors={err.date}>
               <Input id="date" name="date" type="date" defaultValue={today} required />
             </Field>
             <Field label="Amount" htmlFor="amount" required errors={err.amount}>
@@ -50,7 +50,7 @@ export function TransferForm({ accounts, today, defaultFrom }: { accounts: Trans
             <Field label="Reference" htmlFor="reference" errors={err.reference} hint="Cheque no. / UTR">
               <Input id="reference" name="reference" />
             </Field>
-            <Field label="Narration" htmlFor="narration" errors={err.narration}>
+            <Field label="Description" htmlFor="narration" errors={err.narration}>
               <Input id="narration" name="narration" />
             </Field>
           </FormGrid>

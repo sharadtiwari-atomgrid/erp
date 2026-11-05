@@ -12,7 +12,7 @@ import { getPayeeOptions } from "../../_ar_ap/options";
 import { createVendorPayment } from "../actions";
 import { VendorPaymentForm } from "../payment-form";
 
-export const metadata: Metadata = { title: "New vendor payment" };
+export const metadata: Metadata = { title: "New Vendor Payment" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -35,7 +35,7 @@ export default async function NewVendorPaymentPage({ searchParams }: PageProps<"
 
   return (
     <div className="max-w-6xl">
-      <PageHeader title="New vendor payment" back={{ href: "/finance/vendor-payments", label: "Vendor payments" }} />
+      <PageHeader title="New Vendor Payment" back={{ href: "/finance/vendor-payments", label: "Payment Journals" }} />
       <VendorPaymentForm
         action={createVendorPayment}
         suppliers={suppliers.map((s) => ({ id: s.id, code: s.code, name: s.name, pan: s.pan, gstin: s.gstin, transporter: s.transporter }))}

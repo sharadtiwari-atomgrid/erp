@@ -7,7 +7,7 @@ import { ensureFinanceSetup } from "@/lib/finance/setup";
 import { updateBankAccount } from "../../actions";
 import { BankAccountForm } from "../../bank-account-form";
 
-export const metadata: Metadata = { title: "Edit bank account" };
+export const metadata: Metadata = { title: "Edit Bank Account" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;

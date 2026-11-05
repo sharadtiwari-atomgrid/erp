@@ -25,7 +25,7 @@ export type ColumnMapping = {
 };
 
 export const MAPPING_FIELDS: Array<{ key: keyof ColumnMapping; label: string }> = [
-  { key: "date", label: "Date" },
+  { key: "date", label: "Posting Date" },
   { key: "description", label: "Description / narration" },
   { key: "reference", label: "Reference / cheque no." },
   { key: "withdrawal", label: "Withdrawal (debit)" },

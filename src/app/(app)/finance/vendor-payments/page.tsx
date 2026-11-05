@@ -15,7 +15,7 @@ import { dayFromIso, formatDmy, todayIso } from "@/lib/ops/dates";
 import { can } from "@/lib/permissions";
 import { Amount, DocStatus } from "../_ar_ap/ui";
 
-export const metadata: Metadata = { title: "Vendor payments" };
+export const metadata: Metadata = { title: "Payment Journals" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -60,15 +60,15 @@ export default async function VendorPaymentsPage({ searchParams }: PageProps<"/f
   return (
     <>
       <PageHeader
-        title="Vendor payments"
-        description="Payments to suppliers and transporters, applied to their bills, with TDS withheld."
+        title="Payment Journals"
+        description="Payments to vendors and transporters, applied to their purchase invoices, with TDS withheld."
         actions={
           <>
             <ButtonLink href="/b2b/transport/payables" variant="secondary">
               Pay transporters
             </ButtonLink>
             <ButtonLink href="/finance/aged-payables" variant="secondary">
-              Aged payables
+              Aged Accounts Payable
             </ButtonLink>
             {canEdit && <ButtonLink href="/finance/vendor-payments/new">New payment</ButtonLink>}
           </>
@@ -77,20 +77,20 @@ export default async function VendorPaymentsPage({ searchParams }: PageProps<"/f
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard label="Paid this month" value={formatMoney(month._sum.amount)} hint={`${month._count} posted payment${month._count === 1 ? "" : "s"}`} />
         <StatCard label="TDS withheld this month" value={formatMoney(month._sum.tdsAmount)} hint="Due to the government by the 7th" />
-        <StatCard label="Advances to suppliers" value={formatMoney(advances._sum.unappliedAmount)} hint={`${advances._count} payment${advances._count === 1 ? "" : "s"}`} />
+        <StatCard label="Advances to vendors" value={formatMoney(advances._sum.unappliedAmount)} hint={`${advances._count} payment${advances._count === 1 ? "" : "s"}`} />
       </div>
       <Card>
         <ListToolbar
           q={q}
-          placeholder="Search number, supplier or reference"
+          placeholder="Search number, vendor or reference"
           filter={{ name: "status", value: status, allLabel: "All statuses", options: STATUSES.map((s) => ({ value: s, label: humanize(s) })) }}
         />
         <Table>
           <THead>
             <tr>
               <TH>Number</TH>
-              <TH>Date</TH>
-              <TH>Supplier</TH>
+              <TH>Posting Date</TH>
+              <TH>Vendor</TH>
               <TH>Paid from</TH>
               <TH>Method</TH>
               <TH>Status</TH>

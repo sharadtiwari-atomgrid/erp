@@ -8,7 +8,7 @@ import { todayIso } from "@/lib/ops/dates";
 import { glBalances } from "../../_cash_fa/server";
 import { TransferForm } from "../transfer-form";
 
-export const metadata: Metadata = { title: "Transfer between accounts" };
+export const metadata: Metadata = { title: "Bank Account Transfer" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -22,9 +22,9 @@ export default async function TransferPage({ searchParams }: PageProps<"/finance
   return (
     <>
       <PageHeader
-        title="Transfer between accounts"
+        title="Bank Account Transfer"
         description="Move money between bank and cash accounts (contra entry)."
-        back={{ href: "/finance/bank-accounts", label: "Bank accounts" }}
+        back={{ href: "/finance/bank-accounts", label: "Bank Accounts" }}
       />
       <TransferForm
         accounts={accounts.map((a) => ({ id: a.id, code: a.code, name: a.name, balance: balances.get(a.glAccountId) ?? 0 }))}

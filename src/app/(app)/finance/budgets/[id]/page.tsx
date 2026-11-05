@@ -21,7 +21,7 @@ import { copyFromLastYear, deleteBudget, saveBudgetLines } from "../actions";
 import { BudgetGrid } from "../budget-forms";
 import { actualsByMonth, budgetAccounts, budgetDims } from "../data";
 
-export const metadata: Metadata = { title: "Budget" };
+export const metadata: Metadata = { title: "G/L Budget" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -59,7 +59,7 @@ export default async function BudgetPage({ params, searchParams }: PageProps<"/f
       <PageHeader
         title={budget.name}
         description={`${budget.fiscalYear.name} · ${dimensionText(budget.dimensions) || "Whole company"}${budget.notes ? ` · ${budget.notes}` : ""}`}
-        back={{ href: "/finance/budgets", label: "Budgets" }}
+        back={{ href: "/finance/budgets", label: "G/L Budgets" }}
         actions={
           canEdit && (
             <>

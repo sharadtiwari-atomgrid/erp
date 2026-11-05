@@ -62,9 +62,9 @@ export function ManualEntryForm({
         <Field label="Date of deduction / collection" htmlFor="date" required errors={err.date}>
           <Input id="date" name="date" type="date" defaultValue={today} max={today} required />
         </Field>
-        <Field label="Document" htmlFor="documentNo" errors={err.documentNo} hint="E.g. the journal or bill number.">
+        <Field label="Document No." htmlFor="documentNo" errors={err.documentNo} hint="E.g. the journal or purchase invoice number.">
           <div className="flex gap-2">
-            <Input name="documentType" defaultValue="Manual" aria-label="Document type" className="w-32" />
+            <Input name="documentType" defaultValue="Manual" aria-label="Document Type" className="w-32" />
             <Input id="documentNo" name="documentNo" placeholder="Number" />
           </div>
         </Field>

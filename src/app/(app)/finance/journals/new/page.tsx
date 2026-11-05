@@ -10,7 +10,7 @@ import { createJournal } from "../actions";
 import { journalFormOptions, journalFormValues } from "../form-data";
 import { JournalForm, type JournalFormValues } from "../journal-form";
 
-export const metadata: Metadata = { title: "New journal" };
+export const metadata: Metadata = { title: "New General Journal" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -30,13 +30,13 @@ export default async function NewJournalPage({ searchParams }: PageProps<"/finan
   return (
     <>
       <PageHeader
-        title={copied ? "Copy journal" : kind === "Opening balance" ? "Opening balances" : "New journal"}
+        title={copied ? "Copy General Journal" : kind === "Opening balance" ? "Opening Balances" : "New General Journal"}
         description={
           kind === "Opening balance" && !copied
             ? "Enter balances brought forward on the go-live date. The difference goes to opening balance equity."
             : "Manual journal voucher. Control accounts (receivables, payables, GST…) are posted only by documents."
         }
-        back={{ href: "/finance/journals", label: "General journals" }}
+        back={{ href: "/finance/journals", label: "General Journals" }}
       />
       <JournalForm action={createJournal} initial={initial} {...options} cancelHref="/finance/journals" />
     </>

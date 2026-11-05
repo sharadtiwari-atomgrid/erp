@@ -16,7 +16,7 @@ import { loadTrialBalance } from "../_lib/build";
 import { describeFilters, filterQuery, loadFilterOptions, pageReader, readFilters } from "../_lib/data";
 import { ReportFilterBar } from "../_lib/filter-bar";
 
-export const metadata: Metadata = { title: "Trial balance" };
+export const metadata: Metadata = { title: "Trial Balance" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -47,7 +47,7 @@ export default async function TrialBalancePage({ searchParams }: PageProps<"/fin
   return (
     <>
       <PageHeader
-        title="Trial balance"
+        title="Trial Balance"
         description={`${formatDmy(filters.from)} to ${formatDmy(filters.to)}${scope ? ` · ${scope}` : ""}`}
         back={{ href: "/finance", label: "Finance" }}
         actions={

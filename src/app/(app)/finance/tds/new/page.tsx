@@ -11,7 +11,7 @@ import { createManualTdsEntry } from "../actions";
 import { kindOf } from "../_lib/tds";
 import { ManualEntryForm } from "./entry-form";
 
-export const metadata: Metadata = { title: "Manual TDS / TCS entry" };
+export const metadata: Metadata = { title: "Manual TDS & TCS Entry" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -30,7 +30,7 @@ export default async function NewTdsEntryPage({ searchParams }: PageProps<"/fina
   ]);
   return (
     <>
-      <PageHeader title={`Manual ${kind} entry`} description="Record a deduction or collection made outside vendor payments." back={{ href: `/finance/tds?kind=${kind}`, label: "TDS / TCS" }} />
+      <PageHeader title={`Manual ${kind} entry`} description="Record a deduction or collection made outside vendor payments." back={{ href: `/finance/tds?kind=${kind}`, label: "TDS & TCS Entries" }} />
       <Card>
         <CardBody>
           {sections.length === 0 ? (

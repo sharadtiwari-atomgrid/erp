@@ -17,7 +17,7 @@ import { TaxNav } from "../_lib/nav";
 import { loadQuarterSummary } from "../_lib/summary";
 import { kindOf, recentQuarters, returnForm } from "../_lib/tds";
 
-export const metadata: Metadata = { title: "TDS / TCS quarterly summary" };
+export const metadata: Metadata = { title: "TDS & TCS Quarterly Summary" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;

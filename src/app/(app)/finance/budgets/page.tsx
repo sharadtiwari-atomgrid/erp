@@ -13,7 +13,7 @@ import { Amount, dimensionText } from "../_gl/ui";
 import { createBudget } from "./actions";
 import { NewBudgetForm } from "./budget-forms";
 
-export const metadata: Metadata = { title: "Budgets" };
+export const metadata: Metadata = { title: "G/L Budgets" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -32,7 +32,7 @@ export default async function FinanceBudgetsPage() {
 
   return (
     <>
-      <PageHeader title="Budgets" description="Monthly income and expense budgets by account, compared with actuals from the ledger." />
+      <PageHeader title="G/L Budgets" description="Monthly income and expense budgets by account, compared with actuals from the ledger." />
       <div className="space-y-6">
         <Card>
           <Table>

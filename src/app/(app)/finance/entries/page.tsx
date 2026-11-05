@@ -18,7 +18,7 @@ import { getBranchOptions, getDimensionOptions, paymentInvoiceMap } from "../_gl
 import { Amount, FilterField, dimensionText } from "../_gl/ui";
 import { entryInclude, entryWhere, readEntryFilter } from "./filter";
 
-export const metadata: Metadata = { title: "G/L entries" };
+export const metadata: Metadata = { title: "General Ledger Entries" };
 
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
@@ -49,7 +49,7 @@ export default async function FinanceEntriesPage({ searchParams }: PageProps<"/f
   return (
     <>
       <PageHeader
-        title="G/L entries"
+        title="General Ledger Entries"
         description={filter.transactionNo ? `Transaction ${filter.transactionNo}` : "Every line posted to the general ledger."}
         actions={
           <a href={`/finance/entries/export?${qs.toString()}`} className={buttonClass("secondary")}>
@@ -76,7 +76,7 @@ export default async function FinanceEntriesPage({ searchParams }: PageProps<"/f
               ))}
             </Select>
           </FilterField>
-          <FilterField label="Document type">
+          <FilterField label="Document Type">
             <Select name="docType" defaultValue={filter.docType} className="w-40">
               <option value="">All types</option>
               {docTypes.map((d) => (
@@ -86,7 +86,7 @@ export default async function FinanceEntriesPage({ searchParams }: PageProps<"/f
               ))}
             </Select>
           </FilterField>
-          <FilterField label="Document no.">
+          <FilterField label="Document No.">
             <Input name="docNo" defaultValue={filter.docNo} className="w-32" />
           </FilterField>
           <FilterField label="Contact">
@@ -128,12 +128,12 @@ export default async function FinanceEntriesPage({ searchParams }: PageProps<"/f
           <THead>
             <tr>
               <TH>Entry</TH>
-              <TH>Date</TH>
-              <TH>Document</TH>
+              <TH>Posting Date</TH>
+              <TH>Document No.</TH>
               <TH>Account</TH>
               <TH>Description</TH>
-              <TH align="right">Debit</TH>
-              <TH align="right">Credit</TH>
+              <TH align="right">Debit Amount</TH>
+              <TH align="right">Credit Amount</TH>
               <TH>Contact</TH>
               <TH>Dimensions</TH>
             </tr>
