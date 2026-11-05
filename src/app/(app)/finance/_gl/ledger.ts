@@ -19,7 +19,7 @@ export const ACCOUNT_TYPE_LABELS: Record<GlAccountType, string> = {
 
 export const CASH_FLOW_GROUPS = ["OPERATING", "INVESTING", "FINANCING", "CASH", "NONE"] as const;
 
-export const JOURNAL_KINDS = ["General", "Opening balance", "Adjustment", "Contra"] as const;
+export const JOURNAL_KINDS = ["General", "Opening balance", "Adjustment", "Contra", "Bank Payment", "Cash Payment", "Bank Receipt", "Cash Receipt"] as const;
 export type JournalKind = (typeof JOURNAL_KINDS)[number];
 
 export const JOURNAL_STATUS_TONE = { DRAFT: "gray", POSTED: "green", REVERSED: "amber" } as const;
