@@ -172,6 +172,7 @@ export const NAVIGATION: NavGroup[] = [
       {
         label: "Sales & Receivables",
         items: [
+          { label: "Sales Orders", href: "/sales/orders", module: "salesOrders" },
           { label: "Sales Invoices", href: "/sales/invoices", module: "invoices" },
           { label: "Customers", href: "/contacts?role=CUSTOMER", module: "contacts" },
           { label: "Cash Receipt Journals", href: "/finance/receipts", module: "finance" },
@@ -181,6 +182,7 @@ export const NAVIGATION: NavGroup[] = [
       {
         label: "Purchases & Payables",
         items: [
+          { label: "Purchase Orders", href: "/purchases/orders", module: "finance" },
           { label: "Purchase Invoices", href: "/finance/purchase-invoices", module: "finance" },
           { label: "Vendors", href: "/contacts?role=SUPPLIER", module: "contacts" },
           { label: "Payment Journals", href: "/finance/vendor-payments", module: "finance" },
