@@ -40,7 +40,14 @@ export default async function EditSalesOrderPage({ params }: PageProps<"/sales/o
           { name: "customerId", label: "Customer", type: "select", required: true, options: toOptions(customers), defaultValue: order.customerId, placeholder: "Select a customer…" },
           { name: "warehouseId", label: "Deliver from", type: "select", required: true, options: toOptions(warehouses), defaultValue: order.warehouseId, placeholder: "Select a warehouse…" },
           { name: "orderDate", label: "Order date", type: "date", required: true, defaultValue: toDateInput(order.orderDate) },
+          { name: "postingDate", label: "Posting date", type: "date", defaultValue: toDateInput(order.postingDate) },
           { name: "expectedDate", label: "Expected delivery", type: "date", defaultValue: toDateInput(order.expectedDate) },
+          { name: "shipmentDate", label: "Shipment date", type: "date", defaultValue: toDateInput(order.shipmentDate) },
+          { name: "billToCustomerId", label: "Bill-to Customer", type: "select", options: toOptions(customers), defaultValue: order.billToCustomerId ?? order.customerId, placeholder: "Same as sell-to…" },
+          { name: "paymentTermsCode", label: "Payment Terms Code", type: "text", defaultValue: order.paymentTermsCode ?? "" },
+          { name: "paymentMethodCode", label: "Payment Method Code", type: "text", defaultValue: order.paymentMethodCode ?? "" },
+          { name: "shipmentMethodCode", label: "Shipment Method Code", type: "text", defaultValue: order.shipmentMethodCode ?? "" },
+          { name: "currencyCode", label: "Currency Code", type: "text", defaultValue: order.currencyCode ?? "INR" },
         ]}
       />
     </div>
