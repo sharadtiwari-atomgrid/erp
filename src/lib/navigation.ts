@@ -188,6 +188,17 @@ export const NAVIGATION: NavGroup[] = [
         ],
       },
       {
+        label: "Posted Documents",
+        items: [
+          { label: "Posted Sales Invoices", href: "/sales/invoices?status=ISSUED", module: "invoices" },
+          { label: "Posted Purchase Invoices", href: "/finance/purchase-invoices?status=POSTED", module: "finance" },
+          { label: "Posted Sales Credit Memos", href: "/sales/invoices?status=CANCELLED", module: "invoices" },
+          { label: "Posted Purchase Credit Memos", href: "/finance/purchase-invoices?status=CANCELLED", module: "finance" },
+          { label: "Posted Transfer Shipment", href: "/inventory/movements", module: "stock" },
+          { label: "Posted Transfer Receipt", href: "/inventory/movements", module: "stock" },
+        ],
+      },
+      {
         label: "Cash Management",
         items: [
           { label: "Bank Accounts", href: "/finance/bank-accounts", module: "finance" },
