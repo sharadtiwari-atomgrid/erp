@@ -30,7 +30,7 @@ export default async function NewJournalPage({ searchParams }: PageProps<"/finan
   return (
     <>
       <PageHeader
-        title={copied ? "Copy General Journal" : kind === "Opening balance" ? "Opening Balances" : "New General Journal"}
+        title={copied ? `Copy ${kind}` : kind === "Opening balance" ? "Opening Balances" : `${kind} Voucher`}
         description={
           kind === "Opening balance" && !copied
             ? "Enter balances brought forward on the go-live date. The difference goes to opening balance equity."
