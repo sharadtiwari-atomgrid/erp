@@ -19,7 +19,7 @@ import { branchWhere } from "@/lib/branch";
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
 
-export const metadata: Metadata = { title: "Invoices" };
+export const metadata: Metadata = { title: "Sales Invoices" };
 
 export default async function InvoicesPage({ searchParams }: PageProps<"/sales/invoices">) {
   const user = await requireUser("invoices");
@@ -57,8 +57,8 @@ export default async function InvoicesPage({ searchParams }: PageProps<"/sales/i
   return (
     <>
       <PageHeader
-        title="Invoices"
-        description="GST tax invoices and customer payments."
+        title="Sales Invoices"
+        description="Sales invoices, customer payments and receivables."
         actions={can(user, "invoices", "edit") && <ButtonLink href="/sales/invoices/new">New invoice</ButtonLink>}
       />
       <Card>
