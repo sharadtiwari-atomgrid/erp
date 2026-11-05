@@ -107,8 +107,8 @@ export default async function PurchaseOrderPage({ params }: PageProps<"/purchasi
         />
         <StatCard
           label="Expected delivery"
-          value={formatDate(order.expectedDate)}
-          tone={isOpen && order.expectedDate && order.expectedDate < new Date() ? "danger" : "default"}
+          value={formatDate(order.expectedReceiptDate)}
+          tone={isOpen && order.expectedReceiptDate && order.expectedReceiptDate < new Date() ? "danger" : "default"}
         />
       </div>
 
@@ -136,6 +136,19 @@ export default async function PurchaseOrderPage({ params }: PageProps<"/purchasi
                   ),
                 },
                 { label: "Order date", value: formatDate(order.orderDate) },
+                { label: "Posting date", value: formatDate(order.postingDate) },
+                { label: "Expected receipt date", value: formatDate(order.expectedReceiptDate) },
+                { label: "Vendor order no.", value: order.vendorOrderNo },
+                { label: "Pay-to vendor", value: order.payToVendorId ? "Specified" : "Same as supplier" },
+                { label: "Payment terms code", value: order.paymentTermsCode },
+                { label: "Payment method code", value: order.paymentMethodCode },
+                { label: "Shipment method code", value: order.shipmentMethodCode },
+                { label: "Currency code", value: order.currencyCode },
+                { label: "External document no.", value: order.externalDocumentNo },
+                { label: "Purchaser code", value: order.purchaserCode },
+                { label: "Posting description", value: order.postingDescription },
+                { label: "Location code", value: order.locationCode ?? order.warehouse.code },
+                { label: "Ship-to", value: [order.shipToName, order.shipToAddress, order.shipToCity, order.shipToState, order.shipToPincode].filter(Boolean).join(", ") || "—" },
                 { label: "Notes", value: order.notes },
               ]}
             />
