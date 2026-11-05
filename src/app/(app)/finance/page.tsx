@@ -20,10 +20,10 @@ export const instant = false;
 
 const QUICK_ACTIONS = [
   { label: "New General Journal", href: "/finance/journals/new" },
-  { label: "Cash Receipt Journal", href: "/finance/receipts/new" },
-  { label: "New Purchase Invoice", href: "/finance/purchase-invoices/new" },
-  { label: "Payment Journal", href: "/finance/vendor-payments/new" },
-  { label: "Bank Acc. Reconciliation", href: "/finance/bank-reconciliation" },
+  { label: "Cash Receipt Journals", href: "/finance/receipts/new" },
+  { label: "Purchase Invoices", href: "/finance/purchase-invoices/new" },
+  { label: "Payment Journals", href: "/finance/vendor-payments/new" },
+  { label: "Bank Account Reconciliations", href: "/finance/bank-reconciliation" },
   { label: "Calculate Depreciation", href: "/finance/depreciation" },
 ];
 
