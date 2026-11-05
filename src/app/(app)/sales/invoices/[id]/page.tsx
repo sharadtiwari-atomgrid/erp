@@ -24,7 +24,7 @@ import { InvoiceEwayBillsCard } from "../../../books/_components/invoice-eway-ca
 // Signed-in, per-user page: render on request instead of an instant static shell.
 export const instant = false;
 
-export const metadata: Metadata = { title: "Invoice" };
+export const metadata: Metadata = { title: "Sales Invoice" };
 
 export default async function InvoicePage({ params }: PageProps<"/sales/invoices/[id]">) {
   const user = await requireUser("invoices");
@@ -61,12 +61,12 @@ export default async function InvoicePage({ params }: PageProps<"/sales/invoices
       <PageHeader
         title={
           <span className="flex items-center gap-3">
-            {invoice.number} <StatusBadge status={invoice.status} />
+            {invoice.status === "ISSUED" || invoice.status === "PARTIALLY_PAID" || invoice.status === "PAID" ? "Posted Sales Invoice " : "Sales Invoice "}{invoice.number} <StatusBadge status={invoice.status} />
             {overdue && <StatusBadge status="OVERDUE" />}
           </span>
         }
         description={invoice.customer.name}
-        back={{ href: "/sales/invoices", label: "Invoices" }}
+        back={{ href: "/sales/invoices", label: invoice.status === "ISSUED" || invoice.status === "PARTIALLY_PAID" || invoice.status === "PAID" ? "Posted Sales Invoices" : "Sales Invoices" }}
         actions={
           <>
             {canCancel && (
@@ -91,10 +91,10 @@ export default async function InvoicePage({ params }: PageProps<"/sales/invoices
               <ActionButton
                 action={issueInvoice.bind(null, id)}
                 variant="primary"
-                pendingText="Issuing…"
-                confirmMessage="Issue this invoice? It can’t be edited afterwards."
+                pendingText="Posting…"
+                confirmMessage="Post this invoice? It will be recorded in the general ledger and can’t be edited afterwards."
               >
-                Issue invoice
+                Post invoice
               </ActionButton>
             )}
           </>
@@ -186,6 +186,7 @@ export default async function InvoicePage({ params }: PageProps<"/sales/invoices
                     ),
                   },
                   { label: "Customer GSTIN", value: invoice.customer.gstin },
+                  { label: "Customer Ledger", value: <Link href={`/finance/customer-ledger?customerId=${invoice.customer.id}`} className="text-brand-700 hover:underline">View Customer Ledger Entries</Link> },
                   { label: "Invoice date", value: formatDate(invoice.issueDate) },
                   {
                     label: "Sales order",
