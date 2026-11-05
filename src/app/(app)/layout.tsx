@@ -7,11 +7,11 @@ export const instant = false;
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col lg:flex-row">
+    <div className="min-h-screen bg-surface">
       <Suspense fallback={<SidebarSkeleton />}>
         <Sidebar />
       </Suspense>
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-col">
         <header className="flex h-14 items-center justify-between gap-4 border-b border-line bg-surface px-4 sm:px-6 print:hidden">
           <Suspense fallback={<div className="h-8 w-40 animate-pulse rounded bg-muted" />}>
             <BranchMenu />
