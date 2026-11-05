@@ -34,7 +34,7 @@ export default async function NewJournalPage({ searchParams }: PageProps<"/finan
         description={
           kind === "Opening balance" && !copied
             ? "Enter balances brought forward on the go-live date. The difference goes to opening balance equity."
-            : "Manual journal voucher. Control accounts (receivables, payables, GST…) are posted only by documents."
+            : `${kind} voucher. Enter balanced debit and credit lines; control accounts (receivables, payables, GST…) remain document-controlled.`
         }
         back={{ href: "/finance/journals", label: "General Journals" }}
       />
