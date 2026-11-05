@@ -39,6 +39,11 @@ export default async function PurchaseOrderPage({ params }: PageProps<"/purchasi
       orderBy: { createdAt: "desc" },
       include: { lines: { select: { receivedQty: true, acceptedQty: true, rejectedQty: true } } },
     }),
+    db.purchaseInvoice.findMany({
+      where: { purchaseOrderId: id, status: { not: "CANCELLED" } },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, number: true, status: true, total: true, amountPaid: true },
+    }),
     db.activity.findMany({
       where: { entityType: "PurchaseOrder", entityId: id },
       orderBy: { createdAt: "desc" },
@@ -52,6 +57,8 @@ export default async function PurchaseOrderPage({ params }: PageProps<"/purchasi
   const received = order.lines.reduce((s, l) => s + num(l.receivedQty), 0);
   const nothingReceived = order.lines.every((l) => num(l.receivedQty) === 0);
   const isOpen = order.status === "ORDERED" || order.status === "PARTIALLY_RECEIVED";
+  const receivedQty = order.lines.reduce((s, l) => s + num(l.receivedQty), 0);
+  const billedQty = receipts.length === 0 ? 0 : 0;
 
   return (
     <>
@@ -93,6 +100,7 @@ export default async function PurchaseOrderPage({ params }: PageProps<"/purchasi
               </>
             )}
             {isOpen && canReceiveGoods(user) && <ButtonLink href={`/purchasing/orders/${id}/receive`}>Receive goods</ButtonLink>}
+            {receivedQty > 0 && <ButtonLink href={`/finance/purchase-invoices/new?purchaseOrderId=${id}`} variant="secondary">Create Purchase Invoice</ButtonLink>}
           </>
         }
       />
@@ -257,6 +265,23 @@ export default async function PurchaseOrderPage({ params }: PageProps<"/purchasi
               </TBody>
             </Table>
           </Card>
+
+          {purchaseInvoices.length > 0 && (
+            <Card>
+              <CardHeader title="Purchase invoices" description="Invoices linked to this purchase order" />
+              <Table>
+                <THead><tr><TH>Invoice</TH><TH>Status</TH><TH align="right">Total</TH><TH align="right">Paid</TH></tr></THead>
+                <TBody>
+                  {purchaseInvoices.map((i) => <TR key={i.id}>
+                    <TD><Link href={`/finance/purchase-invoices/${i.id}`} className="font-medium text-brand-700 hover:underline">{i.number}</Link></TD>
+                    <TD><StatusBadge status={i.status} /></TD>
+                    <TD align="right">{formatMoney(i.total)}</TD>
+                    <TD align="right">{formatMoney(i.amountPaid)}</TD>
+                  </TR>)}
+                </TBody>
+              </Table>
+            </Card>
+          )}
 
           <Card>
             <CardHeader title="History" />
