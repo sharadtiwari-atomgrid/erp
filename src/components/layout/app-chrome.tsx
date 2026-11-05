@@ -23,7 +23,7 @@ export async function Sidebar() {
     items: visible(g.items),
     subgroups: (g.subgroups ?? []).map((s) => ({ label: s.label, items: visible(s.items) })).filter((s) => s.items.length > 0),
   })).filter((g) => g.items.length > 0 || g.subgroups.length > 0);
-  return <AppNav groups={groups} companyName={company.name} rightSlot={<div className="flex items-center gap-3"><BranchMenu /><UserMenu /></div>} />;
+  return <AppNav groups={groups} companyName={company.name} />;
 }
 
 /** Header branch selector; lists are filtered to the selected branch. */
